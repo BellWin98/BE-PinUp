@@ -1,5 +1,6 @@
 package com.pinup.dto.response;
 
+import com.pinup.enums.PlaceCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -27,6 +28,15 @@ public class PlaceResponseWithFriendReview {
     @Schema(description = "현재 위치에서 해당 장소까지 떨어진 거리(단위: km)")
     private String distance;
 
+    @Schema(description = "장소의 위도")
+    private Double latitude;
+
+    @Schema(description = "장소의 경도")
+    private Double longitude;
+
+    @Schema(description = "장소 카테고리")
+    private PlaceCategory placeCategory;
+
     @Schema(description = "리뷰 이미지 URL 리스트 (가장 먼저 등록된 리뷰 이미지 순서로 최대 3장)")
     private List<String> reviewImageUrls;
 
@@ -34,7 +44,8 @@ public class PlaceResponseWithFriendReview {
     private List<String> reviewerProfileImageUrls;
 
     public PlaceResponseWithFriendReview(Long placeId, String kakaoPlaceId, String name,
-                                         Double averageStarRating, Long reviewCount, Double distance) {
+                                         Double averageStarRating, Long reviewCount, Double distance,
+                                         Double latitude, Double longitude, PlaceCategory placeCategory) {
 
         String distanceUnit;
 
@@ -56,5 +67,8 @@ public class PlaceResponseWithFriendReview {
         this.averageStarRating = averageStarRating;
         this.reviewCount = reviewCount;
         this.distance = distanceUnit;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.placeCategory = placeCategory;
     }
 }

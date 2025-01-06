@@ -47,7 +47,10 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                         place.name.as("name"),
                         review.starRating.avg().as("averageStarRating"),
                         review.id.countDistinct().as("reviewCount"),
-                        calculateDistance(currentLatitude, currentLongitude, place.latitude, place.longitude).as("distance")
+                        calculateDistance(currentLatitude, currentLongitude, place.latitude, place.longitude).as("distance"),
+                        place.latitude.as("latitude"),
+                        place.longitude.as("longitude"),
+                        place.placeCategory.as("placeCategory")
                 ))
                 .from(review)
                 .join(review.place, place)
