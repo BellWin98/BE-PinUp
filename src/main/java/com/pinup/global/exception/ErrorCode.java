@@ -49,6 +49,8 @@ public enum ErrorCode {
 
     // Place
     PLACE_NOT_FOUND(404, "P001", "존재하지 않는 장소입니다."),
+    PLACE_CATEGORY_NOT_FOUND(404, "P002", "존재하지 않는 장소 카테고리입니다."),
+    PLACE_SORT_NOT_FOUND(404, "P003", "존재하지 않는 장소 정렬 필터입니다."),
 
     // Friend
     ALREADY_EXIST_FRIEND_REQUEST(400, "F001", "이미 존재하는 친구 요청입니다."),

@@ -23,7 +23,7 @@ public class PlaceRequest {
     @NotBlank(message = "장소명을 입력하세요.")
     private String name; // 장소명
 
-    @Schema(description = "카테고리", example = "카페")
+    @Schema(description = "카테고리", example = "CAFE")
     @NotBlank(message = "카테고리를 입력하세요.")
     private String category; // 장소 카테고리
 
@@ -43,7 +43,7 @@ public class PlaceRequest {
 
     public Place toEntity() {
 
-        PlaceCategory placeCategory = PlaceCategory.getCategoryByDescription(category);
+        PlaceCategory placeCategory = PlaceCategory.getCategory(category);
 
         return Place.builder()
                 .kakaoMapId(kakaoPlaceId)

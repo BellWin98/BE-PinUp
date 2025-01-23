@@ -12,6 +12,7 @@ public interface PlaceRepositoryQueryDsl {
 
     List<PlaceResponseWithFriendReview> findAllByMemberAndLocation(
             Member loginMember,
+            String query,
             PlaceCategory category,
             SortType sortType,
             double swLatitude,

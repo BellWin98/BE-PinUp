@@ -35,7 +35,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
     @Override
     public List<PlaceResponseWithFriendReview> findAllByMemberAndLocation(
-            Member loginMember, PlaceCategory placeCategory, SortType sortType,
+            Member loginMember, String query, PlaceCategory placeCategory, SortType sortType,
             double swLatitude, double swLongitude, double neLatitude,
             double neLongitude, double currentLatitude, double currentLongitude
     ) {
@@ -61,6 +61,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                         .and(place.latitude.between(swLatitude, neLatitude))
                         .and(place.longitude.between(swLongitude, neLongitude))
                         .and(searchByPlaceCategory(placeCategory))
+                        .and(searchByQuery(query))
                 )
                 .groupBy(place)
                 .orderBy(searchBySortType(sortType, currentLatitude, currentLongitude, place.latitude, place.longitude))
@@ -159,6 +160,10 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
                 )
                 .fetchOne();
+    }
+
+    private BooleanExpression searchByQuery(String query) {
+        return !query.isEmpty() ? place.name.containsIgnoreCase(query) : null;
     }
 
     private BooleanExpression searchByPlaceCategory(PlaceCategory placeCategory) {

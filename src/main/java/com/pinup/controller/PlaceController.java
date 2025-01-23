@@ -22,7 +22,7 @@ import static com.pinup.global.response.ResultCode.GET_PLACE_DETAIL_SUCCESS;
 
 @RestController
 @RequestMapping("/api/places")
-@Tag(name = "장소 API", description = "키워드 없이 장소 목록 조회, 키워드로 장소 목록 조회, 장소 상세 조회")
+@Tag(name = "장소 API", description = "장소 목록 조회(리뷰있는 가게만), 장소 목록 조회(전체) 장소 상세 조회")
 public class PlaceController {
 
     private final PlaceService placeService;
@@ -34,8 +34,8 @@ public class PlaceController {
 
     @GetMapping
     @Operation(
-            summary = "키워드 없이 장소 목록 조회 API",
-            description = "리뷰가 있는 장소 목록만 조회 / 카테고리(음식점, 카페), 정렬조건(가까운 순, 최신 순, 별점 높은 순, 별점 낮은 순)"
+            summary = "리뷰 있는 장소 목록 조회 API",
+            description = "리뷰 있는 장소 목록만 조회(랜딩 페이지에서 사용)"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -47,32 +47,35 @@ public class PlaceController {
             )
     })
     public ResponseEntity<ResultResponse> getPlaces(
-            @Schema(description = "카테고리", example = "카페")
-            @RequestParam(defaultValue = "전체", value = "category", required = false) String category,
+            @Schema(description = "키워드", example = "스타벅스")
+            @RequestParam(defaultValue = "", value = "query", required = false) String query,
 
-            @Schema(description = "정렬조건", example = "가까운 순")
-            @RequestParam(defaultValue = "가까운 순", value = "sort", required = false) String sort,
+            @Schema(description = "카테고리", example = "ALL")
+            @RequestParam(defaultValue = "ALL", value = "category", required = false) String category,
 
-            @Schema(description = "SW 위도", example = "37.600720")
+            @Schema(description = "정렬조건", example = "NEAR")
+            @RequestParam(defaultValue = "NEAR", value = "sort", required = false) String sort,
+
+            @Schema(description = "SW 위도", example = "37.548608")
             @RequestParam(value = "swLatitude") double swLatitude,
 
-            @Schema(description = "SW 경도", example = "127.013901")
+            @Schema(description = "SW 경도", example = "126.795968")
             @RequestParam(value = "swLongitude") double swLongitude,
 
-            @Schema(description = "NE 위도", example = "37.613230")
+            @Schema(description = "NE 위도", example = "37.569940")
             @RequestParam(value = "neLatitude") double neLatitude,
 
-            @Schema(description = "NE 경도", example = "127.030003")
+            @Schema(description = "NE 경도", example = "126.844764")
             @RequestParam(value = "neLongitude") double neLongitude,
 
-            @Schema(description = "현 위치 위도(집)", example = "37.607798")
+            @Schema(description = "현 위치 위도(회사)", example = "37.562651")
             @RequestParam(value = "currentLatitude") double currentLatitude,
 
-            @Schema(description = "현 위치 경도(집)", example = "127.025612")
+            @Schema(description = "현 위치 경도(회사)", example = "126.826539")
             @RequestParam(value = "currentLongitude") double currentLongitude
     ) {
         List<PlaceResponseWithFriendReview> result = placeService.getPlaces(
-                category, sort, swLatitude, swLongitude, neLatitude, neLongitude, currentLatitude, currentLongitude
+                query, category, sort, swLatitude, swLongitude, neLatitude, neLongitude, currentLatitude, currentLongitude
         );
         return ResponseEntity.ok(ResultResponse.of(GET_PLACES_SUCCESS, result));
     }
@@ -97,7 +100,7 @@ public class PlaceController {
     }
 
     @GetMapping("/keyword")
-    @Operation(summary = "키워드로 장소 목록 조회 API", description = "리뷰 작성 시 장소 목록 조회할 때 사용 / 카카오맵 API 호출함")
+    @Operation(summary = "전체 장소 목록 조회 API", description = "리뷰 작성할 장소 조회 시 사용 / 카카오맵 API 호출")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",

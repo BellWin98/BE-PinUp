@@ -1,5 +1,7 @@
 package com.pinup.enums;
 
+import com.pinup.global.exception.EntityNotFoundException;
+import com.pinup.global.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -16,13 +18,13 @@ public enum SortType {
 
     private final String description;
 
-    public static SortType getSortTypeByDescription(String sortDescription) {
+    public static SortType getSortType(String sort) {
         for (SortType sortType : SortType.values()) {
-            if (sortType.description.equals(sortDescription)) {
+            if (sortType.name().equalsIgnoreCase(sort)) {
                 return sortType;
             }
         }
-        return null;
+        throw new EntityNotFoundException(ErrorCode.PLACE_SORT_NOT_FOUND);
     }
 
 }
