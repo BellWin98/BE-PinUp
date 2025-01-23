@@ -1,5 +1,7 @@
 package com.pinup.enums;
 
+import com.pinup.global.exception.EntityNotFoundException;
+import com.pinup.global.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -16,12 +18,12 @@ public enum PlaceCategory {
     private final String description;
     private final String code;
 
-    public static PlaceCategory getCategoryByDescription(String category) {
+    public static PlaceCategory getCategory(String category) {
         for (PlaceCategory placeCategory : PlaceCategory.values()) {
-            if (placeCategory.description.equals(category)) {
+            if (placeCategory.name().equalsIgnoreCase(category)) {
                 return placeCategory;
             }
         }
-        return null;
+        throw new EntityNotFoundException(ErrorCode.PLACE_CATEGORY_NOT_FOUND);
     }
 }

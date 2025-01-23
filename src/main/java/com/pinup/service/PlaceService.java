@@ -6,9 +6,6 @@ import com.pinup.dto.response.PlaceResponseWithFriendReview;
 import com.pinup.entity.Member;
 import com.pinup.enums.PlaceCategory;
 import com.pinup.enums.SortType;
-import com.pinup.global.exception.EntityAlreadyExistException;
-import com.pinup.global.exception.EntityNotFoundException;
-import com.pinup.global.exception.ErrorCode;
 import com.pinup.global.maps.KakaoMapModule;
 import com.pinup.global.util.AuthUtil;
 import com.pinup.repository.PlaceRepository;
@@ -30,17 +27,17 @@ public class PlaceService {
 
     @Transactional
     public List<PlaceResponseWithFriendReview> getPlaces(
-            String category, String sort, double swLatitude,
+            String query, String category, String sort, double swLatitude,
             double swLongitude, double neLatitude, double neLongitude,
             double currentLatitude, double currentLongitude
     ) {
         Member loginMember = authUtil.getLoginMember();
 
-        PlaceCategory placeCategory = PlaceCategory.getCategoryByDescription(category);
-        SortType sortType = SortType.getSortTypeByDescription(sort);
+        PlaceCategory placeCategory = PlaceCategory.getCategory(category);
+        SortType sortType = SortType.getSortType(sort);
 
         return placeRepository.findAllByMemberAndLocation(
-                loginMember, placeCategory, sortType,
+                loginMember, query, placeCategory, sortType,
                 swLatitude, swLongitude, neLatitude,
                 neLongitude, currentLatitude, currentLongitude
         );
