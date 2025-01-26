@@ -38,8 +38,8 @@ public class ReviewController {
             @Valid @RequestPart PlaceRequest placeRequest,
             @RequestPart(name = "multipartFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        Long reviewId = reviewService.register(reviewRequest, placeRequest, multipartFiles);
-        return ResponseEntity.ok(ResultResponse.of(ResultCode.CREATE_REVIEW_SUCCESS, reviewId));
+        String kakaoPlaceId = reviewService.register(reviewRequest, placeRequest, multipartFiles);
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.CREATE_REVIEW_SUCCESS, kakaoPlaceId));
     }
 
     @GetMapping("/{reviewId}")
