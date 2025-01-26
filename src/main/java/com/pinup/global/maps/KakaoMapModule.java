@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pinup.dto.response.PlaceResponseByKeyword;
 import com.pinup.entity.Member;
+import com.pinup.enums.PlaceCategory;
 import com.pinup.repository.PlaceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +27,6 @@ import java.util.List;
 public class KakaoMapModule {
 
     private static final String KAKAO_MAP_API_URI = "https://dapi.kakao.com/v2/local/search";
-    private static final String CATEGORY_FORMAT = "/category.json";
     private static final String KEYWORD_FORMAT = "/keyword.json";
     private static final String HEADER_KEY = "Authorization";
     private static final String HEADER_VALUE = "KakaoAK ";
@@ -37,16 +39,22 @@ public class KakaoMapModule {
     private String apiKey;
 
     public List<PlaceResponseByKeyword> search(Member loginMember, String keyword) {
-        URI kakaoSearchUri = buildUri(keyword);
+        URI restaurantSearchUri = buildUri(keyword, PlaceCategory.RESTAURANT.getCode());
+        URI cafeSearchUri = buildUri(keyword, PlaceCategory.CAFE.getCode());
+        List<PlaceResponseByKeyword> resultOfRestaurant = executeSearchRequest(restaurantSearchUri, loginMember);
+        List<PlaceResponseByKeyword> resultOfCafe = executeSearchRequest(cafeSearchUri, loginMember);
 
-        return executeSearchRequest(kakaoSearchUri, loginMember);
+        return Stream.of(resultOfRestaurant, resultOfCafe)
+                .flatMap(Collection::stream)
+                .toList();
     }
 
-    private URI buildUri(String keyword) {
+    private URI buildUri(String keyword, String category) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
                 .fromUriString(KAKAO_MAP_API_URI)
                 .path(KEYWORD_FORMAT)
-                .queryParam("query", keyword);
+                .queryParam("query", keyword)
+                .queryParam("category_group_code", category);
 
         return uriBuilder.encode().build().toUri();
     }
@@ -100,57 +108,5 @@ public class KakaoMapModule {
                 .reviewCount(reviewCount.intValue())
                 .averageStarRating(averageStarRating)
                 .build();
-    }
-
-    public List<PlaceResponseByKeyword> search(Member loginMember, String keyword, String latitude,
-                                               String longitude, int radius, String sort) {
-
-        URI kakaoSearchUri = buildUri(keyword, latitude, longitude, radius, sort);
-
-        return executeSearchRequest(kakaoSearchUri, loginMember);
-    }
-
-    public List<PlaceResponseByKeyword> searchPlaces(Member currentMember, String key, String value,
-                                                     String longitude, String latitude, int radius, String sort) {
-        String path;
-        if (key.equals("category_group_code")) {
-            path = CATEGORY_FORMAT;
-        } else {
-            path = KEYWORD_FORMAT;
-        }
-
-        URI uri = buildPlaceSearchUri(path, key, value, longitude, latitude, radius, sort);
-
-        return executeSearchRequest(uri, currentMember);
-
-    }
-
-    private URI buildPlaceSearchUri(String path, String key, String value,
-                                    String longitude, String latitude, int radius, String sort) {
-
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(KAKAO_MAP_API_URI)
-                .path(path)
-                .queryParam(key, value)
-                .queryParam("x", longitude)
-                .queryParam("y", latitude)
-                .queryParam("radius", radius)
-                .queryParam("sort", sort);
-
-        return uriBuilder.encode().build().toUri();
-    }
-
-    private URI buildUri(String keyword, String latitude, String longitude, int radius, String sort) {
-
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(KAKAO_MAP_API_URI)
-                .path(KEYWORD_FORMAT)
-                .queryParam("query", keyword)
-                .queryParam("x", longitude)
-                .queryParam("y", latitude)
-                .queryParam("radius", radius)
-                .queryParam("sort", sort);
-
-        return uriBuilder.encode().build().toUri();
     }
 }

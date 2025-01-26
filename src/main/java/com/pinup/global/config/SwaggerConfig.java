@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
     private final String BEARER_TOKEN_PREFIX = "Bearer";
+
     @Bean
     public OpenAPI openAPI() {
         String securityJwtName = "JWT";

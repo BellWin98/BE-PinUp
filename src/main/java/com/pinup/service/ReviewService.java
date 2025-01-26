@@ -44,16 +44,15 @@ public class ReviewService {
     private final S3Service s3Service;
 
     @Transactional
-    public Long register(ReviewRequest reviewRequest, PlaceRequest placeRequest, List<MultipartFile> images) {
+    public String register(ReviewRequest reviewRequest, PlaceRequest placeRequest, List<MultipartFile> images) {
         Member loginMember = authUtil.getLoginMember();
         Place place = findOrCreatePlace(placeRequest);
         List<String> uploadedFileUrls = uploadImages(images);
-
         Review newReview = createReview(reviewRequest, loginMember, place, uploadedFileUrls);
         newReview.setType(images != null && !images.isEmpty() ? ReviewType.PHOTO : ReviewType.TEXT);
+        reviewRepository.save(newReview);
 
-        Review savedReview = reviewRepository.save(newReview);
-        return savedReview.getId();
+        return place.getKakaoMapId();
     }
 
     @Transactional(readOnly = true)
