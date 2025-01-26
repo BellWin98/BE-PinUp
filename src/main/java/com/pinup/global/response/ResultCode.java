@@ -38,8 +38,6 @@ public enum ResultCode {
     GET_MEMBER_PHOTO_REVIEW_PREVIEW_SUCCESS(200, "R006", "멤버의 포토 리뷰 미리보기 목록 조회에 성공하였습니다."),
     GET_MEMBER_TEXT_REVIEW_SUCCESS(200, "R007", "멤버의 텍스트 리뷰 목록 조회에 성공하였습니다."),
 
-
-
     // Friend
     REQUEST_PIN_BUDDY_SUCCESS(201, "F001", "핀버디 신청이 완료되었습니다."),
     ACCEPT_PIN_BUDDY_SUCCESS(200, "F002", "핀버디 신청을 수락했습니다."),
