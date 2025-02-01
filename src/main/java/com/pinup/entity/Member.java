@@ -75,6 +75,9 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "author")
     private List<Article> editorArticles = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member")
+    private List<RoomMember> roomMembers = new ArrayList<>();
+
     @Builder
     public Member(String email, String name, String profileImageUrl,
                   LoginType loginType, String socialId, String password) {

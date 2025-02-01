@@ -57,6 +57,10 @@ public enum ResultCode {
     CREATE_ARTICLE_SUCCESS(201, "AR001", "에디터 아티클을 생성하였습니다."),
     GET_ARTICLE_DETAIL_SUCCESS(200, "AR002", "에디터 아티클을 조회하였습니다."),
     GET_ARTICLE_LIST_SUCCESS(200, "AR003", "에디터 아티클 목록을 조회하였습니다."),
+
+    // Chat
+    CREATE_CHAT_ROOM_SUCCESS(201, "C001", "채팅방을 생성하였습니다."),
+    SEND_CHAT_SUCCESS(201, "C002", "채팅 메시지를 성공적으로 전송하였습니다."),
     ;
 
     private final int status;
