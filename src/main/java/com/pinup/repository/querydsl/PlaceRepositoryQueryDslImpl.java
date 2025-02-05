@@ -215,7 +215,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
     private List<String> fetchReviewerProfileImageUrls(String kakaoPlaceId, Long loginMemberId) {
         return queryFactory
-                .select(member.profileImageUrl)
+                .selectDistinct(member.profileImageUrl)
                 .from(member)
                 .join(review).on(member.eq(review.member))
                 .where(review.place.kakaoMapId.eq(kakaoPlaceId)
