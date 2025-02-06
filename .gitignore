@@ -38,5 +38,3 @@ out/
 
 ### Pin Up ###
 application.yml
-application-local.yml
-docker-compose.yml
