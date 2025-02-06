@@ -19,6 +19,7 @@ import com.pinup.global.util.AuthUtil;
 import com.pinup.repository.MemberRepository;
 import com.pinup.repository.FriendRequestRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +38,7 @@ public class MemberService {
     private final AuthUtil authUtil;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "member", key = "#nickname")
     public MemberResponse searchMembers(String nickname) {
         Member member = memberRepository.findByNickname(nickname)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));

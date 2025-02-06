@@ -1,12 +1,13 @@
 package com.pinup.service;
 
 
-import com.pinup.dto.request.NormalLoginRequest;
 import com.pinup.dto.request.MemberJoinRequest;
+import com.pinup.dto.request.NormalLoginRequest;
 import com.pinup.dto.response.MemberResponse;
 import com.pinup.entity.Member;
 import com.pinup.enums.LoginType;
-import com.pinup.exception.*;
+import com.pinup.exception.InvalidTokenException;
+import com.pinup.exception.PasswordMismatchException;
 import com.pinup.global.exception.EntityAlreadyExistException;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.exception.ErrorCode;
@@ -16,6 +17,7 @@ import com.pinup.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -195,12 +197,12 @@ public class AuthService {
     }
 
     @Transactional
+    @CacheEvict(value = "member", key = "#request.name")
     public void join(MemberJoinRequest request) {
         validateExistEmail(request.getEmail());
 
         Member newMember = Member.builder()
                 .email(request.getEmail())
-//                .nickname(request.getNickname())
                 .name(request.getName())
                 .loginType(LoginType.NORMAL)
                 .profileImageUrl(request.getProfileImageUrl())
