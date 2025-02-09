@@ -1,11 +1,15 @@
 package com.pinup.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Builder
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(title = "키워드로 장소 목록 조회 응답 DTO", description = "카카오맵 API로 키워드와 관련된 모든 장소 목록 조회")
 public class PlaceResponseByKeyword {
 

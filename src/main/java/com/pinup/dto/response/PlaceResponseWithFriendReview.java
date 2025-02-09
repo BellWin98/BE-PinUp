@@ -4,6 +4,8 @@ import com.pinup.enums.PlaceCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Data
@@ -29,10 +31,10 @@ public class PlaceResponseWithFriendReview {
     private String distance;
 
     @Schema(description = "장소의 위도")
-    private Double latitude;
+    private double latitude;
 
     @Schema(description = "장소의 경도")
-    private Double longitude;
+    private double longitude;
 
     @Schema(description = "장소 카테고리")
     private PlaceCategory placeCategory;
@@ -43,24 +45,15 @@ public class PlaceResponseWithFriendReview {
     @Schema(description = "리뷰 작성자 프로필 이미지 URL 리스트 (가장 최근에 리뷰 작성한 유저 순서로 최대 3장)")
     private List<String> reviewerProfileImageUrls;
 
-    public PlaceResponseWithFriendReview(Long placeId, String kakaoPlaceId, String name,
-                                         Double averageStarRating, Long reviewCount, Double distance,
-                                         Double latitude, Double longitude, PlaceCategory placeCategory) {
-
-        String distanceUnit;
-
-        if (averageStarRating != null) {
-            averageStarRating = Math.round(averageStarRating * 10) / 10.0;
-        } else {
-            averageStarRating = 0.0;
-        }
-
-        if (distance < 1) {
-            distanceUnit = Math.round(distance * 1000) + "m";
-        } else {
-            distanceUnit = Math.round(distance) + "km";
-        }
-        
+    public PlaceResponseWithFriendReview(
+            Long placeId, String kakaoPlaceId, String name,
+            Double averageStarRating, Long reviewCount, double distance,
+            double latitude, double longitude, PlaceCategory placeCategory
+    ) {
+        String distanceUnit = distance < 1 ? Math.round(distance * 1000) + "m" : Math.round(distance) + "km";
+        averageStarRating = averageStarRating != null
+                ? BigDecimal.valueOf(averageStarRating).setScale(1, RoundingMode.HALF_UP).doubleValue()
+                : 0.0;
         this.placeId = placeId;
         this.kakaoPlaceId = kakaoPlaceId;
         this.name = name;

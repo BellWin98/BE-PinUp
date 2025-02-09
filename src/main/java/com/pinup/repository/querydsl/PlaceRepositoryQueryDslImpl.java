@@ -73,7 +73,9 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     }
 
     @Override
-    public PlaceDetailResponse findByKakaoPlaceIdAndMember(Member loginMember, String kakaoPlaceId) {
+    public PlaceDetailResponse findByKakaoPlaceIdAndMember(
+            Member loginMember, String kakaoPlaceId, double currentLatitude, double currentLongitude
+    ) {
         List<PlaceDetailResponse.ReviewDetailResponse> reviewDetailList = queryFactory
                 .select(Projections.constructor(
                         PlaceDetailResponse.ReviewDetailResponse.class,
@@ -112,7 +114,11 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                                 PlaceDetailResponse.class,
                                 place.name.as("placeName"),
                                 review.countDistinct().as("reviewCount"),
-                                review.starRating.avg().as("averageStarRating")
+                                review.starRating.avg().as("averageStarRating"),
+                                calculateDistance(currentLatitude, currentLongitude, place.latitude, place.longitude).as("distance"),
+                                place.latitude.as("latitude"),
+                                place.longitude.as("longitude"),
+                                place.placeCategory.as("placeCategory")
                         )
                 )
                 .from(place)
@@ -125,6 +131,8 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .fetchOne();
 
         if (placeDetailResponse != null) {
+            placeDetailResponse.setReviewImageUrls(fetchReviewImageUrls(kakaoPlaceId, loginMember.getId()));
+            placeDetailResponse.setReviewerProfileImageUrls(fetchReviewerProfileImageUrls(kakaoPlaceId, loginMember.getId()));
             placeDetailResponse.setReviews(reviewDetailList);
         } else {
             throw new EntityNotFoundException(ErrorCode.PLACE_NOT_FOUND);

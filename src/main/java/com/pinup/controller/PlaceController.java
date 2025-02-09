@@ -68,10 +68,10 @@ public class PlaceController {
             @Schema(description = "NE 경도", example = "126.844764")
             @RequestParam(value = "neLongitude") double neLongitude,
 
-            @Schema(description = "현 위치 위도(회사)", example = "37.562651")
+            @Schema(description = "현 위치 위도", example = "37.562651")
             @RequestParam(value = "currentLatitude") double currentLatitude,
 
-            @Schema(description = "현 위치 경도(회사)", example = "126.826539")
+            @Schema(description = "현 위치 경도", example = "126.826539")
             @RequestParam(value = "currentLongitude") double currentLongitude
     ) {
         List<PlaceResponseWithFriendReview> result = placeService.getPlaces(
@@ -93,9 +93,13 @@ public class PlaceController {
     })
     public ResponseEntity<ResultResponse> getPlaceDetail(
             @Schema(description = "카카오맵 장소 고유 ID", example = "1997608947")
-            @PathVariable("kakaoPlaceId") String kakaoPlaceId
+            @PathVariable("kakaoPlaceId") String kakaoPlaceId,
+            @Schema(description = "현 위치 위도", example = "37.562651")
+            @RequestParam(value = "currentLatitude") double currentLatitude,
+            @Schema(description = "현 위치 경도", example = "126.826539")
+            @RequestParam(value = "currentLongitude") double currentLongitude
     ) {
-        PlaceDetailResponse result = placeService.getPlaceDetail(kakaoPlaceId);
+        PlaceDetailResponse result = placeService.getPlaceDetail(kakaoPlaceId, currentLatitude, currentLongitude);
         return ResponseEntity.ok(ResultResponse.of(GET_PLACE_DETAIL_SUCCESS, result));
     }
 

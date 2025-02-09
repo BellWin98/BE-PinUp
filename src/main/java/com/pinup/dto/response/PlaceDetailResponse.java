@@ -1,12 +1,19 @@
 package com.pinup.dto.response;
 
+import com.pinup.enums.PlaceCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Schema(title = "장소 상세 조회 응답 DTO", description = "장소명, 리뷰 수, 평균별점, 리뷰 통계, reviews(리뷰 상세 데이터 리스트)")
 public class PlaceDetailResponse {
 
@@ -17,7 +24,25 @@ public class PlaceDetailResponse {
     private Long reviewCount;
 
     @Schema(description = "평균 별점")
-    private Double averageStarRating;
+    private double averageStarRating;
+
+    @Schema(description = "현재 위치에서 해당 장소까지 떨어진 거리(단위: km)")
+    private String distance;
+
+    @Schema(description = "장소의 위도")
+    private double latitude;
+
+    @Schema(description = "장소의 경도")
+    private double longitude;
+
+    @Schema(description = "장소 카테고리")
+    private PlaceCategory placeCategory;
+
+    @Schema(description = "리뷰 이미지 URL 리스트 (가장 먼저 등록된 리뷰 이미지 순서로 최대 3장)")
+    private List<String> reviewImageUrls;
+
+    @Schema(description = "리뷰 작성자 프로필 이미지 URL 리스트 (가장 최근에 리뷰 작성한 유저 순서로 최대 3장)")
+    private List<String> reviewerProfileImageUrls;
 
     @Schema(description = "리뷰 통계 그래프")
     private Map<Integer, Integer> ratingGraph;
@@ -25,20 +50,26 @@ public class PlaceDetailResponse {
     @Schema(description = "리뷰 상세 정보 리스트")
     private List<ReviewDetailResponse> reviews;
 
-    public PlaceDetailResponse(String placeName, Long reviewCount, Double averageStarRating) {
-
-        if (averageStarRating != null) {
-            averageStarRating = Math.round(averageStarRating * 10) / 10.0;
-        } else {
-            averageStarRating = 0.0;
-        }
-
+    public PlaceDetailResponse(
+            String placeName, Long reviewCount, Double averageStarRating,
+            double distance, double latitude, double longitude, PlaceCategory placeCategory
+    ) {
+        String distanceUnit = distance < 1 ? Math.round(distance * 1000) + "m" : Math.round(distance) + "km";
+        averageStarRating = averageStarRating != null
+                ? BigDecimal.valueOf(averageStarRating).setScale(1, RoundingMode.HALF_UP).doubleValue()
+                : 0.0;
         this.placeName = placeName;
         this.reviewCount = reviewCount;
         this.averageStarRating = averageStarRating;
+        this.distance = distanceUnit;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.placeCategory = placeCategory;
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Schema(title = "리뷰 상세 조회 응답 DTO", description = "리뷰 ID, 작성자명, 작성자 등록 리뷰 수, 별점, 방문날짜, 리뷰내용, 작성자 프로필 사진, 리뷰 이미지 리스트")
     public static class ReviewDetailResponse {
 

@@ -43,11 +43,12 @@ public class PlaceService {
         );
     }
 
-    @Transactional
-    public PlaceDetailResponse getPlaceDetail(String kakaoPlaceId) {
+    @Transactional(readOnly = true)
+    public PlaceDetailResponse getPlaceDetail(String kakaoPlaceId, double currentLatitude, double currentLongitude) {
 
         Member loginMember = authUtil.getLoginMember();
-        PlaceDetailResponse placeDetailResponse = placeRepository.findByKakaoPlaceIdAndMember(loginMember, kakaoPlaceId);
+        PlaceDetailResponse placeDetailResponse =
+                placeRepository.findByKakaoPlaceIdAndMember(loginMember, kakaoPlaceId, currentLatitude, currentLongitude);
         List<PlaceDetailResponse.ReviewDetailResponse> reviewDetailResponseList = placeDetailResponse.getReviews();
         Map<Integer, Integer> ratingGraph = new HashMap<>();
 
@@ -60,6 +61,7 @@ public class PlaceService {
         return placeDetailResponse;
     }
 
+    @Transactional(readOnly = true)
     public List<PlaceResponseByKeyword> getPlacesByKeyword(String keyword) {
         Member loginMember = authUtil.getLoginMember();
         return kakaoMapModule.search(loginMember, keyword);
