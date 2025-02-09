@@ -1,7 +1,8 @@
 package com.pinup.cache;
 
-import com.pinup.dto.response.MemberResponse;
-import com.pinup.global.config.RedisConfig;
+import com.pinup.domain.member.dto.response.MemberResponse;
+import com.pinup.global.config.redis.MemberCacheManager;
+import com.pinup.global.config.redis.RedisConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

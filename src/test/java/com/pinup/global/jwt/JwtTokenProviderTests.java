@@ -1,6 +1,7 @@
 package com.pinup.global.jwt;
 
-import com.pinup.enums.Role;
+import com.pinup.domain.member.entity.Role;
+import com.pinup.global.config.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

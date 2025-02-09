@@ -1,9 +1,11 @@
 package com.pinup.service;
 
-import com.pinup.entity.Member;
-import com.pinup.global.response.LoginResponse;
-import com.pinup.global.jwt.JwtTokenProvider;
-import com.pinup.repository.MemberRepository;
+import com.pinup.domain.member.service.AuthService;
+import com.pinup.domain.member.entity.Member;
+import com.pinup.domain.member.dto.response.LoginResponse;
+import com.pinup.global.config.jwt.JwtTokenProvider;
+import com.pinup.domain.member.repository.MemberRepository;
+import com.pinup.global.config.redis.RedisService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,10 @@
 package com.pinup.repository;
 
-import com.pinup.entity.FriendRequest;
-import com.pinup.entity.Member;
-import com.pinup.enums.FriendRequestStatus;
+import com.pinup.domain.friend.repository.FriendRequestRepository;
+import com.pinup.domain.member.repository.MemberRepository;
+import com.pinup.domain.friend.entity.FriendRequest;
+import com.pinup.domain.member.entity.Member;
+import com.pinup.domain.friend.entity.FriendRequestStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

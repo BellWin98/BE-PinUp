@@ -1,6 +1,6 @@
 package com.pinup.constants;
 
-import com.pinup.enums.LoginType;
+import com.pinup.domain.member.entity.LoginType;
 
 import java.util.List;
 

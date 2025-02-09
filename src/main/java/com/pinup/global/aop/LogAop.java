@@ -13,7 +13,7 @@ public class LogAop {
 
     // controller와 service method만 로그 적용
 //    @Around("execution(* com.pinup.controller..*(..)) || execution(* com.pinup.service..*(..))")
-    @Around("(execution(* com.pinup.controller..*(..)) || execution(* com.pinup.service..*(..))) && !execution(* com.pinup.controller.TestController.*(..))")
+    @Around("(execution(* com.pinup.controller..*(..)) || execution(* com.pinup.service..*(..))) && !execution(* com.pinup.domain.home.HomeController.*(..))")
     public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
         log.info("START: {}", joinPoint.toString());
         try {

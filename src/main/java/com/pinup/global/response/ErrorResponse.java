@@ -1,6 +1,5 @@
 package com.pinup.global.response;
 
-import com.pinup.global.exception.ErrorCode;
 import jakarta.validation.ConstraintViolation;
 import lombok.AccessLevel;
 import lombok.Getter;

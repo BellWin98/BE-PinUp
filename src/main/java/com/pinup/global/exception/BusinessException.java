@@ -1,5 +1,6 @@
 package com.pinup.global.exception;
 
+import com.pinup.global.response.ErrorCode;
 import com.pinup.global.response.ErrorResponse;
 import lombok.Getter;
 
