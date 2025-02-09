@@ -25,7 +25,9 @@ public interface PlaceRepositoryQueryDsl {
 
     PlaceDetailResponse findByKakaoPlaceIdAndMember(
             Member loginMember,
-            String kakaoPlaceId
+            String kakaoPlaceId,
+            double currentLatitude,
+            double currentLongitude
     );
 
     Long getReviewCount(Member loginMember, String kakaoMapId);

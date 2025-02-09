@@ -18,9 +18,7 @@ public class ReviewRequest {
     private String content;
 
     @NotNull(message = "별점을 입력하세요")
-    @Min(value = 1, message = "최소 별점은 1입니다.")
-    @Max(value = 5, message = "최대 별점은 5입니다.")
-    @Schema(description = "별점(최소 1.0 ~ 최대 5.0 / 0.5점 단위)", example = "3.5")
+    @Schema(description = "별점(최소 0.5 ~ 최대 5.0 / 0.5점 단위)", example = "3.5")
     private Double starRating;
 
     @NotBlank(message = "방문 날짜를 입력해주세요.")

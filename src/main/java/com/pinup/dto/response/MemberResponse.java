@@ -2,11 +2,15 @@ package com.pinup.dto.response;
 
 import com.pinup.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Schema(title = "유저 정보 상세 조회 응답 DTO", description = "유저 ID, 이메일, 이름, 닉네임, 프로필 사진 URL, 소개글")
 public class MemberResponse {
