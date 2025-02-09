@@ -1,5 +1,6 @@
 package com.pinup.global.exception;
 
+import com.pinup.global.response.ErrorCode;
 import com.pinup.global.response.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pinup.global.exception.ErrorCode.*;
+import static com.pinup.global.response.ErrorCode.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RestControllerAdvice
