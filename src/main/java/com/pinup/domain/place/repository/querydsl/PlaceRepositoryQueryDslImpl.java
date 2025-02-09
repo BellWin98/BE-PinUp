@@ -1,8 +1,8 @@
 package com.pinup.domain.place.repository.querydsl;
 
+import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.place.dto.response.PlaceDetailResponse;
 import com.pinup.domain.place.dto.response.PlaceResponseWithFriendReview;
-import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.place.entity.PlaceCategory;
 import com.pinup.domain.place.entity.SortType;
 import com.pinup.global.exception.EntityNotFoundException;
@@ -21,11 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-import static com.pinup.entity.QFriendShip.friendShip;
-import static com.pinup.entity.QMember.member;
-import static com.pinup.entity.QPlace.place;
-import static com.pinup.entity.QReview.review;
-import static com.pinup.entity.QReviewImage.reviewImage;
+import static com.pinup.domain.friend.entity.QFriendShip.friendShip;
+import static com.pinup.domain.member.entity.QMember.member;
+import static com.pinup.domain.place.entity.QPlace.place;
+import static com.pinup.domain.review.entity.QReview.review;
+import static com.pinup.domain.review.entity.QReviewImage.reviewImage;
 
 @RequiredArgsConstructor
 @Slf4j
