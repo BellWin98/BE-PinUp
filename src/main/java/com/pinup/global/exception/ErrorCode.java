@@ -28,6 +28,7 @@ public enum ErrorCode {
     CACHE_KEY_NULL(400, "G018", "캐시 키는 null일 수 없습니다."),
     SOCIAL_LOGIN_TOKEN_NOT_FOUND(500, "G019", "소셜 로그인 서버로부터 발급된 Access Token이 없습니다."),
     SOCIAL_LOGIN_USER_INFO_NOT_FOUND(500, "G020", "소셜 로그인 서버에서 조회한 유저 정보가 없습니다."),
+    FILE_UPLOAD_ERROR(400, "G021", "파일 업로드를 실패했습니다."),
 
     // Auth
     INVALID_TOKEN(400, "AU001", "유효하지 않은 토큰입니다."),
