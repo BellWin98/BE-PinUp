@@ -144,6 +144,22 @@ public class MemberController {
     @GetMapping("/{memberId}/profile")
     public ResponseEntity<ResultResponse> getProfile(@PathVariable Long memberId) {
         ProfileResponse response = memberService.getProfile(memberId);
-        return ResponseEntity.ok(ResultResponse.of(ResultCode.GET_USER_FEED_SUCCESS, response));
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.GET_MEMBER_FEED_SUCCESS, response));
+    }
+
+    @GetMapping("/me/feed")
+    public ResponseEntity<ResultResponse> getMyFeed() {
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.GET_MY_FEED_SUCCESS,
+                memberService.getMyFeed())
+        );
+    }
+
+    @GetMapping("/{memberId}/feed")
+    public ResponseEntity<ResultResponse> getMemberFeed(@PathVariable Long memberId) {
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.GET_MEMBER_FEED_SUCCESS,
+                memberService.getMemberFeed(memberId))
+        );
     }
 }

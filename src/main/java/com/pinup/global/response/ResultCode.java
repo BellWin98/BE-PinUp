@@ -23,7 +23,7 @@ public enum ResultCode {
     GET_NICKNAME_DUPLICATE_SUCCESS(200, "M005", "닉네임 중복 여부 확인에 성공하였습니다."),
     UPDATE_MEMBER_INFO_SUCCESS(200, "M006", "유저 정보 수정에 성공하였습니다."),
     GET_MY_FEED_SUCCESS(200, "M007", "내 피드 조회에 성공하였습니다."),
-    GET_USER_FEED_SUCCESS(200, "M008", "유저 피드 조회에 성공하였습니다."),
+    GET_MEMBER_FEED_SUCCESS(200, "M008", "유저 피드 조회에 성공하였습니다."),
 
     // Place
     GET_PLACES_SUCCESS(200, "P001", "장소 목록 조회에 성공하였습니다."),

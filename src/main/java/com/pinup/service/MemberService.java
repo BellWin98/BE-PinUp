@@ -3,11 +3,13 @@ package com.pinup.service;
 import com.pinup.cache.MemberCacheManager;
 import com.pinup.dto.request.MemberInfoUpdateRequest;
 import com.pinup.dto.request.UpdateMemberInfoAfterLoginRequest;
+import com.pinup.dto.response.FeedResponse;
 import com.pinup.dto.response.MemberResponse;
 import com.pinup.dto.response.ProfileResponse;
+import com.pinup.dto.response.MemberReviewResponse;
+import com.pinup.entity.FriendShip;
 import com.pinup.entity.Member;
 import com.pinup.entity.Review;
-import com.pinup.entity.ReviewImage;
 import com.pinup.enums.FriendRequestStatus;
 import com.pinup.enums.MemberRelationType;
 import com.pinup.exception.NicknameUpdateTimeLimitException;
@@ -16,12 +18,18 @@ import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.exception.ErrorCode;
 import com.pinup.global.s3.S3Service;
 import com.pinup.global.util.AuthUtil;
-import com.pinup.repository.MemberRepository;
 import com.pinup.repository.FriendRequestRepository;
+import com.pinup.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +43,11 @@ public class MemberService {
     private final FriendShipService friendShipService;
     private final FriendRequestRepository friendRequestRepository;
     private final AuthUtil authUtil;
+    private final ApplicationContext applicationContext;
+
+    private MemberService getSpringProxy() {
+        return applicationContext.getBean(MemberService.class);
+    }
 
     @Transactional(readOnly = true)
     public MemberResponse searchMembers(String nickname) {
@@ -160,6 +173,46 @@ public class MemberService {
                 .friendCount(member.getFriendships().size())
                 .averageRating(Math.round(averageRating * 10.0) / 10.0)
                 .relationType(relationType)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public FeedResponse getMyFeed() {
+        Member loginMember = authUtil.getLoginMember();
+
+        return this.getSpringProxy().buildFeedResponse(loginMember);
+    }
+
+    @Transactional(readOnly = true)
+    public FeedResponse getMemberFeed(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        return this.getSpringProxy().buildFeedResponse(member);
+    }
+
+    @Cacheable(value = "feed", key = "#member.id")
+    public FeedResponse buildFeedResponse(Member member) {
+        List<Review> reviews = member.getReviews();
+        List<FriendShip> friends = member.getFriendships();
+
+        double averageStarRating = reviews.stream()
+                .mapToDouble(Review::getStarRating)
+                .average()
+                .orElse(0.0);
+
+        double roundedAverageRating = BigDecimal.valueOf(averageStarRating)
+                .setScale(1, RoundingMode.HALF_UP)
+                .doubleValue();
+
+        return FeedResponse.builder()
+                .memberResponse(MemberResponse.from(member))
+                .reviewCount(reviews.size())
+                .averageStarRating(roundedAverageRating)
+                .pinBuddyCount(friends.size())
+                .memberReviews(reviews.stream()
+                        .map(MemberReviewResponse::of)
+                        .toList())
                 .build();
     }
 }
