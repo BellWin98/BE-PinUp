@@ -57,6 +57,11 @@ public enum ResultCode {
     CREATE_ARTICLE_SUCCESS(201, "AR001", "에디터 아티클을 생성하였습니다."),
     GET_ARTICLE_DETAIL_SUCCESS(200, "AR002", "에디터 아티클을 조회하였습니다."),
     GET_ARTICLE_LIST_SUCCESS(200, "AR003", "에디터 아티클 목록을 조회하였습니다."),
+
+    //BookMark
+    CREATE_BOOKMARK_SUCCESS(201, "B001", "북마크 등록에 성공하였습니다."),
+    GET_MY_BOOKMARK_SUCCESS(200, "B002", "내 북마크 목록 조회에 성공하였습니다."),
+    DELETE_BOOKMARK_SUCCESS(200, "B003", "북마크 삭제에 성공하였습니다."),
     ;
 
     private final int status;
