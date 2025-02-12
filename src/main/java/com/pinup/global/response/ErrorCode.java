@@ -71,6 +71,10 @@ public enum ErrorCode {
     // Article
     ARTICLE_NOT_FOUND(404, "AR001", "존재하지 않는 아티클입니다."),
 
+    // BookMark
+    BOOKMARK_NOT_FOUND(404, "B001", "존재하지 않는 북마크입니다."),
+    ALREADY_EXIST_BOOKMARK(400, "B002", "이미 존재하는 북마크입니다."),
+    UNAUTHORIZED_BOOKMARK_ACCESS(403, "B003", "해당 북마크에 접근할 권한이 없습니다."),
     ;
 
     private final int status;
