@@ -40,7 +40,7 @@ public class BookMarkController {
     public ResponseEntity<ResultResponse> create(
             @Valid @RequestBody BookMarkCreateRequest request
     ) {
-        Long bookmarkId = bookMarkService.create(request.getKakaoMapId());
+        Long bookmarkId = bookMarkService.create(request.getKakaoPlaceId());
         return ResponseEntity.ok(ResultResponse.of(ResultCode.CREATE_BOOKMARK_SUCCESS, bookmarkId));
     }
 
