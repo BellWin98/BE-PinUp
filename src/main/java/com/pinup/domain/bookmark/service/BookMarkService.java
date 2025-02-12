@@ -31,7 +31,7 @@ public class BookMarkService {
     public Long create(Long placeId) {
         Member loginMember = authUtil.getLoginMember();
         Place place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKMARK_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PLACE_NOT_FOUND));
 
         if (bookMarkRepository.existsByMemberAndPlace(loginMember, place)) {
             throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_BOOKMARK);
