@@ -1,7 +1,6 @@
-package com.pinup.domain.bookmark.response;
+package com.pinup.domain.bookmark.dto.response;
 
 import com.pinup.domain.bookmark.entity.BookMark;
-import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.place.entity.PlaceCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,16 +1,14 @@
 package com.pinup.domain.bookmark.service;
 
-
 import com.pinup.domain.bookmark.entity.BookMark;
 import com.pinup.domain.bookmark.repository.BookMarkRepository;
-import com.pinup.domain.bookmark.response.BookMarkResponse;
+import com.pinup.domain.bookmark.dto.response.BookMarkResponse;
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.place.entity.Place;
 import com.pinup.domain.place.repository.PlaceRepository;
 import com.pinup.global.common.AuthUtil;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.exception.EntityAlreadyExistException;
-
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,9 +26,9 @@ public class BookMarkService {
     private final AuthUtil authUtil;
 
     @Transactional
-    public Long create(Long placeId) {
+    public Long create(String kakaoMapId) {
         Member loginMember = authUtil.getLoginMember();
-        Place place = placeRepository.findById(placeId)
+        Place place = placeRepository.findByKakaoMapId(kakaoMapId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PLACE_NOT_FOUND));
 
         if (bookMarkRepository.existsByMemberAndPlace(loginMember, place)) {
