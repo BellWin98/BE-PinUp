@@ -87,9 +87,9 @@ public class KakaoMapModule {
 
     private PlaceResponseByKeyword extractPlaceInfo(JsonNode documentNode, Member currentMember) {
 
-        String kakaoMapId = documentNode.path("id").asText();
-        Long reviewCount = placeRepository.getReviewCount(currentMember, kakaoMapId);
-        Double averageStarRating = placeRepository.getAverageStarRating(currentMember, kakaoMapId);
+        String kakaoPlaceId = documentNode.path("id").asText();
+        Long reviewCount = placeRepository.getReviewCount(currentMember, kakaoPlaceId);
+        Double averageStarRating = placeRepository.getAverageStarRating(currentMember, kakaoPlaceId);
 
         if (averageStarRating != null) {
             averageStarRating = Math.round(averageStarRating * 10) / 10.0;
@@ -98,7 +98,7 @@ public class KakaoMapModule {
         }
 
         return PlaceResponseByKeyword.builder()
-                .kakaoMapId(kakaoMapId)
+                .kakaoPlaceId(kakaoPlaceId)
                 .name(documentNode.path("place_name").asText())
                 .category(documentNode.path("category_group_name").asText())
                 .address(documentNode.path("address_name").asText())

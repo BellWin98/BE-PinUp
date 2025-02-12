@@ -39,7 +39,7 @@ public class MemberReviewResponse {
 
         return MemberReviewResponse.builder()
                 .reviewId(review.getId())
-                .kakaoPlaceId(review.getPlace().getKakaoMapId())
+                .kakaoPlaceId(review.getPlace().getKakaoPlaceId())
                 .placeName(review.getPlace().getName())
                 .content(review.getContent())
                 .starRating(review.getStarRating())

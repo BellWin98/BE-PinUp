@@ -46,7 +46,7 @@ public class PlaceRequest {
         PlaceCategory placeCategory = PlaceCategory.getCategory(category);
 
         return Place.builder()
-                .kakaoMapId(kakaoPlaceId)
+                .kakaoPlaceId(kakaoPlaceId)
                 .name(name)
                 .placeCategory(placeCategory)
                 .address(address)

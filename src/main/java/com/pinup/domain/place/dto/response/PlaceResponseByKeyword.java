@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class PlaceResponseByKeyword {
 
     @Schema(description = "카카오맵에서 부여한 장소 고유 ID")
-    private String kakaoMapId;
+    private String kakaoPlaceId;
 
     @Schema(description = "장소명")
     private String name;

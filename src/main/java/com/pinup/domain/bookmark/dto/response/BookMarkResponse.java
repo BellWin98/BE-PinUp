@@ -22,7 +22,7 @@ public class BookMarkResponse {
     private Double placeLongitude;
     private String placeStatus;
     private PlaceCategory placeCategory;
-    private String kakaoMapId;
+    private String kakaoPlaceId;
 
     public static BookMarkResponse from(BookMark bookmark) {
         return BookMarkResponse.builder()
@@ -35,7 +35,7 @@ public class BookMarkResponse {
                 .placeLatitude(bookmark.getPlace().getLatitude())
                 .placeLongitude(bookmark.getPlace().getLongitude())
                 .placeStatus(bookmark.getPlace().getStatus())
-                .kakaoMapId(bookmark.getPlace().getKakaoMapId())
+                .kakaoPlaceId(bookmark.getPlace().getKakaoPlaceId())
                 .placeCategory(bookmark.getPlace().getPlaceCategory())
                 .build();
     }

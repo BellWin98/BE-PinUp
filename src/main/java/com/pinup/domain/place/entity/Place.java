@@ -21,7 +21,7 @@ public class Place extends BaseTimeEntity {
     private Long id;
 
     @Column(unique = true)
-    private String kakaoMapId; // 카카오맵에서 부여된 장소 ID
+    private String kakaoPlaceId; // 카카오맵에서 부여된 장소 ID
 
     private String name; // 장소명
     private String address; // 주소
@@ -38,9 +38,9 @@ public class Place extends BaseTimeEntity {
     private List<Review> reviews = new ArrayList<>();
 
     @Builder
-    public Place(String kakaoMapId, String name, String address, String roadAddress,
+    public Place(String kakaoPlaceId, String name, String address, String roadAddress,
                  Double latitude, Double longitude, PlaceCategory placeCategory) {
-        this.kakaoMapId = kakaoMapId;
+        this.kakaoPlaceId = kakaoPlaceId;
         this.name = name;
         this.address = address;
         this.roadAddress = roadAddress;

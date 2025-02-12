@@ -43,7 +43,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
         List<PlaceResponseWithFriendReview> result = queryFactory
                 .select(Projections.constructor(PlaceResponseWithFriendReview.class,
                         place.id.as("placeId"),
-                        place.kakaoMapId.as("kakaoPlaceId"),
+                        place.kakaoPlaceId.as("kakaoPlaceId"),
                         place.name.as("name"),
                         review.starRating.avg().as("averageStarRating"),
                         review.id.countDistinct().as("reviewCount"),
@@ -88,7 +88,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                         review.member.profileImageUrl.as("writerProfileImageUrl")
                 ))
                 .from(review)
-                .where(review.place.kakaoMapId.eq(kakaoPlaceId)
+                .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMember.getId())
                                 .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
                         )
@@ -123,7 +123,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 )
                 .from(place)
                 .join(review).on(place.eq(review.place))
-                .where(place.kakaoMapId.eq(kakaoPlaceId)
+                .where(place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMember.getId())
                                 .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
                         )
@@ -142,11 +142,11 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     }
 
     @Override
-    public Long getReviewCount(Member loginMember, String kakaoMapId) {
+    public Long getReviewCount(Member loginMember, String kakaoPlaceId) {
         return queryFactory
                 .select(review.count())
                 .from(review)
-                .where(review.place.kakaoMapId.eq(kakaoMapId)
+                .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMember.getId())
                                 .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
                         )
@@ -155,13 +155,13 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     }
 
     @Override
-    public Double getAverageStarRating(Member loginMember, String kakaoMapId) {
+    public Double getAverageStarRating(Member loginMember, String kakaoPlaceId) {
         return queryFactory
                 .select(review.starRating.avg())
                 .from(place)
                 .join(review).on(place.eq(review.place))
                 .where(place.status.eq("Y")
-                        .and(place.kakaoMapId.eq(kakaoMapId))
+                        .and(place.kakaoPlaceId.eq(kakaoPlaceId))
                         .and(review.member.id.eq(loginMember.getId())
                                 .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
                         )
@@ -212,7 +212,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .select(reviewImage.url)
                 .from(reviewImage)
                 .join(review).on(reviewImage.review.eq(review))
-                .where(review.place.kakaoMapId.eq(kakaoPlaceId)
+                .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMemberId)
                                 .or(review.member.id.in(getFriendMemberIds(loginMemberId))))
                         .and(reviewImage.url.isNotNull()))
@@ -226,7 +226,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .selectDistinct(member.profileImageUrl)
                 .from(member)
                 .join(review).on(member.eq(review.member))
-                .where(review.place.kakaoMapId.eq(kakaoPlaceId)
+                .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMemberId)
                                 .or(review.member.id.in(getFriendMemberIds(loginMemberId)))))
                 .orderBy(review.updatedAt.desc())

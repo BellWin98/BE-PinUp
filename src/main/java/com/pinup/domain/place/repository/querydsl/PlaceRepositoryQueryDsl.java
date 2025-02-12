@@ -30,6 +30,6 @@ public interface PlaceRepositoryQueryDsl {
             double currentLongitude
     );
 
-    Long getReviewCount(Member loginMember, String kakaoMapId);
-    Double getAverageStarRating(Member loginMember, String kakaoMapId);
+    Long getReviewCount(Member loginMember, String kakaoPlaceId);
+    Double getAverageStarRating(Member loginMember, String kakaoPlaceId);
 }

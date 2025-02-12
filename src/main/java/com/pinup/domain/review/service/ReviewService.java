@@ -53,7 +53,7 @@ public class ReviewService {
         newReview.setType(images != null && !images.isEmpty() ? ReviewType.PHOTO : ReviewType.TEXT);
         reviewRepository.save(newReview);
 
-        return place.getKakaoMapId();
+        return place.getKakaoPlaceId();
     }
 
     @Transactional(readOnly = true)
@@ -124,7 +124,7 @@ public class ReviewService {
     private Place findOrCreatePlace(PlaceRequest placeRequest) {
         String kakaoPlaceId = placeRequest.getKakaoPlaceId();
 
-        return placeRepository.findByKakaoMapId(kakaoPlaceId)
+        return placeRepository.findByKakaoPlaceId(kakaoPlaceId)
                 .orElseGet(() -> placeRepository.save(placeRequest.toEntity()));
     }
 
