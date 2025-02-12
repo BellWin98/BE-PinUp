@@ -38,6 +38,9 @@ public class PlaceDetailResponse {
     @Schema(description = "장소 카테고리")
     private PlaceCategory placeCategory;
 
+    @Schema(description = "북마크 여부")
+    private boolean isBookmark;
+
     @Schema(description = "리뷰 이미지 URL 리스트 (가장 먼저 등록된 리뷰 이미지 순서로 최대 3장)")
     private List<String> reviewImageUrls;
 
@@ -52,7 +55,7 @@ public class PlaceDetailResponse {
 
     public PlaceDetailResponse(
             String placeName, Long reviewCount, Double averageStarRating,
-            double distance, double latitude, double longitude, PlaceCategory placeCategory
+            double distance, double latitude, double longitude, PlaceCategory placeCategory, boolean isBookmark
     ) {
         String distanceUnit = distance < 1 ? Math.round(distance * 1000) + "m" : Math.round(distance) + "km";
         averageStarRating = averageStarRating != null
@@ -65,6 +68,7 @@ public class PlaceDetailResponse {
         this.latitude = latitude;
         this.longitude = longitude;
         this.placeCategory = placeCategory;
+        this.isBookmark = isBookmark;
     }
 
     @Data

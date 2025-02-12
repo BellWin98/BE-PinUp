@@ -9,10 +9,7 @@ import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.NumberTemplate;
+import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+import static com.pinup.domain.bookmark.entity.QBookMark.bookMark;
 import static com.pinup.domain.friend.entity.QFriendShip.friendShip;
 import static com.pinup.domain.member.entity.QMember.member;
 import static com.pinup.domain.place.entity.QPlace.place;
@@ -118,11 +116,12 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                                 calculateDistance(currentLatitude, currentLongitude, place.latitude, place.longitude).as("distance"),
                                 place.latitude.as("latitude"),
                                 place.longitude.as("longitude"),
-                                place.placeCategory.as("placeCategory")
+                                place.placeCategory.as("placeCategory"),
+                                isBookmark(kakaoPlaceId, loginMember.getId()).as("isBookmark")
                         )
                 )
                 .from(place)
-                .join(review).on(place.eq(review.place))
+                .leftJoin(review).on(place.eq(review.place))
                 .where(place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMember.getId())
                                 .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
@@ -248,5 +247,15 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .select(friendShip.friend.id)
                 .from(friendShip)
                 .where(friendShip.member.id.eq(loginMemberId));
+    }
+
+    private BooleanExpression isBookmark(String kakaoPlaceId, Long memberId) {
+
+        return JPAExpressions
+                .selectOne()
+                .from(bookMark)
+                .where(bookMark.place.kakaoPlaceId.eq(kakaoPlaceId)
+                        .and(bookMark.member.id.eq(memberId)))
+                .exists();
     }
 }
