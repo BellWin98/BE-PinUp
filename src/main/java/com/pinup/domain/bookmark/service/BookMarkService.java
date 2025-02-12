@@ -26,9 +26,9 @@ public class BookMarkService {
     private final AuthUtil authUtil;
 
     @Transactional
-    public Long create(String kakaoMapId) {
+    public Long create(String kakaoPlaceId) {
         Member loginMember = authUtil.getLoginMember();
-        Place place = placeRepository.findByKakaoMapId(kakaoMapId)
+        Place place = placeRepository.findByKakaoPlaceId(kakaoPlaceId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PLACE_NOT_FOUND));
 
         if (bookMarkRepository.existsByMemberAndPlace(loginMember, place)) {
