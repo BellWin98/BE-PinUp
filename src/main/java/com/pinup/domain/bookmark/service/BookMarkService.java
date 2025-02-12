@@ -52,14 +52,13 @@ public class BookMarkService {
     }
 
     @Transactional
-    public void delete(Long bookmarkId) {
+    public void delete(String kakaoPlaceId) {
         Member loginMember = authUtil.getLoginMember();
-        BookMark bookMark = bookMarkRepository.findById(bookmarkId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKMARK_NOT_FOUND));
+        Place place = placeRepository.findByKakaoPlaceId(kakaoPlaceId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PLACE_NOT_FOUND));
 
-        if (!bookMark.getMember().equals(loginMember)) {
-            throw new EntityNotFoundException(ErrorCode.UNAUTHORIZED_BOOKMARK_ACCESS);
-        }
+        BookMark bookMark = bookMarkRepository.findByMemberAndPlace(loginMember, place)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKMARK_NOT_FOUND));
 
         bookMarkRepository.delete(bookMark);
     }
