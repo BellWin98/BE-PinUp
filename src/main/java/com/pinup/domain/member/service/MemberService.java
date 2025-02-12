@@ -192,7 +192,7 @@ public class MemberService {
         return this.getSpringProxy().buildFeedResponse(member);
     }
 
-    @Cacheable(value = "feed", key = "#member.id")
+//    @Cacheable(value = "feed", key = "#member.id")
     public FeedResponse buildFeedResponse(Member member) {
         List<Review> reviews = member.getReviews();
         List<FriendShip> friends = member.getFriendships();
