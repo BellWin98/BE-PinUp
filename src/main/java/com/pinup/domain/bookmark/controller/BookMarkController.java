@@ -1,6 +1,7 @@
 package com.pinup.domain.bookmark.controller;
 
-import com.pinup.domain.bookmark.response.BookMarkResponse;
+import com.pinup.domain.bookmark.dto.request.BookMarkCreateRequest;
+import com.pinup.domain.bookmark.dto.response.BookMarkResponse;
 import com.pinup.domain.bookmark.service.BookMarkService;
 import com.pinup.global.response.ResultCode;
 import com.pinup.global.response.ResultResponse;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,10 +38,9 @@ public class BookMarkController {
             )
     })
     public ResponseEntity<ResultResponse> create(
-            @Schema(description = "등록할 장소의 ID", example = "1")
-            @RequestBody Long placeId
+            @Valid @RequestBody BookMarkCreateRequest request
     ) {
-        Long bookmarkId = bookMarkService.create(placeId);
+        Long bookmarkId = bookMarkService.create(request.getKakaoMapId());
         return ResponseEntity.ok(ResultResponse.of(ResultCode.CREATE_BOOKMARK_SUCCESS, bookmarkId));
     }
 
