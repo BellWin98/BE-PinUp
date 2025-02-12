@@ -10,5 +10,5 @@ public class BookMarkCreateRequest {
 
     @NotBlank(message = "카카오맵 장소 ID를 입력하세요.")
     @Schema(description = "카카오맵에서 부여한 장소 고유 ID", example = "480323354")
-    private String kakaoMapId;
+    private String kakaoPlaceId;
 }
