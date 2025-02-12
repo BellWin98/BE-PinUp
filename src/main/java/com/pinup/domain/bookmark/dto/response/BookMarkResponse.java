@@ -2,6 +2,7 @@ package com.pinup.domain.bookmark.dto.response;
 
 import com.pinup.domain.bookmark.entity.BookMark;
 import com.pinup.domain.place.entity.PlaceCategory;
+import com.pinup.domain.review.entity.Review;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +18,7 @@ public class BookMarkResponse {
     private String placeName;
     private String placeAddress;
     private String placeRoadAddress;
-    private String placeDefaultImgUrl;
+    private String placeFirstReviewImageUrl;
     private Double placeLatitude;
     private Double placeLongitude;
     private String placeStatus;
@@ -25,13 +26,19 @@ public class BookMarkResponse {
     private String kakaoPlaceId;
 
     public static BookMarkResponse from(BookMark bookmark) {
+        String firstReviewImageUrl = bookmark.getPlace().getReviews().stream()
+                .filter(review -> !review.getReviewImages().isEmpty())
+                .findFirst()
+                .map(review -> review.getReviewImages().get(0).getUrl())
+                .orElse(bookmark.getPlace().getDefaultImgUrl());
+
         return BookMarkResponse.builder()
                 .id(bookmark.getId())
                 .placeId(bookmark.getPlace().getId())
                 .placeName(bookmark.getPlace().getName())
                 .placeAddress(bookmark.getPlace().getAddress())
                 .placeRoadAddress(bookmark.getPlace().getRoadAddress())
-                .placeDefaultImgUrl(bookmark.getPlace().getDefaultImgUrl())
+                .placeFirstReviewImageUrl(firstReviewImageUrl)
                 .placeLatitude(bookmark.getPlace().getLatitude())
                 .placeLongitude(bookmark.getPlace().getLongitude())
                 .placeStatus(bookmark.getPlace().getStatus())
