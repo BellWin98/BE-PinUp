@@ -1,7 +1,6 @@
 package com.pinup.domain.bookmark.controller;
 
 import com.pinup.domain.bookmark.dto.request.BookMarkCreateRequest;
-import com.pinup.domain.bookmark.dto.request.BookMarkDeleteRequest;
 import com.pinup.domain.bookmark.dto.response.BookMarkResponse;
 import com.pinup.domain.bookmark.service.BookMarkService;
 import com.pinup.global.response.ResultCode;
@@ -61,7 +60,7 @@ public class BookMarkController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.GET_MY_BOOKMARK_SUCCESS, bookmarks));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{kakaoPlaceId}")
     @Operation(summary = "북마크 삭제 API", description = "특정 북마크를 삭제합니다")
     @ApiResponses(value = {
             @ApiResponse(
@@ -70,9 +69,10 @@ public class BookMarkController {
             )
     })
     public ResponseEntity<ResultResponse> delete(
-            @Valid @RequestBody BookMarkDeleteRequest request
+            @Schema(description = "카카오맵에서 부여한 장소 고유 ID", example = "480323354")
+            @PathVariable String kakaoPlaceId
     ) {
-        bookMarkService.delete(request.getKakaoPlaceId());
+        bookMarkService.delete(kakaoPlaceId);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.DELETE_BOOKMARK_SUCCESS));
     }
 }
