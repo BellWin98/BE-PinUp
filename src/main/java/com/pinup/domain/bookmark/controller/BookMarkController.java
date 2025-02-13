@@ -60,6 +60,36 @@ public class BookMarkController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.GET_MY_BOOKMARK_SUCCESS, bookmarks));
     }
 
+    @GetMapping("/filter")
+    @Operation(summary = "북마크 필터링 조회 API", description = "카테고리와 정렬 조건으로 북마크 목록을 필터링하여 조회합니다")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "북마크 필터링 조회에 성공하였습니다.",
+                    content = {
+                            @Content(schema = @Schema(implementation = BookMarkResponse.class))
+                    }
+            )
+    })
+    public ResponseEntity<ResultResponse> getFilteredBookmarks(
+            @Schema(description = "카테고리 (ALL/RESTAURANT/CAFE)", example = "ALL")
+            @RequestParam(defaultValue = "ALL", value = "category", required = false) String category,
+
+            @Schema(description = "정렬조건 (NEAR/LATEST/STAR_HIGH/STAR_LOW)", example = "NEAR")
+            @RequestParam(defaultValue = "NEAR", value = "sort", required = false) String sort,
+
+            @Schema(description = "현 위치 위도", example = "37.562651")
+            @RequestParam(value = "currentLatitude") double currentLatitude,
+
+            @Schema(description = "현 위치 경도", example = "126.826539")
+            @RequestParam(value = "currentLongitude") double currentLongitude
+    ) {
+        List<BookMarkResponse> bookmarks = bookMarkService.getFilteredBookmarks(
+                category, sort, currentLatitude, currentLongitude
+        );
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.GET_MY_BOOKMARK_SUCCESS, bookmarks));
+    }
+
     @DeleteMapping("/{kakaoPlaceId}")
     @Operation(summary = "북마크 삭제 API", description = "특정 북마크를 삭제합니다")
     @ApiResponses(value = {
