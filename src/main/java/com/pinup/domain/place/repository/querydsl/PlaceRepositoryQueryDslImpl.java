@@ -2,7 +2,9 @@ package com.pinup.domain.place.repository.querydsl;
 
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.place.dto.response.PlaceDetailResponse;
+import com.pinup.domain.place.dto.response.PlaceResponse;
 import com.pinup.domain.place.dto.response.PlaceResponseWithFriendReview;
+import com.pinup.domain.place.entity.Place;
 import com.pinup.domain.place.entity.PlaceCategory;
 import com.pinup.domain.place.entity.SortType;
 import com.pinup.global.exception.EntityNotFoundException;
@@ -16,6 +18,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.pinup.domain.bookmark.entity.QBookMark.bookMark;
@@ -32,42 +35,23 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<PlaceResponseWithFriendReview> findAllByMemberAndLocation(
-            Member loginMember, String query, PlaceCategory placeCategory, SortType sortType,
-            double swLatitude, double swLongitude, double neLatitude,
-            double neLongitude, double currentLatitude, double currentLongitude
+    public List<Place> findAllByMemberAndLocation(
+            List<Long> allowedMemberIds, String query, PlaceCategory placeCategory, SortType sortType,
+            double swLat, double swLon, double neLat, double neLon, double currLat, double currLon
     ) {
 
-        List<PlaceResponseWithFriendReview> result = queryFactory
-                .select(Projections.constructor(PlaceResponseWithFriendReview.class,
-                        place.id.as("placeId"),
-                        place.kakaoPlaceId.as("kakaoPlaceId"),
-                        place.name.as("name"),
-                        review.starRating.avg().as("averageStarRating"),
-                        review.id.countDistinct().as("reviewCount"),
-                        calculateDistance(currentLatitude, currentLongitude, place.latitude, place.longitude).as("distance"),
-                        place.latitude.as("latitude"),
-                        place.longitude.as("longitude"),
-                        place.placeCategory.as("placeCategory")
-                ))
-                .from(review)
-                .join(review.place, place)
+        return queryFactory
+                .selectFrom(place)
+                .innerJoin(review).on(place.eq(review.place))
                 .where(place.status.eq("Y")
-                        .and(review.member.id.eq(loginMember.getId())
-                                .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
-                        )
-                        .and(place.latitude.between(swLatitude, neLatitude))
-                        .and(place.longitude.between(swLongitude, neLongitude))
-                        .and(searchByPlaceCategory(placeCategory))
+                        .and(review.member.id.in(allowedMemberIds))
+                        .and(place.latitude.between(swLat, neLat))
+                        .and(place.longitude.between(swLon, neLon))
                         .and(searchByQuery(query))
+                        .and(searchByPlaceCategory(placeCategory))
                 )
-                .groupBy(place)
-                .orderBy(searchBySortType(sortType, currentLatitude, currentLongitude, place.latitude, place.longitude))
+                .orderBy(searchBySortType(sortType, currLat, currLon, place.latitude, place.longitude))
                 .fetch();
-
-        addImageInfoOnPlaceResult(result, loginMember);
-
-        return result;
     }
 
     @Override
@@ -88,7 +72,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .from(review)
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMember.getId())
-                                .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
+                                .or(review.member.id.in(fetchPinBuddyIds(loginMember.getId())))
                         )
                 )
                 .orderBy(review.createdAt.desc())
@@ -124,7 +108,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .leftJoin(review).on(place.eq(review.place))
                 .where(place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMember.getId())
-                                .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
+                                .or(review.member.id.in(fetchPinBuddyIds(loginMember.getId())))
                         )
                 )
                 .fetchOne();
@@ -147,7 +131,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .from(review)
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMember.getId())
-                                .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
+                                .or(review.member.id.in(fetchPinBuddyIds(loginMember.getId())))
                         )
                 )
                 .fetchOne();
@@ -162,7 +146,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .where(place.status.eq("Y")
                         .and(place.kakaoPlaceId.eq(kakaoPlaceId))
                         .and(review.member.id.eq(loginMember.getId())
-                                .or(review.member.id.in(getFriendMemberIds(loginMember.getId())))
+                                .or(review.member.id.in(fetchPinBuddyIds(loginMember.getId())))
                         )
 
                 )
@@ -213,7 +197,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .join(review).on(reviewImage.review.eq(review))
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMemberId)
-                                .or(review.member.id.in(getFriendMemberIds(loginMemberId))))
+                                .or(review.member.id.in(fetchPinBuddyIds(loginMemberId))))
                         .and(reviewImage.url.isNotNull()))
                 .orderBy(reviewImage.createdAt.asc())
                 .limit(3)
@@ -227,7 +211,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .join(review).on(member.eq(review.member))
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.eq(loginMemberId)
-                                .or(review.member.id.in(getFriendMemberIds(loginMemberId)))))
+                                .or(review.member.id.in(fetchPinBuddyIds(loginMemberId)))))
                 .orderBy(review.updatedAt.desc())
                 .limit(3)
                 .fetch();
@@ -242,11 +226,12 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
         );
     }
 
-    private JPQLQuery<Long> getFriendMemberIds(Long loginMemberId) {
-        return JPAExpressions
+    private List<Long> fetchPinBuddyIds(Long memberId) {
+        return queryFactory
                 .select(friendShip.friend.id)
                 .from(friendShip)
-                .where(friendShip.member.id.eq(loginMemberId));
+                .where(friendShip.member.id.eq(memberId))
+                .fetch();
     }
 
     private BooleanExpression isBookmark(String kakaoPlaceId, Long memberId) {

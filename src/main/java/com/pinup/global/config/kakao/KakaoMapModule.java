@@ -9,6 +9,7 @@ import com.pinup.domain.place.repository.PlaceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
@@ -47,6 +49,19 @@ public class KakaoMapModule {
         return Stream.of(resultOfRestaurant, resultOfCafe)
                 .flatMap(Collection::stream)
                 .toList();
+    }
+
+    @Cacheable("kakaoSearch")
+    public List<PlaceResponseByKeyword> searchParallel(Member member, String keyword) {
+        List<String> categories = List.of(PlaceCategory.RESTAURANT.getCode(), PlaceCategory.CAFE.getCode());
+        List<List<PlaceResponseByKeyword>> results = categories.parallelStream()
+                .map(category -> {
+                    URI uri = buildUri(keyword, category);
+                    return executeSearchRequest(uri, member);
+                })
+                .toList();
+
+        return results.stream().flatMap(Collection::stream).toList();
     }
 
     private URI buildUri(String keyword, String category) {

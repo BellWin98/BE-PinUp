@@ -26,5 +26,4 @@ public enum SortType {
         }
         throw new EntityNotFoundException(ErrorCode.PLACE_SORT_NOT_FOUND);
     }
-
 }
