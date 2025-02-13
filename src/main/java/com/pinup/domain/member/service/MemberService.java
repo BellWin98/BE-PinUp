@@ -51,10 +51,11 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public MemberResponse searchMembers(String nickname) {
-        Member member = memberRepository.findByNickname(nickname)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-        return MemberResponse.from(member);
+    public List<MemberResponse> searchMembers(String nickname) {
+        List<Member> members = memberRepository.findByNicknameContaining(nickname);
+        return members.stream()
+                .map(MemberResponse::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -192,7 +193,6 @@ public class MemberService {
         return this.getSpringProxy().buildFeedResponse(member);
     }
 
-//    @Cacheable(value = "feed", key = "#member.id")
     public FeedResponse buildFeedResponse(Member member) {
         List<Review> reviews = member.getReviews();
         List<FriendShip> friends = member.getFriendships();
