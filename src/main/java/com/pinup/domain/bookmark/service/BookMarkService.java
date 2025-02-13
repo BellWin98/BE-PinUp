@@ -5,6 +5,8 @@ import com.pinup.domain.bookmark.repository.BookMarkRepository;
 import com.pinup.domain.bookmark.dto.response.BookMarkResponse;
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.place.entity.Place;
+import com.pinup.domain.place.entity.PlaceCategory;
+import com.pinup.domain.place.entity.SortType;
 import com.pinup.domain.place.repository.PlaceRepository;
 import com.pinup.global.common.AuthUtil;
 import com.pinup.global.exception.EntityNotFoundException;
@@ -49,6 +51,26 @@ public class BookMarkService {
         return bookMarkRepository.findAllByMember(loginMember).stream()
                 .map(BookMarkResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookMarkResponse> getFilteredBookmarks(
+            String category,
+            String sort,
+            double currentLatitude,
+            double currentLongitude
+    ) {
+        Member loginMember = authUtil.getLoginMember();
+        PlaceCategory placeCategory = PlaceCategory.getCategory(category);
+        SortType sortType = SortType.getSortType(sort);
+
+        return bookMarkRepository.findAllByMemberAndFilter(
+                loginMember,
+                placeCategory,
+                sortType,
+                currentLatitude,
+                currentLongitude
+        );
     }
 
     @Transactional

@@ -1,16 +1,12 @@
 package com.pinup.domain.bookmark.dto.response;
-
 import com.pinup.domain.bookmark.entity.BookMark;
 import com.pinup.domain.place.entity.PlaceCategory;
-import com.pinup.domain.review.entity.Review;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class BookMarkResponse {
     private Long id;
@@ -24,6 +20,32 @@ public class BookMarkResponse {
     private String placeStatus;
     private PlaceCategory placeCategory;
     private String kakaoPlaceId;
+
+    public BookMarkResponse(
+            Long id,
+            Long placeId,
+            String placeName,
+            String placeAddress,
+            String placeRoadAddress,
+            String placeFirstReviewImageUrl,
+            Double placeLatitude,
+            Double placeLongitude,
+            String placeStatus,
+            PlaceCategory placeCategory,
+            String kakaoPlaceId
+    ) {
+        this.id = id;
+        this.placeId = placeId;
+        this.placeName = placeName;
+        this.placeAddress = placeAddress;
+        this.placeRoadAddress = placeRoadAddress;
+        this.placeFirstReviewImageUrl = placeFirstReviewImageUrl;
+        this.placeLatitude = placeLatitude;
+        this.placeLongitude = placeLongitude;
+        this.placeStatus = placeStatus;
+        this.placeCategory = placeCategory;
+        this.kakaoPlaceId = kakaoPlaceId;
+    }
 
     public static BookMarkResponse from(BookMark bookmark) {
         String firstReviewImageUrl = bookmark.getPlace().getReviews().stream()

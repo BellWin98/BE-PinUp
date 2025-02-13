@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "유저 API", description = "")
@@ -29,7 +31,7 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/search")
-    @Operation(summary = "닉네임으로 유저 조회 API", description = "닉네임으로 핀업 유저를 조회합니다.")
+    @Operation(summary = "닉네임으로 유저 조회 API", description = "닉네임으로 핀업 유저를 조회합니다. (부분 일치)")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -40,8 +42,8 @@ public class MemberController {
             )
     })
     public ResponseEntity<ResultResponse> searchMembers(@RequestParam("nickname") String nickname) {
-        MemberResponse searchResult = memberService.searchMembers(nickname);
-        return ResponseEntity.ok(ResultResponse.of(ResultCode.GET_USER_INFO_SUCCESS, searchResult));
+        List<MemberResponse> searchResults = memberService.searchMembers(nickname);
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.GET_USER_INFO_SUCCESS, searchResults));
     }
 
     @GetMapping("/me")
