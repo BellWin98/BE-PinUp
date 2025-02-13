@@ -21,7 +21,6 @@ public class BookMarkResponse {
     private PlaceCategory placeCategory;
     private String kakaoPlaceId;
 
-    // 명시적 생성자 추가
     public BookMarkResponse(
             Long id,
             Long placeId,
