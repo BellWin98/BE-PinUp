@@ -1,12 +1,10 @@
 package com.pinup.domain.member.service;
 
+import com.pinup.domain.friend.repository.FriendShipRepository;
+import com.pinup.domain.member.dto.response.*;
 import com.pinup.global.config.redis.MemberCacheManager;
 import com.pinup.domain.member.dto.request.MemberInfoUpdateRequest;
 import com.pinup.domain.member.dto.request.UpdateMemberInfoAfterLoginRequest;
-import com.pinup.domain.member.dto.response.FeedResponse;
-import com.pinup.domain.member.dto.response.MemberResponse;
-import com.pinup.domain.member.dto.response.ProfileResponse;
-import com.pinup.domain.member.dto.response.MemberReviewResponse;
 import com.pinup.domain.friend.entity.FriendShip;
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.review.entity.Review;
@@ -22,7 +20,6 @@ import com.pinup.domain.friend.repository.FriendRequestRepository;
 import com.pinup.domain.member.repository.MemberRepository;
 import com.pinup.domain.friend.service.FriendShipService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +42,7 @@ public class MemberService {
     private final MemberCacheManager memberCacheManager;
     private final FriendShipService friendShipService;
     private final FriendRequestRepository friendRequestRepository;
+    private final FriendShipRepository friendShipRepository;
     private final AuthUtil authUtil;
     private final ApplicationContext applicationContext;
 
@@ -51,11 +51,18 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<MemberResponse> searchMembers(String nickname) {
-        List<Member> members = memberRepository.findByNicknameContaining(nickname);
+    public List<SearchMemberResponse> searchMembers(String nickname) {
+        Member loginMember = authUtil.getLoginMember();
+        List<Member> members = memberRepository.findAllByNickname(nickname);
+
         return members.stream()
-                .map(MemberResponse::from)
-                .toList();
+                .map(member -> SearchMemberResponse.builder()
+                        .memberResponse(MemberResponse.from(member))
+                        .relationType(determineRelationType(loginMember, member))
+                        .reviewCount(member.getReviews().size())
+                        .pinBuddyCount(member.getFriendships().size())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -215,5 +222,19 @@ public class MemberService {
                         .map(MemberReviewResponse::of)
                         .toList())
                 .build();
+    }
+
+    private MemberRelationType determineRelationType(Member loginMember, Member member) {
+        if (loginMember.equals(member)) {
+            return MemberRelationType.SELF;
+        }
+        if (friendShipRepository.existsByMemberAndFriend(loginMember, member)) {
+            return MemberRelationType.FRIEND;
+        }
+        if (friendRequestRepository.existsBySenderAndReceiverAndFriendRequestStatus(
+                loginMember, member, FriendRequestStatus.PENDING)) {
+            return MemberRelationType.PENDING;
+        }
+        return MemberRelationType.STRANGER;
     }
 }

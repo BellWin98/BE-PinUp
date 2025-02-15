@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface FriendShipRepository extends JpaRepository<FriendShip, Long> {
 
     List<FriendShip> findAllByMember(Member member);
-
+    boolean existsByMemberAndFriend(Member member, Member friend);
     Optional<FriendShip> findByMemberAndFriend(Member member, Member friend);
 }

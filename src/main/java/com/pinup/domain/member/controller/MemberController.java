@@ -4,6 +4,7 @@ import com.pinup.domain.member.dto.request.MemberInfoUpdateRequest;
 import com.pinup.domain.member.dto.request.UpdateMemberInfoAfterLoginRequest;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.dto.response.ProfileResponse;
+import com.pinup.domain.member.dto.response.SearchMemberResponse;
 import com.pinup.global.response.ResultCode;
 import com.pinup.global.response.ResultResponse;
 import com.pinup.domain.member.service.MemberService;
@@ -31,19 +32,21 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/search")
-    @Operation(summary = "닉네임으로 유저 조회 API", description = "닉네임으로 핀업 유저를 조회합니다. (부분 일치)")
+    @Operation(summary = "닉네임으로 유저 조회 API", description = "닉네임으로 핀업 유저를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "유저 정보 조회에 성공하였습니다.",
                     content = {
-                            @Content(schema = @Schema(implementation = MemberResponse.class))
+                            @Content(schema = @Schema(implementation = SearchMemberResponse.class))
                     }
             )
     })
     public ResponseEntity<ResultResponse> searchMembers(@RequestParam("nickname") String nickname) {
-        List<MemberResponse> searchResults = memberService.searchMembers(nickname);
-        return ResponseEntity.ok(ResultResponse.of(ResultCode.GET_USER_INFO_SUCCESS, searchResults));
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.GET_USER_INFO_SUCCESS,
+                memberService.searchMembers(nickname))
+        );
     }
 
     @GetMapping("/me")
