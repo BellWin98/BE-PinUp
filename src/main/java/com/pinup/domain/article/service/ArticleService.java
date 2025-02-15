@@ -57,8 +57,8 @@ public class ArticleService {
     }
 
     private Member getCurrentMember() {
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findByEmail(currentUserEmail)
+        String socialId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return memberRepository.findBySocialId(socialId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
