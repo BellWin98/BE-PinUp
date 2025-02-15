@@ -32,7 +32,7 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/search")
-    @Operation(summary = "닉네임으로 유저 조회 API", description = "닉네임으로 핀업 유저를 조회합니다.")
+    @Operation(summary = "닉네임으로 유저 조회 API", description = "닉네임으로 핀업 유저를 조회합니다. (부분 일치)")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
