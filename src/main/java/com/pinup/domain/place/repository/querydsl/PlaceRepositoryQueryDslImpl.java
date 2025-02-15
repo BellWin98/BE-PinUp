@@ -41,7 +41,6 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
         List<PlaceResponseWithFriendReview> result = queryFactory
                 .select(Projections.constructor(PlaceResponseWithFriendReview.class,
-                        place.id.as("placeId"),
                         place.kakaoPlaceId.as("kakaoPlaceId"),
                         place.name.as("name"),
                         review.starRating.avg().as("averageStarRating"),
