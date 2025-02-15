@@ -1,16 +1,20 @@
 package com.pinup.domain.place.dto.response;
 
+import com.pinup.domain.place.entity.Place;
 import com.pinup.domain.place.entity.PlaceCategory;
+import com.pinup.domain.review.entity.Review;
+import com.pinup.domain.review.entity.ReviewImage;
+import com.pinup.global.common.Formatter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.List;
 
-@Data
-@Schema(title = "키워드 없이 장소 목록 조회 응답 DTO", description = "친구 리뷰가 있는 장소 목록 데이터만 조회")
-public class PlaceResponseWithFriendReview {
+@Getter
+@Builder
+public class PlaceResponse {
 
     @Schema(description = "카카오맵 장소 고유 ID")
     private String kakaoPlaceId;
@@ -22,7 +26,7 @@ public class PlaceResponseWithFriendReview {
     private Double averageStarRating;
 
     @Schema(description = "리뷰 수")
-    private Long reviewCount;
+    private int reviewCount;
 
     @Schema(description = "현재 위치에서 해당 장소까지 떨어진 거리(단위: km)")
     private String distance;
@@ -42,22 +46,28 @@ public class PlaceResponseWithFriendReview {
     @Schema(description = "리뷰 작성자 프로필 이미지 URL 리스트 (가장 최근에 리뷰 작성한 유저 순서로 최대 3장)")
     private List<String> reviewerProfileImageUrls;
 
-    public PlaceResponseWithFriendReview(
-            String kakaoPlaceId, String name,
-            Double averageStarRating, Long reviewCount, double distance,
-            double latitude, double longitude, PlaceCategory placeCategory
-    ) {
-        String distanceUnit = distance < 1 ? Math.round(distance * 1000) + "m" : Math.round(distance) + "km";
-        averageStarRating = averageStarRating != null
-                ? BigDecimal.valueOf(averageStarRating).setScale(1, RoundingMode.HALF_UP).doubleValue()
-                : 0.0;
-        this.kakaoPlaceId = kakaoPlaceId;
-        this.name = name;
-        this.averageStarRating = averageStarRating;
-        this.reviewCount = reviewCount;
-        this.distance = distanceUnit;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.placeCategory = placeCategory;
+    public static PlaceResponse from(Place place) {
+
+        List<Review> reviews = place.getReviews();
+
+        double averageStarRating = reviews.stream()
+                .mapToDouble(Review::getStarRating)
+                .average()
+                .orElse(0.0);
+
+        reviews.stream()
+                .map(Review::getReviewImages)
+                .flatMap(List::stream)
+                .sorted(Comparator.comparing(ReviewImage::getCreatedAt))
+                .limit(3)
+                .map(ReviewImage::getUrl)
+                .toList();
+
+        return PlaceResponse.builder()
+                .kakaoPlaceId(place.getKakaoPlaceId())
+                .name(place.getName())
+                .averageStarRating(Formatter.formatStarRating(averageStarRating))
+                .reviewCount(reviews.size())
+                .build()
     }
 }
