@@ -11,8 +11,8 @@ import java.util.List;
 
 public interface PlaceRepositoryQueryDsl {
 
-    List<Place> findAllByMemberAndLocation(
-            List<Long> allowedMemberIds,
+    List<PlaceResponseWithFriendReview> findAllByMemberAndLocation(
+            Member loginMember,
             String query,
             PlaceCategory category,
             SortType sortType,
