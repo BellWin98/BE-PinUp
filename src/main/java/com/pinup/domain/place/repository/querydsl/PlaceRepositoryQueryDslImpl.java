@@ -2,23 +2,22 @@ package com.pinup.domain.place.repository.querydsl;
 
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.place.dto.response.PlaceDetailResponse;
-import com.pinup.domain.place.dto.response.PlaceResponse;
 import com.pinup.domain.place.dto.response.PlaceResponseWithFriendReview;
-import com.pinup.domain.place.entity.Place;
 import com.pinup.domain.place.entity.PlaceCategory;
 import com.pinup.domain.place.entity.SortType;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.pinup.domain.bookmark.entity.QBookMark.bookMark;
@@ -35,23 +34,37 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Place> findAllByMemberAndLocation(
-            List<Long> allowedMemberIds, String query, PlaceCategory placeCategory, SortType sortType,
+    public List<PlaceResponseWithFriendReview> findAllByMemberAndLocation(
+            Member loginMember, String query, PlaceCategory placeCategory, SortType sortType,
             double swLat, double swLon, double neLat, double neLon, double currLat, double currLon
     ) {
 
-        return queryFactory
-                .selectFrom(place)
-                .innerJoin(review).on(place.eq(review.place))
+        List<PlaceResponseWithFriendReview> result = queryFactory
+                .select(Projections.constructor(PlaceResponseWithFriendReview.class,
+                        place.id.as("placeId"),
+                        place.kakaoPlaceId.as("kakaoPlaceId"),
+                        place.name.as("name"),
+                        review.starRating.avg().as("averageStarRating"),
+                        review.id.countDistinct().as("reviewCount"),
+                        calculateDistance(currLat, currLon, place.latitude, place.longitude).as("distance"),
+                        place.latitude.as("latitude"),
+                        place.longitude.as("longitude"),
+                        place.placeCategory.as("placeCategory")
+                ))
+                .from(review)
+                .join(review.place, place)
                 .where(place.status.eq("Y")
-                        .and(review.member.id.in(allowedMemberIds))
+                        .and(review.member.id.eq(loginMember.getId())
+                                .or(review.member.id.in(fetchPinBuddyIds(loginMember.getId())))
+                        )
                         .and(place.latitude.between(swLat, neLat))
-                        .and(place.longitude.between(swLon, neLon))
-                        .and(searchByQuery(query))
-                        .and(searchByPlaceCategory(placeCategory))
-                )
-                .orderBy(searchBySortType(sortType, currLat, currLon, place.latitude, place.longitude))
-                .fetch();
+                        .and(place.longitude.between(swLat, neLon))
+                        .and(searchByPlaceCategory(placeCategory)))
+                        .groupBy(place)
+                        .orderBy(searchBySortType(sortType, currLat, currLon, place.latitude, place.longitude))
+                        .fetch();
+        addImageInfoOnPlaceResult(result, loginMember);
+        return result;
     }
 
     @Override
