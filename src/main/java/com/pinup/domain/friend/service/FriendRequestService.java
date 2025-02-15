@@ -37,9 +37,9 @@ public class FriendRequestService {
     @Transactional
     public FriendRequestResponse sendFriendRequest(Long receiverId) {
 
-        String senderEmail = authUtil.getLoginMember().getEmail();
+        String senderSocialId = authUtil.getLoginMember().getSocialId();
 
-        Member sender = memberRepository.findByEmail(senderEmail)
+        Member sender = memberRepository.findBySocialId(senderSocialId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         Member receiver = memberRepository.findById(receiverId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
@@ -139,7 +139,7 @@ public class FriendRequestService {
 
         String receiverEmail = authUtil.getLoginMember().getEmail();
 
-        Member receiver = memberRepository.findByEmail(receiverEmail)
+        Member receiver = memberRepository.findBySocialId(receiverEmail)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         return friendRequestRepository.findByReceiver(receiver)

@@ -24,7 +24,7 @@ public class JwtTokenProviderTests {
         String token = jwtTokenProvider.createAccessToken(TEST_MEMBER_EMAIL, Role.ROLE_USER);
 
         assertTrue(jwtTokenProvider.validateToken(token));
-        assertEquals(TEST_MEMBER_EMAIL, jwtTokenProvider.getEmail(token));
+        assertEquals(TEST_MEMBER_EMAIL, jwtTokenProvider.getSocialId(token));
     }
 
     @Test

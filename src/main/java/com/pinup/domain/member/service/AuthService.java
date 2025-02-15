@@ -78,7 +78,7 @@ public class AuthService {
         String name = (String) userInfo.get("name");
         String profilePictureUrl = (String) userInfo.get("picture");
 
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findBySocialId(socialId)
                 .orElseGet(() -> memberRepository.save(Member.builder()
                         .email(email)
                         .name(name)
@@ -87,8 +87,8 @@ public class AuthService {
                         .socialId(socialId)
                         .build()));
 
-        String jwtToken = jwtTokenProvider.createAccessToken(member.getEmail(), member.getRole());
-        String refreshToken = jwtTokenProvider.createRefreshToken(email);
+        String jwtToken = jwtTokenProvider.createAccessToken(member.getSocialId(), member.getRole());
+        String refreshToken = jwtTokenProvider.createRefreshToken(socialId);
 
         redisService.setValues(REFRESH_TOKEN_PREFIX+member.getId(), refreshToken);
 
@@ -114,8 +114,8 @@ public class AuthService {
             throw new InvalidTokenException();
         }
 
-        String email = jwtTokenProvider.getEmail(refreshToken);
-        Member member = getMemberByEmail(email);
+        String socialId = jwtTokenProvider.getSocialId(refreshToken);
+        Member member = getMemberBySocialId(socialId);
 
         String storedRefreshToken = redisService.getValues(REFRESH_TOKEN_PREFIX+member.getId());
         if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
@@ -123,8 +123,8 @@ public class AuthService {
         }
 
 
-        String newAccessToken = jwtTokenProvider.createAccessToken(email, member.getRole());
-        String newRefreshToken = jwtTokenProvider.createRefreshToken(email);
+        String newAccessToken = jwtTokenProvider.createAccessToken(socialId, member.getRole());
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(socialId);
 
         redisService.setValues(REFRESH_TOKEN_PREFIX+member.getId(), newRefreshToken);
 
@@ -137,8 +137,8 @@ public class AuthService {
             throw new InvalidTokenException();
         }
 
-        String email = jwtTokenProvider.getEmail(accessToken);
-        Member member = getMemberByEmail(email);
+        String socialId = jwtTokenProvider.getSocialId(accessToken);
+        Member member = getMemberBySocialId(socialId);
         redisService.deleteValues(REFRESH_TOKEN_PREFIX+member.getId());
     }
 
@@ -186,7 +186,7 @@ public class AuthService {
         String name = (String) userInfo.get("name");
         String profilePictureUrl = (String) userInfo.get("picture");
 
-        return memberRepository.findByEmail(email)
+        return memberRepository.findBySocialId(socialId)
                 .orElseGet(() -> memberRepository.save(Member.builder()
                         .email(email)
                         .name(name)
@@ -230,6 +230,11 @@ public class AuthService {
         redisService.setValues(REFRESH_TOKEN_PREFIX+member.getId(), refreshToken);
 
         return new LoginResponse(accessToken, refreshToken, MemberResponse.from(member));
+    }
+
+    private Member getMemberBySocialId(String socialId) {
+        return memberRepository.findBySocialId(socialId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
     private Member getMemberByEmail(String email) {

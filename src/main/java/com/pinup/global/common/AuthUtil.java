@@ -19,8 +19,8 @@ public class AuthUtil {
     }
 
     public Member getLoginMember() {
-        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findByEmail(memberEmail)
+        String socialId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return memberRepository.findBySocialId(socialId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }
