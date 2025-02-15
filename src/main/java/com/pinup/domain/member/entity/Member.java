@@ -49,6 +49,7 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private LoginType loginType;
 
+    @Column(unique = true)
     private String socialId;
 
     private String password;

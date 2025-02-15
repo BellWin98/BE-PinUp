@@ -35,8 +35,8 @@ public class JwtTokenProvider {
         this.objectMapper = objectMapper;
     }
 
-    public String createAccessToken(String email, Role role) {
-        Claims claims = Jwts.claims().setSubject(email);
+    public String createAccessToken(String socialId, Role role) {
+        Claims claims = Jwts.claims().setSubject(socialId);
         claims.put("role", role);
 
         Date now = new Date();
@@ -50,8 +50,8 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String createRefreshToken(String email) {
-        Claims claims = Jwts.claims().setSubject(email);
+    public String createRefreshToken(String socialId) {
+        Claims claims = Jwts.claims().setSubject(socialId);
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidityInMilliseconds);
@@ -73,7 +73,7 @@ public class JwtTokenProvider {
         }
     }
 
-    public String getEmail(String token) {
+    public String getSocialId(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
         } catch (JwtException | IllegalArgumentException e) {
@@ -88,10 +88,10 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-        String email = claims.getSubject();
+        String socialId = claims.getSubject();
         String role = claims.get("role", String.class);
 
-        return new UsernamePasswordAuthenticationToken(email, null,
+        return new UsernamePasswordAuthenticationToken(socialId, null,
                 Collections.singletonList(new SimpleGrantedAuthority(role)));
     }
 }
