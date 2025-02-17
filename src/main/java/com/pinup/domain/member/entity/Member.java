@@ -24,7 +24,7 @@ public class Member extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "VARCHAR(100)", unique = true, nullable = false)
+    @Column(columnDefinition = "VARCHAR(100)", unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -55,15 +55,6 @@ public class Member extends BaseTimeEntity {
     private String password;
 
     @Column(columnDefinition = "VARCHAR(1)")
-    private final String termsOfAgreement = "Y";
-
-    @Column(columnDefinition = "VARCHAR(1)")
-    private final String termsOfPrivacy = "Y";
-
-    @Column(columnDefinition = "VARCHAR(1)")
-    private final String termsOfGeolocation = "Y";
-
-    @Column(columnDefinition = "VARCHAR(1)")
     private String termsOfMarketing;
 
     @OneToMany(mappedBy = "member")
@@ -79,16 +70,21 @@ public class Member extends BaseTimeEntity {
     private List<Article> editorArticles = new ArrayList<>();
 
     @Builder
-    public Member(String email, String name, String profileImageUrl,
-                  LoginType loginType, String socialId, String password) {
+    public Member(
+            String email, String name, String nickname,
+            String profileImageUrl, String socialId, String password,
+            String termsOfMarketing ,LoginType loginType
+    ) {
         this.email = email;
         this.name = name;
+        this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
-        this.loginType = loginType;
         this.socialId = socialId;
+        this.password = password;
+        this.termsOfMarketing = termsOfMarketing;
+        this.loginType = loginType;
         this.role = Role.ROLE_USER;
         this.status = "Y";
-        this.password = password;
     }
 
     public void updateBio(String bio) {

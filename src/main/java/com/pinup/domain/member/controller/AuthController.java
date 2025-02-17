@@ -1,8 +1,10 @@
 package com.pinup.domain.member.controller;
 
 
+import com.pinup.domain.member.dto.request.LoginRequest;
 import com.pinup.domain.member.dto.request.NormalLoginRequest;
 import com.pinup.domain.member.dto.request.MemberJoinRequest;
+import com.pinup.domain.member.dto.request.SignUpRequest;
 import com.pinup.global.response.ResultCode;
 import com.pinup.global.response.ResultResponse;
 import com.pinup.domain.member.dto.response.LoginResponse;
@@ -16,8 +18,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -32,6 +36,27 @@ public class AuthController {
     @Autowired
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @Operation(summary = "회원가입 API", description = "SocialId 반환")
+    @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResultResponse> signUp(
+            @RequestPart SignUpRequest signUpRequest,
+            @RequestPart(name = "multipartFile", required = false) MultipartFile multipartFile
+    ) {
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.SIGN_UP_SUCCESS,
+                authService.signUp(signUpRequest, multipartFile))
+        );
+    }
+
+    @Operation(summary = "로그인 API", description = "AT, RT, 유저정보 반환")
+    @PostMapping("/login")
+    public ResponseEntity<ResultResponse> login(@RequestBody LoginRequest loginRequest) {
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.SOCIAL_LOGIN_SUCCESS,
+                authService.login(loginRequest))
+        );
     }
 
     @GetMapping("/login/google")
