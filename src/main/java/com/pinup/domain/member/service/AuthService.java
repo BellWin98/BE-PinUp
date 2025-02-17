@@ -1,13 +1,16 @@
 package com.pinup.domain.member.service;
 
 
+import com.pinup.domain.member.dto.request.LoginRequest;
 import com.pinup.domain.member.dto.request.NormalLoginRequest;
 import com.pinup.domain.member.dto.request.MemberJoinRequest;
+import com.pinup.domain.member.dto.request.SignUpRequest;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.member.entity.LoginType;
 import com.pinup.domain.member.exception.InvalidTokenException;
 import com.pinup.domain.member.exception.PasswordMismatchException;
+import com.pinup.global.config.s3.S3Service;
 import com.pinup.global.exception.EntityAlreadyExistException;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
@@ -25,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
@@ -32,14 +36,15 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
-    private final String REFRESH_TOKEN_PREFIX = "refresh:";
+    private static final String PROFILE_IMAGE_DIRECTORY = "profiles";
+    private static final String REFRESH_TOKEN_PREFIX = "refresh:";
 
     private final RestTemplate restTemplate;
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisService redisService;
     private final PasswordEncoder passwordEncoder;
+    private final S3Service s3Service;
 
     @Value("${oauth2.google.client-id}")
     private String googleClientId;
@@ -58,6 +63,27 @@ public class AuthService {
 
     @Value("${oauth2.google.auth-uri}")
     private String googleAuthUri;
+
+    public String signUp(final SignUpRequest signUpRequest, final MultipartFile multipartFile) {
+        Member createdMember = signUpRequest.toEntity();
+        if (multipartFile != null && !multipartFile.isEmpty()) {
+            String imageUploadUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile);
+            createdMember.updateProfileImage(imageUploadUrl);
+        }
+
+        return memberRepository.save(createdMember).getSocialId();
+    }
+
+    @Transactional
+    public LoginResponse login(final LoginRequest loginRequest) {
+        Member findMember = memberRepository.findBySocialId(loginRequest.getSocialId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        String accessToken = jwtTokenProvider.createAccessToken(findMember.getSocialId(), findMember.getRole());
+        String refreshToken = jwtTokenProvider.createRefreshToken(findMember.getSocialId());
+        redisService.setValues(REFRESH_TOKEN_PREFIX+findMember.getSocialId(), refreshToken);
+
+        return new LoginResponse(accessToken, refreshToken, MemberResponse.from(findMember));
+    }
 
     public String getGoogleAuthorizationUrl() {
         return UriComponentsBuilder.fromHttpUrl(googleAuthUri)
