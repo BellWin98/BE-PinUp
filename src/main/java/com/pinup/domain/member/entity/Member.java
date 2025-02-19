@@ -30,7 +30,7 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "VARCHAR(12)", unique = true, nullable = false)
+    @Column(columnDefinition = "VARCHAR(12)", unique = true)
     private String nickname;
 
     private String profileImageUrl;
