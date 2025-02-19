@@ -24,13 +24,13 @@ public class Member extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "VARCHAR(100)")
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "VARCHAR(10)", unique = true)
+    @Column(columnDefinition = "VARCHAR(12)", unique = true, nullable = false)
     private String nickname;
 
     private String profileImageUrl;
@@ -53,7 +53,7 @@ public class Member extends BaseTimeEntity {
     private String socialId;
 
     @Column(columnDefinition = "VARCHAR(1)")
-    private String termsOfMarketing;
+    private String termsOfMarketing = "Y";
 
     @OneToMany(mappedBy = "member")
     private List<Review> reviews = new ArrayList<>();
@@ -70,7 +70,7 @@ public class Member extends BaseTimeEntity {
     @Builder
     public Member(
             String email, String name, String nickname,
-            String profileImageUrl, String socialId, String termsOfMarketing ,LoginType loginType
+            String profileImageUrl, String socialId, String termsOfMarketing, LoginType loginType
     ) {
         this.email = email;
         this.name = name;

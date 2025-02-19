@@ -57,14 +57,14 @@ public class AuthService {
     private String googleAuthUri;*/
 
     @Transactional
-    public String signUp(final SignUpRequest signUpRequest, final MultipartFile multipartFile) {
+    public void signUp(final SignUpRequest signUpRequest, final MultipartFile multipartFile) {
         Member createdMember = signUpRequest.toEntity();
         if (multipartFile != null && !multipartFile.isEmpty()) {
             String imageUploadUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile);
             createdMember.updateProfileImage(imageUploadUrl);
         }
 
-        return memberRepository.save(createdMember).getSocialId();
+        memberRepository.save(createdMember);
     }
 
     @Transactional
