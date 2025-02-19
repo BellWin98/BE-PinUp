@@ -43,9 +43,7 @@ public class NotificationService {
 
     public void sendNotification(String userEmail, String message) {
         String eventId = makeEventId(userEmail);
-
         eventCacheRepository.save(userEmail, eventId, message);
-
         emitterRepository.findAllEmitterStartsWithByUserEmail(userEmail)
                 .forEach((key, emitter) -> {
                     sendToClient(emitter, eventId, message);

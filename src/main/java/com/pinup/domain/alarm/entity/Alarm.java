@@ -4,7 +4,6 @@ import com.pinup.domain.member.entity.Member;
 import com.pinup.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,14 +21,12 @@ public class Alarm extends BaseTimeEntity {
     private Member receiver;
 
     boolean isRead = false;
-
     private String message;
 
     public void read(){
         this.isRead = true;
     }
 
-    @Builder
     public Alarm(Member receiver, String message){
         this.receiver = receiver;
         this.message = message;

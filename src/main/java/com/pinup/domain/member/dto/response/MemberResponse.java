@@ -12,7 +12,7 @@ import org.springframework.util.StringUtils;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(title = "유저 정보 상세 조회 응답 DTO", description = "유저 ID, 이메일, 이름, 닉네임, 프로필 사진 URL, 소개글")
+@Schema(title = "유저 정보 응답 DTO")
 public class MemberResponse {
 
     @Schema(description = "유저 ID")

@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class PlaceService {
 
     private static final Logger log = LoggerFactory.getLogger(PlaceService.class);
