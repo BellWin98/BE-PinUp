@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,19 +35,17 @@ public class AuthController {
     @ApiResponse(content = {@Content(schema = @Schema(implementation = Long.class))})
     @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResultResponse> signUp(
-            @RequestPart SignUpRequest signUpRequest,
+            @Valid @RequestPart SignUpRequest signUpRequest,
             @RequestPart(name = "multipartFile", required = false) MultipartFile multipartFile
     ) {
-        return ResponseEntity.ok(ResultResponse.of(
-                ResultCode.SIGN_UP_SUCCESS,
-                authService.signUp(signUpRequest, multipartFile))
-        );
+        authService.signUp(signUpRequest, multipartFile);
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.SIGN_UP_SUCCESS));
     }
 
     @Operation(summary = "로그인 API", description = "AT, RT, 유저정보 반환")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     @PostMapping("/login")
-    public ResponseEntity<ResultResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ResultResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.SOCIAL_LOGIN_SUCCESS,
                 authService.login(loginRequest))
