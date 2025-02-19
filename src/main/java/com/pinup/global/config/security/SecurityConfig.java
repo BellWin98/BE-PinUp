@@ -30,6 +30,7 @@ public class SecurityConfig {
 
     private static final String[] PERMITTED_API_URL = {
             "/api/auth/**",
+            "/api/members/nickname/check",
             "/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**",
             "/chats"
     };
