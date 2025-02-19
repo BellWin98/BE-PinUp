@@ -11,7 +11,6 @@ public class SignUpRequest {
     private String nickname;
     private String socialId;
     private String loginType;
-    private String profileImageUrl;
     private String termsOfMarketing;
 
     public Member toEntity() {
@@ -20,7 +19,6 @@ public class SignUpRequest {
                 .name(name)
                 .nickname(nickname)
                 .socialId(socialId)
-                .profileImageUrl(profileImageUrl)
                 .loginType(LoginType.getLoginType(loginType))
                 .termsOfMarketing(termsOfMarketing)
                 .build();

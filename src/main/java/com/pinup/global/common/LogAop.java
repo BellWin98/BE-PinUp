@@ -1,4 +1,4 @@
-package com.pinup.global.aop;
+package com.pinup.global.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

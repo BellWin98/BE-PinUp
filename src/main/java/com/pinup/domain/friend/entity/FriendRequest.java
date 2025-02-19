@@ -4,7 +4,6 @@ import com.pinup.domain.member.entity.Member;
 import com.pinup.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,7 +27,6 @@ public class FriendRequest extends BaseTimeEntity {
     @JoinColumn(name = "receiver_id", nullable = false)
     private Member receiver;
 
-    @Builder
     public FriendRequest(Member sender, Member receiver) {
         this.friendRequestStatus = FriendRequestStatus.PENDING;
         this.sender = sender;

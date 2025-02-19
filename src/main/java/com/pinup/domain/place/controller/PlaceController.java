@@ -20,9 +20,9 @@ import java.util.List;
 import static com.pinup.global.response.ResultCode.GET_PLACES_SUCCESS;
 import static com.pinup.global.response.ResultCode.GET_PLACE_DETAIL_SUCCESS;
 
-@RestController
-@RequestMapping("/api/places")
 @Tag(name = "장소 API", description = "장소 목록 조회(리뷰있는 가게만), 장소 목록 조회(전체) 장소 상세 조회")
+@RequestMapping("/api/places")
+@RestController
 public class PlaceController {
 
     private final PlaceService placeService;
@@ -32,20 +32,9 @@ public class PlaceController {
         this.placeService = placeService;
     }
 
+    @Operation(summary = "리뷰 있는 장소 목록 조회 API")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = PlaceResponseWithFriendReview.class))})
     @GetMapping
-    @Operation(
-            summary = "리뷰 있는 장소 목록 조회 API",
-            description = "리뷰 있는 장소 목록만 조회(랜딩 페이지에서 사용)"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "장소 목록 조회에 성공하였습니다.",
-                    content = {
-                            @Content(schema = @Schema(implementation = PlaceResponseWithFriendReview.class))
-                    }
-            )
-    })
     public ResponseEntity<ResultResponse> getPlaces(
             @Schema(description = "키워드", example = "스타벅스")
             @RequestParam(defaultValue = "", value = "query", required = false) String query,
@@ -82,20 +71,14 @@ public class PlaceController {
 
     @GetMapping("/{kakaoPlaceId}")
     @Operation(summary = "장소 상세 조회 API", description = "카카오맵에서 부여한 고유 ID로 장소 상세 조회")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "장소 상세 조회에 성공하였습니다.",
-                    content = {
-                            @Content(schema = @Schema(implementation = PlaceDetailResponse.class))
-                    }
-            )
-    })
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = PlaceDetailResponse.class))})
     public ResponseEntity<ResultResponse> getPlaceDetail(
             @Schema(description = "카카오맵 장소 고유 ID", example = "1997608947")
             @PathVariable("kakaoPlaceId") String kakaoPlaceId,
+
             @Schema(description = "현 위치 위도", example = "37.562651")
             @RequestParam(value = "currentLatitude") double currentLatitude,
+
             @Schema(description = "현 위치 경도", example = "126.826539")
             @RequestParam(value = "currentLongitude") double currentLongitude
     ) {
@@ -103,17 +86,9 @@ public class PlaceController {
         return ResponseEntity.ok(ResultResponse.of(GET_PLACE_DETAIL_SUCCESS, result));
     }
 
-    @GetMapping("/keyword")
     @Operation(summary = "전체 장소 목록 조회 API", description = "리뷰 작성할 장소 조회 시 사용 / 카카오맵 API 호출")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "장소 목록 조회에 성공하였습니다.",
-                    content = {
-                            @Content(schema = @Schema(implementation = PlaceResponseByKeyword.class))
-                    }
-            )
-    })
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = PlaceResponseByKeyword.class))})
+    @GetMapping("/keyword")
     public ResponseEntity<ResultResponse> getPlacesByKeyword(
             @Schema(description = "검색어", example = "하루카페") @RequestParam(value = "query") String query
     ) {

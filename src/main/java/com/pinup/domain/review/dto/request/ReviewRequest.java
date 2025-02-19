@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+@Schema(title = "리뷰 등록 DTO")
 @Data
-@Schema(title = "리뷰 등록 DTO", description = "리뷰 데이터 등록 (내용, 별점, 방문 날짜)")
 public class ReviewRequest {
 
     @NotBlank(message = "리뷰 내용을 입력하세요")
