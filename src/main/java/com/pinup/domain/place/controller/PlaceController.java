@@ -1,15 +1,14 @@
 package com.pinup.domain.place.controller;
 
-import com.pinup.domain.place.dto.response.PlaceDetailResponse;
-import com.pinup.domain.place.dto.response.PlaceResponseByKeyword;
-import com.pinup.domain.place.dto.response.PlaceResponseWithFriendReview;
-import com.pinup.global.response.ResultResponse;
+import com.pinup.domain.place.dto.response.EntirePlaceResponse;
+import com.pinup.domain.place.dto.response.MapPlaceDetailResponse;
+import com.pinup.domain.place.dto.response.MapPlaceResponse;
 import com.pinup.domain.place.service.PlaceService;
+import com.pinup.global.response.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +32,7 @@ public class PlaceController {
     }
 
     @Operation(summary = "리뷰 있는 장소 목록 조회 API")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = PlaceResponseWithFriendReview.class))})
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = MapPlaceResponse.class))})
     @GetMapping
     public ResponseEntity<ResultResponse> getPlaces(
             @Schema(description = "키워드", example = "스타벅스")
@@ -63,7 +62,7 @@ public class PlaceController {
             @Schema(description = "현 위치 경도", example = "126.826539")
             @RequestParam(value = "currentLongitude") double currentLongitude
     ) {
-        List<PlaceResponseWithFriendReview> result = placeService.getPlaces(
+        List<MapPlaceResponse> result = placeService.getMapPlaces(
                 query, category, sort, swLatitude, swLongitude, neLatitude, neLongitude, currentLatitude, currentLongitude
         );
         return ResponseEntity.ok(ResultResponse.of(GET_PLACES_SUCCESS, result));
@@ -71,7 +70,7 @@ public class PlaceController {
 
     @GetMapping("/{kakaoPlaceId}")
     @Operation(summary = "장소 상세 조회 API", description = "카카오맵에서 부여한 고유 ID로 장소 상세 조회")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = PlaceDetailResponse.class))})
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = MapPlaceDetailResponse.class))})
     public ResponseEntity<ResultResponse> getPlaceDetail(
             @Schema(description = "카카오맵 장소 고유 ID", example = "1997608947")
             @PathVariable("kakaoPlaceId") String kakaoPlaceId,
@@ -82,17 +81,17 @@ public class PlaceController {
             @Schema(description = "현 위치 경도", example = "126.826539")
             @RequestParam(value = "currentLongitude") double currentLongitude
     ) {
-        PlaceDetailResponse result = placeService.getPlaceDetail(kakaoPlaceId, currentLatitude, currentLongitude);
+        MapPlaceDetailResponse result = placeService.getMapPlaceDetail(kakaoPlaceId, currentLatitude, currentLongitude);
         return ResponseEntity.ok(ResultResponse.of(GET_PLACE_DETAIL_SUCCESS, result));
     }
 
     @Operation(summary = "전체 장소 목록 조회 API", description = "리뷰 작성할 장소 조회 시 사용 / 카카오맵 API 호출")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = PlaceResponseByKeyword.class))})
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = EntirePlaceResponse.class))})
     @GetMapping("/keyword")
     public ResponseEntity<ResultResponse> getPlacesByKeyword(
             @Schema(description = "검색어", example = "하루카페") @RequestParam(value = "query") String query
     ) {
-        List<PlaceResponseByKeyword> result = placeService.getPlacesByKeyword(query);
+        List<EntirePlaceResponse> result = placeService.getEntirePlaces(query);
         return ResponseEntity.ok(ResultResponse.of(GET_PLACES_SUCCESS, result));
     }
 }
