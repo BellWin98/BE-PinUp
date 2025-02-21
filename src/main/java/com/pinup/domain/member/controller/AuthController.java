@@ -71,7 +71,7 @@ public class AuthController {
 
     @Operation(summary = "로그아웃 API", description = "헤더에 accessToken 필요")
     @PostMapping("/logout")
-    public ResponseEntity<ResultResponse> logout(@RequestHeader("Authorization") String accessToken) {
+    public ResponseEntity<ResultResponse> logout(@RequestHeader("Access") String accessToken) {
         authService.logout(accessToken);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.LOGOUT_SUCCESS));
     }
