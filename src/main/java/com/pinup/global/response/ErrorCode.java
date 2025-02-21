@@ -36,7 +36,7 @@ public enum ErrorCode {
     FORBIDDEN(403, "AU003", "접근할 수 있는 권한이 없습니다."),
     EXPIRED_OR_PREVIOUS_REFRESH_TOKEN(403, "AU004", "만료되었거나 이전에 발급된 Refresh Token입니다."),
     ACCESS_DENIED(401, "AU005", "유효한 인증 정보가 아닙니다."),
-    EXPIRED_ACCESS_TOKEN(401, "AU006", "Access Token이 만료되었습니다. 토큰을 재발급해주세요"),
+    EXPIRED_TOKEN(401, "AU006", "토큰 유효기간이 만료되었습니다."),
     LOGIN_TYPE_NOT_FOUND(400, "AU007", "일치하는 로그인 타입을 찾을 수 없습니다."),
 
     // Member

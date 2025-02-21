@@ -1,6 +1,5 @@
 package com.pinup.domain.member.controller;
 
-
 import com.pinup.domain.member.dto.request.LoginRequest;
 import com.pinup.domain.member.dto.request.SignUpRequest;
 import com.pinup.domain.member.dto.response.LoginResponse;
@@ -64,7 +63,7 @@ public class AuthController {
     @Operation(summary = "토큰 재발급 API", description = "헤더에 refreshToken 필요")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     @PostMapping("/refresh")
-    public ResponseEntity<ResultResponse> refresh(@RequestHeader("Authorization") String refreshToken) {
+    public ResponseEntity<ResultResponse> refresh(@RequestHeader("Refresh") String refreshToken) {
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.TOKEN_REISSUED_SUCCESS, authService.refresh(refreshToken))
         );
