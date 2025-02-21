@@ -1,6 +1,5 @@
 package com.pinup.domain.member.controller;
 
-
 import com.pinup.domain.member.dto.request.LoginRequest;
 import com.pinup.domain.member.dto.request.SignUpRequest;
 import com.pinup.domain.member.dto.response.LoginResponse;
@@ -12,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,19 +34,17 @@ public class AuthController {
     @ApiResponse(content = {@Content(schema = @Schema(implementation = Long.class))})
     @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResultResponse> signUp(
-            @RequestPart SignUpRequest signUpRequest,
+            @Valid @RequestPart SignUpRequest signUpRequest,
             @RequestPart(name = "multipartFile", required = false) MultipartFile multipartFile
     ) {
-        return ResponseEntity.ok(ResultResponse.of(
-                ResultCode.SIGN_UP_SUCCESS,
-                authService.signUp(signUpRequest, multipartFile))
-        );
+        authService.signUp(signUpRequest, multipartFile);
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.SIGN_UP_SUCCESS));
     }
 
     @Operation(summary = "로그인 API", description = "AT, RT, 유저정보 반환")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     @PostMapping("/login")
-    public ResponseEntity<ResultResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ResultResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.SOCIAL_LOGIN_SUCCESS,
                 authService.login(loginRequest))
@@ -65,7 +63,7 @@ public class AuthController {
     @Operation(summary = "토큰 재발급 API", description = "헤더에 refreshToken 필요")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     @PostMapping("/refresh")
-    public ResponseEntity<ResultResponse> refresh(@RequestHeader("Authorization") String refreshToken) {
+    public ResponseEntity<ResultResponse> refresh(@RequestHeader("Refresh") String refreshToken) {
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.TOKEN_REISSUED_SUCCESS, authService.refresh(refreshToken))
         );
@@ -73,7 +71,7 @@ public class AuthController {
 
     @Operation(summary = "로그아웃 API", description = "헤더에 accessToken 필요")
     @PostMapping("/logout")
-    public ResponseEntity<ResultResponse> logout(@RequestHeader("Authorization") String accessToken) {
+    public ResponseEntity<ResultResponse> logout(@RequestHeader("Access") String accessToken) {
         authService.logout(accessToken);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.LOGOUT_SUCCESS));
     }

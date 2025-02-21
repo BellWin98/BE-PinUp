@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,7 +51,10 @@ public class MemberService {
     @Transactional(readOnly = true)
     public List<SearchMemberResponse> searchMembers(String nickname) {
         Member loginMember = authUtil.getLoginMember();
-        List<Member> members = memberRepository.findAllByNickname(nickname);
+        if (nickname.isBlank()) {
+            return null;
+        }
+        List<Member> members = memberRepository.findAllByNicknameContaining(nickname);
 
         return members.stream()
                 .map(member -> SearchMemberResponse.builder()
