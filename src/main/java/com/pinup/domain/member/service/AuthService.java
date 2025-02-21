@@ -1,12 +1,12 @@
 package com.pinup.domain.member.service;
 
-
 import com.pinup.domain.member.dto.request.LoginRequest;
 import com.pinup.domain.member.dto.request.SignUpRequest;
 import com.pinup.domain.member.dto.response.LoginResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.entity.LoginType;
 import com.pinup.domain.member.entity.Member;
+import com.pinup.domain.member.exception.ExpiredTokenException;
 import com.pinup.domain.member.exception.InvalidTokenException;
 import com.pinup.domain.member.repository.MemberRepository;
 import com.pinup.global.config.jwt.JwtTokenProvider;
@@ -14,6 +14,8 @@ import com.pinup.global.config.redis.RedisService;
 import com.pinup.global.config.s3.S3Service;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -102,29 +104,29 @@ public class AuthService {
     }
 
     public LoginResponse refresh(String refreshToken) {
-        if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new InvalidTokenException();
-        }
-        String socialId = jwtTokenProvider.getSocialId(refreshToken);
-        Member member = getMemberBySocialId(socialId);
-        String storedRefreshToken = redisService.getValues(REFRESH_TOKEN_PREFIX+member.getSocialId());
-        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
-            throw new InvalidTokenException();
-        }
-        String newAccessToken = jwtTokenProvider.createAccessToken(socialId, member.getRole());
-        String newRefreshToken = jwtTokenProvider.createRefreshToken(socialId);
-        redisService.setValues(REFRESH_TOKEN_PREFIX+member.getId(), newRefreshToken);
+        if (isTokenValidate(refreshToken)) {
+            String socialId = getSocialIdByToken(refreshToken);
+            Member member = getMemberBySocialId(socialId);
+            String storedRefreshToken = redisService.getValues(REFRESH_TOKEN_PREFIX+member.getSocialId());
+            if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+                throw new InvalidTokenException();
+            }
+            String newAccessToken = jwtTokenProvider.createAccessToken(socialId, member.getRole());
+            String newRefreshToken = jwtTokenProvider.createRefreshToken(socialId);
+            redisService.setValues(REFRESH_TOKEN_PREFIX+member.getSocialId(), newRefreshToken);
 
-        return new LoginResponse(newAccessToken, newRefreshToken, MemberResponse.from(member));
+            return new LoginResponse(newAccessToken, newRefreshToken, MemberResponse.from(member));
+        }
+
+        return null;
     }
 
     public void logout(String accessToken) {
-        if (!jwtTokenProvider.validateToken(accessToken)) {
-            throw new InvalidTokenException();
+        if (isTokenValidate(accessToken)) {
+            String socialId = getSocialIdByToken(accessToken);
+            Member member = getMemberBySocialId(socialId);
+            redisService.deleteValues(REFRESH_TOKEN_PREFIX+member.getSocialId());
         }
-        String socialId = jwtTokenProvider.getSocialId(accessToken);
-        Member member = getMemberBySocialId(socialId);
-        redisService.deleteValues(REFRESH_TOKEN_PREFIX+member.getSocialId());
     }
 
     private String getAccessToken(String authorizationCode) {
@@ -148,9 +150,7 @@ public class AuthService {
     private Map<String, Object> getUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
-
         HttpEntity<String> entity = new HttpEntity<>("", headers);
-
         ResponseEntity<Map> response = restTemplate.exchange(googleResourceUri, HttpMethod.GET, entity, Map.class);
 
         if (response.getBody() == null) {
@@ -163,6 +163,20 @@ public class AuthService {
     private Member getMemberBySocialId(String socialId) {
         return memberRepository.findBySocialId(socialId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    private boolean isTokenValidate(String token) {
+        try {
+            return jwtTokenProvider.validateToken(token);
+        } catch (ExpiredJwtException e) {
+            throw new ExpiredTokenException();
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new InvalidTokenException();
+        }
+    }
+
+    private String getSocialIdByToken(String token) {
+        return jwtTokenProvider.getSocialId(token);
     }
 
     /* 미사용 코드
