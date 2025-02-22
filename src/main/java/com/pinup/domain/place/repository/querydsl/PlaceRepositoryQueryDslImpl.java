@@ -115,7 +115,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                         review.member.profileImageUrl.as("writerProfileImageUrl")
                 ))
                 .from(review)
-                .innerJoin(reviewImage).on(review.eq(reviewImage.review))
+                .leftJoin(reviewImage).on(review.eq(reviewImage.review))
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
                         .and(review.member.id.in(targetMemberIds))
                 )
