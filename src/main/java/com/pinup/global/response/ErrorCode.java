@@ -29,6 +29,7 @@ public enum ErrorCode {
     SOCIAL_LOGIN_TOKEN_NOT_FOUND(500, "G019", "소셜 로그인 서버로부터 발급된 Access Token이 없습니다."),
     SOCIAL_LOGIN_USER_INFO_NOT_FOUND(500, "G020", "소셜 로그인 서버에서 조회한 유저 정보가 없습니다."),
     FILE_UPLOAD_ERROR(400, "G021", "파일 업로드를 실패했습니다."),
+    NO_RESOURCE_FOUND(404, "G022", "해당 경로의 URI를 찾을 수 없습니다."),
 
     // Auth
     INVALID_TOKEN(400, "AU001", "유효하지 않은 토큰입니다."),
@@ -40,40 +41,40 @@ public enum ErrorCode {
     LOGIN_TYPE_NOT_FOUND(400, "AU007", "일치하는 로그인 타입을 찾을 수 없습니다."),
 
     // Member
-    MEMBER_NOT_FOUND(404, "M001", "존재하지 않는 유저입니다."),
+    MEMBER_NOT_FOUND(400, "M001", "존재하지 않는 유저입니다."),
     ALREADY_EXIST_NICKNAME(400, "M002", "중복된 닉네임입니다."),
     ALREADY_EXIST_EMAIL(400, "M003", "이미 가입된 이메일입니다."),
     PASSWORD_MISMATCH(400, "M004", "비밀번호가 일치하지 않습니다."),
     NICKNAME_UPDATE_TIME_LIMIT(400, "M005", "닉네임은 30일에 한 번만 변경할 수 있습니다."),
 
     // Review
-    REVIEW_NOT_FOUND(404, "R001", "존재하지 않는 리뷰입니다."),
+    REVIEW_NOT_FOUND(400, "R001", "존재하지 않는 리뷰입니다."),
 
     // Place
-    PLACE_NOT_FOUND(404, "P001", "존재하지 않는 장소입니다."),
-    PLACE_CATEGORY_NOT_FOUND(404, "P002", "존재하지 않는 장소 카테고리입니다."),
-    PLACE_SORT_NOT_FOUND(404, "P003", "존재하지 않는 장소 정렬 필터입니다."),
+    PLACE_NOT_FOUND(400, "P001", "존재하지 않는 장소입니다."),
+    PLACE_CATEGORY_NOT_FOUND(400, "P002", "존재하지 않는 장소 카테고리입니다."),
+    PLACE_SORT_NOT_FOUND(400, "P003", "존재하지 않는 장소 정렬 필터입니다."),
 
     // Friend
     ALREADY_EXIST_FRIEND_REQUEST(400, "F001", "이미 존재하는 친구 요청입니다."),
     SELF_FRIEND_REQUEST(400, "F002", "자기 자신에게 친구 요청을 보낼 수 없습니다."),
     ALREADY_PROCESSED_FRIEND_REQUEST(400, "F003", "이미 처리된 친구 요청입니다."),
-    FRIEND_REQUEST_NOT_FOUND(404, "F004", "존재하지 않는 친구 요청입니다."),
-    FRIENDSHIP_NOT_FOUND(404, "F005", "존재하지 않는 친구 관계입니다."),
-    FRIEND_NOT_FOUND(404, "F006", "해당 이름을 가진 친구를 찾을 수 없습니다."),
+    FRIEND_REQUEST_NOT_FOUND(400, "F004", "존재하지 않는 친구 요청입니다."),
+    FRIENDSHIP_NOT_FOUND(400, "F005", "존재하지 않는 친구 관계입니다."),
+    FRIEND_NOT_FOUND(400, "F006", "해당 이름을 가진 친구를 찾을 수 없습니다."),
     ALREADY_FRIEND(400, "F007", "이미 친구 관계입니다."),
     FRIEND_REQUEST_RECEIVER_MISMATCH(403, "F008", "현재 사용자가 친구 요청의 수신자가 아닙니다."),
 
     // Alarm
     SSE_CONNECTION_ERROR(500, "AL001", "SSE 연결 중 오류가 발생했습니다."),
-    ALARM_NOT_FOUND(404, "AL002", "존재하지 않는 알람입니다."),
+    ALARM_NOT_FOUND(400, "AL002", "존재하지 않는 알람입니다."),
     UNAUTHORIZED_ALARM_ACCESS(403, "AL003", "해당 알람에 접근할 권한이 없습니다."),
 
     // Article
-    ARTICLE_NOT_FOUND(404, "AR001", "존재하지 않는 아티클입니다."),
+    ARTICLE_NOT_FOUND(400, "AR001", "존재하지 않는 아티클입니다."),
 
     // BookMark
-    BOOKMARK_NOT_FOUND(404, "B001", "존재하지 않는 북마크입니다."),
+    BOOKMARK_NOT_FOUND(400, "B001", "존재하지 않는 북마크입니다."),
     ALREADY_EXIST_BOOKMARK(400, "B002", "이미 존재하는 북마크입니다."),
     UNAUTHORIZED_BOOKMARK_ACCESS(403, "B003", "해당 북마크에 접근할 권한이 없습니다."),
     ;
