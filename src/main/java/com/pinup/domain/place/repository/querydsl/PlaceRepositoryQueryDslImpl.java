@@ -105,7 +105,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     public List<ReviewDetailResponse> findAllTargetMemberReviews(Long memberId, String kakaoPlaceId) {
         List<Long> targetMemberIds = fetchTargetMemberIds(memberId);
         List<ReviewDetailResponse> reviewDetails = queryFactory
-                .select(Projections.constructor(ReviewDetailResponse.class,
+                .selectDistinct(Projections.constructor(ReviewDetailResponse.class,
                         review.id.as("reviewId"),
                         review.member.nickname.as("writerName"),
                         review.member.reviews.size().as("writerTotalReviewCount"),
