@@ -22,6 +22,6 @@ public class ResultResponse {
     }
 
     public static ResultResponse of(ResultCode resultCode) {
-        return new ResultResponse(resultCode, "");
+        return new ResultResponse(resultCode, null);
     }
 }
