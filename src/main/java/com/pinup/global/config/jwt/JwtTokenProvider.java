@@ -22,16 +22,17 @@ public class JwtTokenProvider {
 
     private final Key key;
     private final ObjectMapper objectMapper;
-    private final long tokenValidityInMilliseconds;
+    private final long accessTokenValidityInMilliseconds;
     private final long refreshTokenValidityInMilliseconds;
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds,
+            @Value("${jwt.access-token-validity-in-seconds}") long accessTokenValidityInSeconds,
+            @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds,
             ObjectMapper objectMapper) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
-        this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
-        this.refreshTokenValidityInMilliseconds = tokenValidityInSeconds * 1000 * 3;
+        this.accessTokenValidityInMilliseconds = accessTokenValidityInSeconds * 1000;
+        this.refreshTokenValidityInMilliseconds = refreshTokenValidityInSeconds * 1000;
         this.objectMapper = objectMapper;
     }
 
@@ -40,7 +41,7 @@ public class JwtTokenProvider {
         claims.put("role", role);
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + tokenValidityInMilliseconds);
+        Date validity = new Date(now.getTime() + accessTokenValidityInMilliseconds);
 
         return Jwts.builder()
                 .setClaims(claims)
