@@ -1,7 +1,6 @@
 package com.pinup.domain.member.service;
 
 import com.pinup.domain.friend.entity.FriendRequestStatus;
-import com.pinup.domain.friend.entity.FriendShip;
 import com.pinup.domain.friend.repository.FriendRequestRepository;
 import com.pinup.domain.friend.repository.FriendShipRepository;
 import com.pinup.domain.member.dto.request.UpdateMemberInfoAfterLoginRequest;
@@ -15,7 +14,6 @@ import com.pinup.domain.member.exception.NicknameUpdateTimeLimitException;
 import com.pinup.domain.member.repository.MemberRepository;
 import com.pinup.domain.review.entity.Review;
 import com.pinup.global.common.AuthUtil;
-import com.pinup.global.common.Formatter;
 import com.pinup.global.config.s3.S3Service;
 import com.pinup.global.exception.EntityAlreadyExistException;
 import com.pinup.global.exception.EntityNotFoundException;
@@ -52,8 +50,6 @@ public class MemberService {
                 .map(member -> SearchMemberResponse.builder()
                         .memberResponse(MemberResponse.from(member))
                         .relationType(determineRelationType(loginMember, member))
-                        .reviewCount(member.getReviews().size())
-                        .pinBuddyCount(member.getFriendships().size())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -101,17 +97,8 @@ public class MemberService {
 
     private FeedResponse buildFeedResponse(Member loginMember, Member member) {
         List<Review> reviews = member.getReviews();
-        List<FriendShip> friends = member.getFriendships();
-        double averageStarRating = reviews.stream()
-                .mapToDouble(Review::getStarRating)
-                .average()
-                .orElse(0.0);
-        double roundedAverageRating = Formatter.formatStarRating(averageStarRating);
         return FeedResponse.builder()
                 .memberResponse(MemberResponse.from(member))
-                .reviewCount(reviews.size())
-                .averageStarRating(roundedAverageRating)
-                .pinBuddyCount(friends.size())
                 .relationType(determineRelationType(loginMember, member))
                 .memberReviews(reviews.stream()
                         .map(MemberReviewResponse::of)

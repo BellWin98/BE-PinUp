@@ -1,12 +1,17 @@
 package com.pinup.domain.member.dto.response;
 
+import com.pinup.domain.friend.entity.FriendShip;
 import com.pinup.domain.member.entity.Member;
+import com.pinup.domain.review.entity.Review;
+import com.pinup.global.common.Formatter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -36,7 +41,24 @@ public class MemberResponse {
     @Schema(description = "마케팅 정보 수신 동의")
     private String termsOfMarketing;
 
+    @Schema(description = "작성한 리뷰 수")
+    private int reviewCount;
+
+    @Schema(description = "작성 리뷰 평균 별점")
+    private double averageStarRating;
+
+    @Schema(description = "핀버디 수")
+    private int pinBuddyCount;
+
     public static MemberResponse from(Member member) {
+        List<Review> reviews = member.getReviews();
+        List<FriendShip> friends = member.getFriendships();
+        double averageStarRating = reviews.stream()
+                .mapToDouble(Review::getStarRating)
+                .average()
+                .orElse(0.0);
+        double roundedAverageRating = Formatter.formatStarRating(averageStarRating);
+
         return MemberResponse.builder()
                 .memberId(member.getId())
                 .email(member.getEmail())
@@ -45,6 +67,9 @@ public class MemberResponse {
                 .nickname(StringUtils.hasText(member.getNickname()) ? member.getNickname() : "")
                 .bio(StringUtils.hasText(member.getBio()) ? member.getBio() : "")
                 .termsOfMarketing(member.getTermsOfMarketing())
+                .reviewCount(reviews.size())
+                .averageStarRating(roundedAverageRating)
+                .pinBuddyCount(friends.size())
                 .build();
     }
 }
