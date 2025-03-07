@@ -12,7 +12,10 @@ public class Formatter {
         return BigDecimal.valueOf(starRating).setScale(1, RoundingMode.HALF_UP).doubleValue();
     }
 
-    public static String formatDistance(double distance) {
+    public static String formatDistance(Double distance) {
+        if (distance == null) {
+            return null;
+        }
         return distance < 1
                 ? Math.round(distance * 1000) + "m"
                 : Math.round(distance) + "km";
