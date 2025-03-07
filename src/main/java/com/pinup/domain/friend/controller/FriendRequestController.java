@@ -32,6 +32,16 @@ public class FriendRequestController {
         );
     }
 
+    @Operation(summary = "보낸 핀버디 신청 목록 조회 API", description = "상태가 PENDING 인 보낸 핀버디 신청 목록 조회")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = FriendRequestResponse.class))})
+    @GetMapping("/sent")
+    public ResponseEntity<ResultResponse> getSentFriendRequests() {
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.GET_SENT_PIN_BUDDY_REQUEST_LIST_SUCCESS,
+                friendRequestService.getSentFriendRequests())
+        );
+    }
+
     @Operation(summary = "핀버디 신청 API", description = "친구요청 상태 PENDING 으로 신규 생성")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = FriendRequestResponse.class))})
     @PostMapping("/send")
