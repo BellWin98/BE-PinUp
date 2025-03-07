@@ -15,19 +15,16 @@ import com.pinup.domain.member.exception.NicknameUpdateTimeLimitException;
 import com.pinup.domain.member.repository.MemberRepository;
 import com.pinup.domain.review.entity.Review;
 import com.pinup.global.common.AuthUtil;
+import com.pinup.global.common.Formatter;
 import com.pinup.global.config.s3.S3Service;
 import com.pinup.global.exception.EntityAlreadyExistException;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,11 +39,6 @@ public class MemberService {
     private final FriendShipRepository friendShipRepository;
     private final AuthUtil authUtil;
     private final S3Service s3Service;
-    private final ApplicationContext applicationContext;
-
-    private MemberService getSpringProxy() {
-        return applicationContext.getBean(MemberService.class);
-    }
 
     @Transactional(readOnly = true)
     public List<SearchMemberResponse> searchMembers(String nickname) {
@@ -70,15 +62,16 @@ public class MemberService {
     public FeedResponse getMyFeed() {
         Member loginMember = authUtil.getLoginMember();
 
-        return this.getSpringProxy().buildFeedResponse(loginMember);
+        return buildFeedResponse(loginMember, loginMember);
     }
 
     @Transactional(readOnly = true)
     public FeedResponse getMemberFeed(Long memberId) {
+        Member loginMember = authUtil.getLoginMember();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        return this.getSpringProxy().buildFeedResponse(member);
+        return buildFeedResponse(loginMember, member);
     }
 
     @Transactional(readOnly = true)
@@ -106,21 +99,20 @@ public class MemberService {
         return MemberResponse.from(memberRepository.save(loginMember));
     }
 
-    private FeedResponse buildFeedResponse(Member member) {
+    private FeedResponse buildFeedResponse(Member loginMember, Member member) {
         List<Review> reviews = member.getReviews();
         List<FriendShip> friends = member.getFriendships();
         double averageStarRating = reviews.stream()
                 .mapToDouble(Review::getStarRating)
                 .average()
                 .orElse(0.0);
-        double roundedAverageRating = BigDecimal.valueOf(averageStarRating)
-                .setScale(1, RoundingMode.HALF_UP)
-                .doubleValue();
+        double roundedAverageRating = Formatter.formatStarRating(averageStarRating);
         return FeedResponse.builder()
                 .memberResponse(MemberResponse.from(member))
                 .reviewCount(reviews.size())
                 .averageStarRating(roundedAverageRating)
                 .pinBuddyCount(friends.size())
+                .relationType(determineRelationType(loginMember, member))
                 .memberReviews(reviews.stream()
                         .map(MemberReviewResponse::of)
                         .toList())
