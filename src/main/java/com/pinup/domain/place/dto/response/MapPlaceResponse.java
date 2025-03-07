@@ -46,7 +46,7 @@ public class MapPlaceResponse {
 
     public MapPlaceResponse(
             String kakaoPlaceId, String name, double averageStarRating,
-            Long reviewCount, double distance, double latitude,
+            Long reviewCount, Double distance, double latitude,
             double longitude, PlaceCategory placeCategory
     ) {
         this.kakaoPlaceId = kakaoPlaceId;

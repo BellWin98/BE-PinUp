@@ -34,7 +34,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     @Override
     public List<MapPlaceResponse> findMapPlaces(
             Long memberId, String query, PlaceCategory placeCategory, SortType sortType,
-            double swLat, double swLon, double neLat, double neLon, double currLat, double currLon
+            double swLat, double swLon, double neLat, double neLon, Double currLat, Double currLon
     ) {
         List<Long> targetMemberIds = fetchTargetMemberIds(memberId);
         List<MapPlaceResponse> mapPlaces = queryFactory
@@ -72,7 +72,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
     @Override
     public MapPlaceResponse findMapPlaceDetail(
-            Long memberId, String kakaoPlaceId, double currLat, double currLon
+            Long memberId, String kakaoPlaceId, Double currLat, Double currLon
     ) {
         List<Long> targetMemberIds = fetchTargetMemberIds(memberId);
         MapPlaceResponse mapPlaceDetail = queryFactory
@@ -161,7 +161,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     }
 
     private OrderSpecifier<?> searchBySortType(
-            SortType sortType, double currLat, double currLon,
+            SortType sortType, Double currLat, Double currLon,
             NumberPath<Double> placeLat, NumberPath<Double> placeLon
     ) {
         switch (sortType) {
@@ -175,6 +175,9 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 return review.starRating.avg().asc();
             }
             default -> {
+                if (currLat == null || currLon == null) {
+                    return review.createdAt.desc();
+                }
                 return calculateDistance(currLat, currLon, placeLat, placeLon).asc();
             }
         }
@@ -214,8 +217,11 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     }
 
     private NumberTemplate<Double> calculateDistance(
-            double latitude1, double longitude1, NumberPath<Double> latitude2, NumberPath<Double> longitude2
+            Double latitude1, Double longitude1, NumberPath<Double> latitude2, NumberPath<Double> longitude2
     ) {
+        if (latitude1 == null || longitude1 == null) {
+            return Expressions.numberTemplate(Double.class, "NULL");
+        }
         return Expressions.numberTemplate(Double.class,
                 "6371 * acos(cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({4})) * sin(radians({5})))",
                 latitude1, latitude2, longitude2, longitude1, latitude1, latitude2

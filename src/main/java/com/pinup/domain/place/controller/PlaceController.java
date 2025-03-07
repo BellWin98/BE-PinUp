@@ -57,10 +57,10 @@ public class PlaceController {
             @RequestParam(value = "neLongitude") double neLongitude,
 
             @Schema(description = "현 위치 위도", example = "37.562651")
-            @RequestParam(value = "currentLatitude") double currentLatitude,
+            @RequestParam(value = "currentLatitude", required = false) Double currentLatitude,
 
             @Schema(description = "현 위치 경도", example = "126.826539")
-            @RequestParam(value = "currentLongitude") double currentLongitude
+            @RequestParam(value = "currentLongitude", required = false) Double currentLongitude
     ) {
         List<MapPlaceResponse> result = placeService.getMapPlaces(
                 query, category, sort, swLatitude, swLongitude, neLatitude, neLongitude, currentLatitude, currentLongitude

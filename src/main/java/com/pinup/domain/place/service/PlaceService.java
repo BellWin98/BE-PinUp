@@ -30,7 +30,7 @@ public class PlaceService {
     public List<MapPlaceResponse> getMapPlaces(
             String query, String category, String sort,
             double swLat, double swLon, double neLat,
-            double neLon, double currLat, double currLon
+            double neLon, Double currLat, Double currLon
     ) {
         Member loginMember = authUtil.getLoginMember();
         PlaceCategory placeCategory = PlaceCategory.getCategory(category);

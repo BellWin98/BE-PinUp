@@ -12,10 +12,10 @@ public interface PlaceRepositoryQueryDsl {
     List<MapPlaceResponse> findMapPlaces(
             Long memberId, String query, PlaceCategory category, SortType sortType,
             double swLatitude, double swLongitude, double neLatitude, double neLongitude,
-            double currentLatitude, double currentLongitude
+            Double currentLatitude, Double currentLongitude
     );
     MapPlaceResponse findMapPlaceDetail(
-            Long memberId, String kakaoPlaceId, double currentLatitude, double currentLongitude
+            Long memberId, String kakaoPlaceId, Double currentLatitude, Double currentLongitude
     );
     List<ReviewDetailResponse> findAllTargetMemberReviews(Long memberId, String kakaoPlaceId);
     Long getReviewCount(Long memberId, String kakaoPlaceId);
