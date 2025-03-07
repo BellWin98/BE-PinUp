@@ -44,7 +44,7 @@ public class PlaceService {
     }
 
     @Transactional(readOnly = true)
-    public MapPlaceDetailResponse getMapPlaceDetail(String kakaoPlaceId, double currentLatitude, double currentLongitude) {
+    public MapPlaceDetailResponse getMapPlaceDetail(String kakaoPlaceId, Double currentLatitude, Double currentLongitude) {
         Member loginMember = authUtil.getLoginMember();
         MapPlaceResponse mapPlaceResponse = placeRepository.findMapPlaceDetail(
                 loginMember.getId(), kakaoPlaceId, currentLatitude, currentLongitude
