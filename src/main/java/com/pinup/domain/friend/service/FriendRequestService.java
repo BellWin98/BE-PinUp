@@ -7,6 +7,7 @@ import com.pinup.domain.friend.dto.response.FriendRequestResponse;
 import com.pinup.domain.friend.entity.FriendRequest;
 import com.pinup.domain.friend.entity.FriendRequestStatus;
 import com.pinup.domain.friend.exception.FriendRequestReceiverMismatchException;
+import com.pinup.domain.friend.exception.FriendRequestSenderMismatchException;
 import com.pinup.domain.friend.exception.SelfFriendRequestException;
 import com.pinup.domain.friend.repository.FriendRequestRepository;
 import com.pinup.domain.friend.repository.FriendShipRepository;
@@ -70,6 +71,15 @@ public class FriendRequestService {
     }
 
     @Transactional
+    public void cancelFriendRequest(final Long friendRequestId) {
+        Member loginMember = authUtil.getLoginMember();
+        FriendRequest friendRequest = friendRequestRepository.findById(friendRequestId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
+        validateRequestSenderIsCurrentUser(loginMember.getSocialId(), friendRequest.getSender().getSocialId());
+        friendRequestRepository.delete(friendRequest);
+    }
+
+    @Transactional
     public FriendRequestResponse acceptFriendRequest(Long friendRequestId) {
         Member loginMember = authUtil.getLoginMember();
         FriendRequest friendRequest = friendRequestRepository.findById(friendRequestId)
@@ -127,9 +137,15 @@ public class FriendRequestService {
         }
     }
 
-    private void validateRequestReceiverIsCurrentUser(String currentMemberSocialId, String receiverId) {
-        if (!currentMemberSocialId.equals(receiverId)) {
+    private void validateRequestReceiverIsCurrentUser(String currentMemberSocialId, String receiverSocialId) {
+        if (!currentMemberSocialId.equals(receiverSocialId)) {
             throw new FriendRequestReceiverMismatchException();
+        }
+    }
+
+    private void validateRequestSenderIsCurrentUser(String currentMemberSocialId, String senderSocialId) {
+        if (!currentMemberSocialId.equals(senderSocialId)) {
+            throw new FriendRequestSenderMismatchException();
         }
     }
 }
