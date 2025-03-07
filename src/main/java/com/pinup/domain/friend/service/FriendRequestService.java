@@ -45,6 +45,14 @@ public class FriendRequestService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<FriendRequestResponse> getSentFriendRequests() {
+        Member loginMember = authUtil.getLoginMember();
+        return friendRequestRepository.findAllBySenderAndFriendRequestStatus(loginMember, PENDING).stream()
+                .map(FriendRequestResponse::from)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public FriendRequestResponse sendFriendRequest(Long receiverId) {
         Member sender = authUtil.getLoginMember();

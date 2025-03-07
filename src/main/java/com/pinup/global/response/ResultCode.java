@@ -48,6 +48,7 @@ public enum ResultCode {
     GET_MY_PIN_BUDDY_LIST_SUCCESS(200, "F007", "나의 핀버디 목록을 조회하였습니다."),
     GET_USER_PIN_BUDDY_LIST_SUCCESS(200, "F008", "해당 유저의 핀버디 목록을 조회하였습니다."),
     GET_MY_PIN_BUDDY_INFO_SUCCESS(200, "F009", "나의 핀버디 정보를 조회하였습니다."),
+    GET_SENT_PIN_BUDDY_REQUEST_LIST_SUCCESS(200, "F010", "보낸 핀버디 신청 목록을 조회하였습니다."),
 
     // Alarm
     GET_ALARMS_SUCCESS(200, "AL001", "알림 목록을 조회하였습니다."),
