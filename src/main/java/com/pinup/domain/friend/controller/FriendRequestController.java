@@ -42,7 +42,7 @@ public class FriendRequestController {
         );
     }
 
-    @Operation(summary = "핀버디 신청 API", description = "친구요청 상태 PENDING 으로 신규 생성")
+    @Operation(summary = "핀버디 신청 API", description = "핀버디 요청 상태 PENDING 으로 신규 생성")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = FriendRequestResponse.class))})
     @PostMapping("/send")
     public ResponseEntity<ResultResponse> sendFriendRequest(@RequestBody SendFriendRequest sendFriendRequest) {
@@ -52,7 +52,14 @@ public class FriendRequestController {
         );
     }
 
-    @Operation(summary = "핀버디 신청 수락 API", description = "친구요청 상태를 ACCEPTED 로 변경")
+    @Operation(summary = "핀버디 신청 취소 API", description = "핀버디 요청 삭제")
+    @DeleteMapping("/{friendRequestId}")
+    public ResponseEntity<ResultResponse> cancelFriendRequest(@PathVariable("friendRequestId") Long friendRequestId) {
+        friendRequestService.cancelFriendRequest(friendRequestId);
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.CANCEL_PIN_BUDDY_SUCCESS));
+    }
+
+    @Operation(summary = "핀버디 신청 수락 API", description = "핀버디 요청 상태를 ACCEPTED 로 변경")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = FriendRequestResponse.class))})
     @PatchMapping("/{friendRequestId}/accept")
     public ResponseEntity<ResultResponse> acceptFriendRequest(
@@ -65,7 +72,7 @@ public class FriendRequestController {
         );
     }
 
-    @Operation(summary = "핀버디 신청 거절 API", description = "친구요청 상태를 REJECTED 로 변경")
+    @Operation(summary = "핀버디 신청 거절 API", description = "핀버디 요청 상태를 REJECTED 로 변경")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = FriendRequestResponse.class))})
     @PatchMapping("/{friendRequestId}/reject")
     public ResponseEntity<ResultResponse> rejectFriendRequest(

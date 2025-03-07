@@ -64,6 +64,7 @@ public enum ErrorCode {
     FRIEND_NOT_FOUND(400, "F006", "해당 이름을 가진 친구를 찾을 수 없습니다."),
     ALREADY_FRIEND(400, "F007", "이미 친구 관계입니다."),
     FRIEND_REQUEST_RECEIVER_MISMATCH(403, "F008", "현재 사용자가 친구 요청의 수신자가 아닙니다."),
+    FRIEND_REQUEST_SENDER_MISMATCH(403, "F009", "현재 사용자가 친구 요청의 발신자가 아닙니다."),
 
     // Alarm
     SSE_CONNECTION_ERROR(500, "AL001", "SSE 연결 중 오류가 발생했습니다."),
