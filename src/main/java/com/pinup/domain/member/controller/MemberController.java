@@ -1,10 +1,12 @@
 package com.pinup.domain.member.controller;
 
 import com.pinup.domain.member.dto.request.UpdateMemberInfoAfterLoginRequest;
-import com.pinup.domain.member.dto.response.FeedResponse;
+import com.pinup.domain.member.dto.response.MemberInfoResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.dto.response.SearchMemberResponse;
 import com.pinup.domain.member.service.MemberService;
+import com.pinup.domain.review.dto.response.PhotoReviewResponse;
+import com.pinup.domain.review.dto.response.TextReviewResponse;
 import com.pinup.global.response.ResultCode;
 import com.pinup.global.response.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,13 +41,13 @@ public class MemberController {
         );
     }
 
-    @Operation(summary = "핀버디 정보 조회 API")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberResponse.class))})
-    @GetMapping("/{friendId}")
-    public ResponseEntity<ResultResponse> getMemberInfo(@PathVariable("friendId") Long friendId) {
+    @Operation(summary = "유저 정보 조회 API")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberInfoResponse.class))})
+    @GetMapping("/{memberId}")
+    public ResponseEntity<ResultResponse> getMemberInfo(@PathVariable("memberId") Long memberId) {
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_USER_INFO_SUCCESS,
-                memberService.getMemberInfo(friendId))
+                memberService.getMemberInfo(memberId))
         );
     }
 
@@ -70,23 +74,35 @@ public class MemberController {
         );
     }
 
-    @Operation(summary = "마이피드 조회 API")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = FeedResponse.class))})
-    @GetMapping("/me/feed")
-    public ResponseEntity<ResultResponse> getMyFeed() {
+    @Operation(summary = "텍스트 리뷰 조회 API")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = TextReviewResponse.class))})
+    @GetMapping("/{memberId}/text-reviews")
+    public ResponseEntity<ResultResponse> getTextReviews(
+            @PathVariable Long memberId,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
         return ResponseEntity.ok(ResultResponse.of(
-                ResultCode.GET_MY_FEED_SUCCESS,
-                memberService.getMyFeed())
+                ResultCode.GET_TEXT_REVIEW_SUCCESS,
+                memberService.getTextReviews(pageable, memberId))
         );
     }
 
-    @Operation(summary = "유저 피드 조회 API")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = FeedResponse.class))})
-    @GetMapping("/{memberId}/feed")
-    public ResponseEntity<ResultResponse> getMemberFeed(@PathVariable Long memberId) {
+    @Operation(summary = "포토 리뷰 조회 API")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = PhotoReviewResponse.class))})
+    @GetMapping("/{memberId}/photo-reviews")
+    public ResponseEntity<ResultResponse> getPhotoReviews(
+            @PathVariable Long memberId,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
         return ResponseEntity.ok(ResultResponse.of(
-                ResultCode.GET_MEMBER_FEED_SUCCESS,
-                memberService.getMemberFeed(memberId))
+                ResultCode.GET_PHOTO_REVIEW_SUCCESS,
+                memberService.getPhotoReviews(pageable, memberId))
         );
     }
 }

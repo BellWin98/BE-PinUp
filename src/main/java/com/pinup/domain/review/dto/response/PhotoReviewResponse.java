@@ -1,22 +1,17 @@
-package com.pinup.domain.member.dto.response;
+package com.pinup.domain.review.dto.response;
 
 import com.pinup.domain.review.entity.Review;
 import com.pinup.domain.review.entity.ReviewImage;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-@Schema(title = "유저가 작성한 리뷰 조회 응답 DTO")
-public class MemberReviewResponse {
+public class PhotoReviewResponse {
 
     @Schema(description = "리뷰 고유 ID")
     private Long reviewId;
@@ -35,9 +30,8 @@ public class MemberReviewResponse {
     @Schema(description = "장소 방문일자")
     private String visitedDate;
 
-    public static MemberReviewResponse of(Review review) {
-
-        return MemberReviewResponse.builder()
+    public static PhotoReviewResponse from(Review review) {
+        return PhotoReviewResponse.builder()
                 .reviewId(review.getId())
                 .kakaoPlaceId(review.getPlace().getKakaoPlaceId())
                 .placeName(review.getPlace().getName())

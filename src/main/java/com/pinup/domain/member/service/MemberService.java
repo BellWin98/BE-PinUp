@@ -4,21 +4,26 @@ import com.pinup.domain.friend.entity.FriendRequestStatus;
 import com.pinup.domain.friend.repository.FriendRequestRepository;
 import com.pinup.domain.friend.repository.FriendShipRepository;
 import com.pinup.domain.member.dto.request.UpdateMemberInfoAfterLoginRequest;
-import com.pinup.domain.member.dto.response.FeedResponse;
+import com.pinup.domain.member.dto.response.MemberInfoResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
-import com.pinup.domain.member.dto.response.MemberReviewResponse;
 import com.pinup.domain.member.dto.response.SearchMemberResponse;
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.member.entity.MemberRelationType;
 import com.pinup.domain.member.exception.NicknameUpdateTimeLimitException;
 import com.pinup.domain.member.repository.MemberRepository;
+import com.pinup.domain.review.dto.response.PhotoReviewResponse;
+import com.pinup.domain.review.dto.response.TextReviewResponse;
 import com.pinup.domain.review.entity.Review;
+import com.pinup.domain.review.entity.ReviewType;
+import com.pinup.domain.review.repository.ReviewRepository;
 import com.pinup.global.common.AuthUtil;
 import com.pinup.global.config.s3.S3Service;
 import com.pinup.global.exception.EntityAlreadyExistException;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +42,7 @@ public class MemberService {
     private final FriendShipRepository friendShipRepository;
     private final AuthUtil authUtil;
     private final S3Service s3Service;
+    private final ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
     public List<SearchMemberResponse> searchMembers(String nickname) {
@@ -55,26 +61,30 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public FeedResponse getMyFeed() {
-        Member loginMember = authUtil.getLoginMember();
-
-        return buildFeedResponse(loginMember, loginMember);
-    }
-
-    @Transactional(readOnly = true)
-    public FeedResponse getMemberFeed(Long memberId) {
+    public MemberInfoResponse getMemberInfo(Long memberId) {
         Member loginMember = authUtil.getLoginMember();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-
-        return buildFeedResponse(loginMember, member);
+        return MemberInfoResponse.builder()
+                .memberResponse(MemberResponse.from(member))
+                .relationType(determineRelationType(loginMember, member))
+                .build();
     }
 
     @Transactional(readOnly = true)
-    public MemberResponse getMemberInfo(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-        return MemberResponse.from(member);
+    public Page<TextReviewResponse> getTextReviews(Pageable pageable, Long memberId) {
+        Member member = authUtil.getValidMember(memberId);
+        Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, member, ReviewType.TEXT);
+
+        return reviewPage.map(TextReviewResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PhotoReviewResponse> getPhotoReviews(Pageable pageable, Long memberId) {
+        Member member = authUtil.getValidMember(memberId);
+        Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, member, ReviewType.PHOTO);
+
+        return reviewPage.map(PhotoReviewResponse::from);
     }
 
     @Transactional(readOnly = true)
@@ -93,17 +103,6 @@ public class MemberService {
         loginMember.updateProfileImage(imageUrl);
 
         return MemberResponse.from(memberRepository.save(loginMember));
-    }
-
-    private FeedResponse buildFeedResponse(Member loginMember, Member member) {
-        List<Review> reviews = member.getReviews();
-        return FeedResponse.builder()
-                .memberResponse(MemberResponse.from(member))
-                .relationType(determineRelationType(loginMember, member))
-                .memberReviews(reviews.stream()
-                        .map(MemberReviewResponse::of)
-                        .toList())
-                .build();
     }
 
     private MemberRelationType determineRelationType(Member loginMember, Member member) {
