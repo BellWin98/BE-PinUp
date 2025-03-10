@@ -32,11 +32,8 @@ public enum ResultCode {
     // Review
     CREATE_REVIEW_SUCCESS(201, "R001", "리뷰 등록에 성공하였습니다."),
     GET_REVIEW_DETAIL_SUCCESS(200, "R002", "리뷰 상세 조회에 성공하였습니다."),
-    GET_MY_PHOTO_REVIEW_PREVIEW_SUCCESS(200, "R003", "내 포토 리뷰 미리보기 목록 조회에 성공하였습니다."),
-    GET_MY_TEXT_REVIEW_SUCCESS(200, "R004", "내 텍스트 리뷰 목록 조회에 성공하였습니다."),
-    GET_MEMBER_PHOTO_REVIEW_SUCCESS(200, "R005", "멤버의 포토 리뷰 목록 조회에 성공하였습니다."),
-    GET_MEMBER_PHOTO_REVIEW_PREVIEW_SUCCESS(200, "R006", "멤버의 포토 리뷰 미리보기 목록 조회에 성공하였습니다."),
-    GET_MEMBER_TEXT_REVIEW_SUCCESS(200, "R007", "멤버의 텍스트 리뷰 목록 조회에 성공하였습니다."),
+    GET_PHOTO_REVIEW_SUCCESS(200, "R003", "포토 리뷰 목록 조회에 성공하였습니다."),
+    GET_TEXT_REVIEW_SUCCESS(200, "R004", "텍스트 리뷰 목록 조회에 성공하였습니다."),
 
     // Friend
     REQUEST_PIN_BUDDY_SUCCESS(201, "F001", "핀버디 신청이 완료되었습니다."),

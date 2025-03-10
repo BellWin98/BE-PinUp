@@ -23,4 +23,9 @@ public class AuthUtil {
         return memberRepository.findBySocialId(socialId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
     }
+
+    public Member getValidMember(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+    }
 }

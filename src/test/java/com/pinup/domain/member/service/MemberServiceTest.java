@@ -3,7 +3,7 @@ package com.pinup.domain.member.service;
 import com.pinup.domain.friend.repository.FriendRequestRepository;
 import com.pinup.domain.friend.repository.FriendShipRepository;
 import com.pinup.domain.member.dto.request.UpdateMemberInfoAfterLoginRequest;
-import com.pinup.domain.member.dto.response.FeedResponse;
+import com.pinup.domain.member.dto.response.MemberInfoResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.dto.response.SearchMemberResponse;
 import com.pinup.domain.member.entity.LoginType;
@@ -119,7 +119,7 @@ class MemberServiceTest {
         given(applicationContext.getBean(MemberService.class)).willReturn(memberService);
 
         // when
-        FeedResponse response = memberService.getMyFeed();
+        MemberInfoResponse response = memberService.getMyFeed();
 
         // then
         assertThat(response.getMemberResponse().getNickname()).isEqualTo(TEST_NICKNAME);
@@ -136,7 +136,7 @@ class MemberServiceTest {
         given(applicationContext.getBean(MemberService.class)).willReturn(memberService);
 
         // when
-        FeedResponse response = memberService.getMemberFeed(memberId);
+        MemberInfoResponse response = memberService.getMemberFeed(memberId);
 
         // then
         assertThat(response.getMemberResponse().getNickname()).isEqualTo(TEST_NICKNAME);
