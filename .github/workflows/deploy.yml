@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - dev
+      - main
+  pull_request:
+    branches:
+      - dev
 # 코드의 내용을 Github Actions 에서 사용하는 VM(action 을 실행하는 주체)이 읽을 수 있도록 허용
 permissions:
   contents: read
@@ -29,11 +33,34 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Get Properties from Github Secret And Paste
+      - name: Make application.yml
         run: |
           cd ./src/main/resources
           touch ./application.yml
-          echo "${{ secrets.PROPERTIES }}" > ./application.yml
+          echo "${{ secrets.APPLICATION }}" > ./application.yml
+        shell: bash
+
+      - name: Make application-dev.yml
+        if: contains(github.ref, 'dev')
+        run: |
+          cd ./src/main/resources
+          touch ./application-dev.yml
+          echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
+        shell: bash
+
+      - name: Make application-prod.yml
+        if: contains(github.ref, 'main')
+        run: |
+          cd ./src/main/resources
+          touch ./application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
+        shell: bash
+
+      - name: Make application-secret.yml
+        run: |
+          cd ./src/main/resources
+          touch ./application-secret.yml
+          echo "${{ secrets.APPLICATION_SECRET }}" > ./application-secret.yml
         shell: bash
           
       - name: Grant Execute Permission For Gradlew
@@ -42,22 +69,50 @@ jobs:
       - name: Build With Gradle
         run: ./gradlew clean build -x test --no-daemon
         
-      - name: Docker build & Push to Docker Hub
+      - name: Docker build & Push to Docker Hub dev repo
+        if: contains(github.ref, 'dev')
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -t ${{ secrets.DOCKER_REPO }}/pinup:latest .
-          docker push ${{ secrets.DOCKER_REPO }}/pinup:latest
+          docker build -t ${{ secrets.DOCKER_REPO }}/pinup-dev:latest .
+          docker push ${{ secrets.DOCKER_REPO }}/pinup-dev:latest
+
+      - name: Docker build & Push to Docker Hub prod repo
+        if: contains(github.ref, 'main')
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -t ${{ secrets.DOCKER_REPO }}/pinup-prod:latest .
+          docker push ${{ secrets.DOCKER_REPO }}/pinup-prod:latest
       
-      - name: Deploy Images with Docker Compose
+      - name: Deploy to dev
         uses: appleboy/ssh-action@master
+        id: deploy-dev
+        if: contains(github.ref, 'dev')
         env:
-          COMPOSE: "/home/ubuntu/compose/docker-compose.yml"
+          COMPOSE: "/home/ubuntu/compose/pinup-dev/docker-compose.yml"
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.EC2_HOST_DEV }}
           username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY_DEV }}
           envs: COMPOSE
           script: |
-            sudo docker-compose -f $COMPOSE down --rmi all
-            sudo docker pull ${{ secrets.DOCKER_REPO }}/pinup
+            sudo docker stop pinup-dev
+            sudo docker rm -f $(sudo docker ps --filter 'status=exited' -a -q)
+            sudo docker pull ${{ secrets.DOCKER_REPO }}/pinup-dev
             sudo docker-compose -f $COMPOSE up -d
+
+      - name: Deploy to prod
+        uses: appleboy/ssh-action@master
+        id: deploy-prod
+        if: contains(github.ref, 'main')
+        env:
+          COMPOSE: "/home/ubuntu/compose/pinup-prod/docker-compose.yml"
+        with:
+          host: ${{ secrets.EC2_HOST_PROD }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY_PROD }}
+          envs: COMPOSE
+          script: |
+            sudo docker stop pinup-prod
+            sudo docker rm -f $(sudo docker ps --filter 'status=exited' -a -q)
+            sudo docker pull ${{ secrets.DOCKER_REPO }}/pinup-prod
+            sudo docker-compose -f $COMPOSE up -d            
