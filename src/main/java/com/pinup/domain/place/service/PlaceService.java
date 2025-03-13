@@ -25,6 +25,7 @@ public class PlaceService {
     private final AuthUtil authUtil;
     private final KakaoMapModule kakaoMapModule;
     private final PlaceRepository placeRepository;
+    private final PlaceClusteringService placeClusteringService;
 
     @Transactional(readOnly = true)
     public List<MapPlaceResponse> getMapPlaces(String query, String category, String sort, MapBoundDto mapBound) {
@@ -58,5 +59,23 @@ public class PlaceService {
         Member loginMember = authUtil.getLoginMember();
 
         return kakaoMapModule.search(loginMember.getId(), keyword);
+    }
+
+    @Transactional(readOnly = true)
+    public TotalPlaceResponse getClusteredMapPlacesWithinBounds(String query, String category, String sort, MapViewDto mapView) {
+        Member loginMember = authUtil.getLoginMember();
+        PlaceCategory placeCategory = PlaceCategory.getCategory(category);
+        SortType sortType = SortType.getSortType(sort);
+        MapBoundDto mapBound = MapBoundDto.builder()
+                .neLat(mapView.getNeLat())
+                .neLng(mapView.getNeLng())
+                .swLat(mapView.getSwLat())
+                .swLng(mapView.getSwLng())
+                .currLat(mapView.getCurrLat())
+                .currLng(mapView.getCurrLng())
+                .build();
+        List<MapPlaceResponse> places = placeRepository.findMapPlacesWithinBounds(loginMember.getId(), query, placeCategory, sortType, mapBound);
+
+        return placeClusteringService.clusterPlacesByZoomLevel(places, mapView);
     }
 }

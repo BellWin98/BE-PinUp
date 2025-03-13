@@ -104,7 +104,63 @@ public class PlaceController {
     public ResponseEntity<ResultResponse> getEntirePlaces(
             @Schema(description = "검색어", example = "하루카페") @RequestParam(value = "query") String query
     ) {
-        List<EntirePlaceResponse> result = placeService.getEntirePlaces(query);
+        List<PlaceResponse> result = placeService.getEntirePlaces(query);
+        return ResponseEntity.ok(ResultResponse.of(GET_PLACES_SUCCESS, result));
+    }
+
+    @Operation(summary = "지도 상 장소 목록 조회 API", description = "클러스터링 적용")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = TotalPlaceResponse.class))})
+    @GetMapping("/clustered")
+    public ResponseEntity<ResultResponse> getClusteredMapPlacesWithinBounds(
+            @Schema(description = "키워드", example = "스타벅스")
+            @RequestParam(defaultValue = "", value = "query", required = false) String query,
+
+            @Schema(description = "카테고리", example = "ALL")
+            @RequestParam(defaultValue = "ALL", value = "category", required = false) String category,
+
+            @Schema(description = "정렬조건", example = "NEAR")
+            @RequestParam(defaultValue = "NEAR", value = "sort", required = false) String sort,
+
+            @Schema(description = "지도 중심 위도", example = "37.3576046")
+            @RequestParam(value = "centerLatitude") double centerLatitude,
+
+            @Schema(description = "지도 중심 경도", example = "126.95550245")
+            @RequestParam(value = "centerLongitude") double centerLongitude,
+
+            @Schema(description = "SW 위도", example = "36.5258844")
+            @RequestParam(value = "swLatitude") double swLatitude,
+
+            @Schema(description = "SW 경도", example = "126.354001")
+            @RequestParam(value = "swLongitude") double swLongitude,
+
+            @Schema(description = "NE 위도", example = "38.1893248")
+            @RequestParam(value = "neLatitude") double neLatitude,
+
+            @Schema(description = "NE 경도", example = "127.5570039")
+            @RequestParam(value = "neLongitude") double neLongitude,
+
+            @Schema(description = "현 위치 위도", example = "37.5626316")
+            @RequestParam(value = "currentLatitude", required = false) Double currentLatitude,
+
+            @Schema(description = "현 위치 경도", example = "126.8357822")
+            @RequestParam(value = "currentLongitude", required = false) Double currentLongitude,
+
+            @Schema(description = "줌 레벨", example = "0")
+            @RequestParam(value = "zoomLevel") int zoomLevel
+    ) {
+        MapViewDto mapView = MapViewDto.builder()
+                .centerLat(centerLatitude)
+                .centerLng(centerLongitude)
+                .neLat(neLatitude)
+                .neLng(neLongitude)
+                .swLat(swLatitude)
+                .swLng(swLongitude)
+                .currLat(currentLatitude)
+                .currLng(currentLongitude)
+                .zoomLevel(zoomLevel + 1)
+                .build();
+        TotalPlaceResponse result = placeService.getClusteredMapPlacesWithinBounds(query, category, sort, mapView);
+
         return ResponseEntity.ok(ResultResponse.of(GET_PLACES_SUCCESS, result));
     }
 }
