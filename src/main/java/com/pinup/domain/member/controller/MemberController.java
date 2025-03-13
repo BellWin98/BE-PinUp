@@ -79,8 +79,12 @@ public class MemberController {
     @GetMapping("/{memberId}/text-reviews")
     public ResponseEntity<ResultResponse> getTextReviews(
             @PathVariable Long memberId,
-            @RequestParam int page,
-            @RequestParam int size
+
+            @Schema(description = "현재 페이지", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Schema(description = "한 페이지에 노출할 데이터 건수", example = "20")
+            @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -95,8 +99,12 @@ public class MemberController {
     @GetMapping("/{memberId}/photo-reviews")
     public ResponseEntity<ResultResponse> getPhotoReviews(
             @PathVariable Long memberId,
-            @RequestParam int page,
-            @RequestParam int size
+
+            @Schema(description = "현재 페이지", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Schema(description = "한 페이지에 노출할 데이터 건수", example = "20")
+            @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
 

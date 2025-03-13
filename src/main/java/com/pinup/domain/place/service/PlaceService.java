@@ -1,9 +1,9 @@
 package com.pinup.domain.place.service;
 
 import com.pinup.domain.member.entity.Member;
-import com.pinup.domain.place.dto.response.MapPlaceDetailResponse;
-import com.pinup.domain.place.dto.response.MapPlaceResponse;
-import com.pinup.domain.place.dto.response.EntirePlaceResponse;
+import com.pinup.domain.place.dto.request.MapBoundDto;
+import com.pinup.domain.place.dto.request.MapViewDto;
+import com.pinup.domain.place.dto.response.*;
 import com.pinup.domain.place.entity.PlaceCategory;
 import com.pinup.domain.place.entity.SortType;
 import com.pinup.domain.place.repository.PlaceRepository;
@@ -25,22 +25,15 @@ public class PlaceService {
     private final AuthUtil authUtil;
     private final KakaoMapModule kakaoMapModule;
     private final PlaceRepository placeRepository;
+    private final PlaceClusteringService placeClusteringService;
 
     @Transactional(readOnly = true)
-    public List<MapPlaceResponse> getMapPlaces(
-            String query, String category, String sort,
-            double swLat, double swLon, double neLat,
-            double neLon, Double currLat, Double currLon
-    ) {
+    public List<MapPlaceResponse> getMapPlaces(String query, String category, String sort, MapBoundDto mapBound) {
         Member loginMember = authUtil.getLoginMember();
         PlaceCategory placeCategory = PlaceCategory.getCategory(category);
         SortType sortType = SortType.getSortType(sort);
 
-        return placeRepository.findMapPlaces(
-                loginMember.getId(), query, placeCategory, sortType,
-                swLat, swLon, neLat,
-                neLon, currLat, currLon
-        );
+        return placeRepository.findMapPlacesWithinBounds(loginMember.getId(), query, placeCategory, sortType, mapBound);
     }
 
     @Transactional(readOnly = true)
@@ -62,9 +55,27 @@ public class PlaceService {
     }
 
     @Transactional(readOnly = true)
-    public List<EntirePlaceResponse> getEntirePlaces(String keyword) {
+    public List<PlaceResponse> getEntirePlaces(String keyword) {
         Member loginMember = authUtil.getLoginMember();
 
         return kakaoMapModule.search(loginMember.getId(), keyword);
+    }
+
+    @Transactional(readOnly = true)
+    public TotalPlaceResponse getClusteredMapPlacesWithinBounds(String query, String category, String sort, MapViewDto mapView) {
+        Member loginMember = authUtil.getLoginMember();
+        PlaceCategory placeCategory = PlaceCategory.getCategory(category);
+        SortType sortType = SortType.getSortType(sort);
+        MapBoundDto mapBound = MapBoundDto.builder()
+                .neLat(mapView.getNeLat())
+                .neLng(mapView.getNeLng())
+                .swLat(mapView.getSwLat())
+                .swLng(mapView.getSwLng())
+                .currLat(mapView.getCurrLat())
+                .currLng(mapView.getCurrLng())
+                .build();
+        List<MapPlaceResponse> places = placeRepository.findMapPlacesWithinBounds(loginMember.getId(), query, placeCategory, sortType, mapBound);
+
+        return placeClusteringService.clusterPlacesByZoomLevel(places, mapView);
     }
 }
