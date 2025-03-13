@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(title = "키워드로 장소 목록 조회 응답 DTO", description = "카카오맵 + 모든 장소 목록 조회")
-public class EntirePlaceResponse {
+public class PlaceResponse {
 
     @Schema(description = "카카오맵에서 부여한 장소 고유 ID")
     private String kakaoPlaceId;

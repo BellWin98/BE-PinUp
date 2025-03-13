@@ -1,6 +1,7 @@
 package com.pinup.domain.place.repository.querydsl;
 
 import com.pinup.domain.bookmark.entity.BookMark;
+import com.pinup.domain.place.dto.request.MapBoundDto;
 import com.pinup.domain.place.dto.response.MapPlaceResponse;
 import com.pinup.domain.place.entity.PlaceCategory;
 import com.pinup.domain.place.entity.SortType;
@@ -32,10 +33,10 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<MapPlaceResponse> findMapPlaces(
-            Long memberId, String query, PlaceCategory placeCategory, SortType sortType,
-            double swLat, double swLon, double neLat, double neLon, Double currLat, Double currLon
-    ) {
+    public List<MapPlaceResponse> findMapPlacesWithinBounds(Long memberId, String query, PlaceCategory placeCategory, SortType sortType, MapBoundDto mapBound) {
+//        int pageSize = pageable.getPageSize();
+        Double currLat = mapBound.getCurrLat();
+        Double currLng = mapBound.getCurrLng();
         List<Long> targetMemberIds = fetchTargetMemberIds(memberId);
         List<MapPlaceResponse> mapPlaces = queryFactory
                 .select(Projections.constructor(MapPlaceResponse.class,
@@ -43,7 +44,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                         place.name.as("name"),
                         review.starRating.avg().as("averageStarRating"),
                         review.id.countDistinct().as("reviewCount"),
-                        calculateDistance(currLat, currLon, place.latitude, place.longitude).as("distance"),
+                        calculateDistance(currLat, currLng, place.latitude, place.longitude).as("distance"),
                         place.latitude.as("latitude"),
                         place.longitude.as("longitude"),
                         place.placeCategory.as("placeCategory")
@@ -52,13 +53,15 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .innerJoin(review).on(place.eq(review.place))
                 .where(place.status.eq("Y")
                     .and(review.member.id.in(targetMemberIds))
-                    .and(place.latitude.between(swLat, neLat))
-                    .and(place.longitude.between(swLon, neLon))
+                    .and(place.latitude.between(mapBound.getSwLat(), mapBound.getNeLat()))
+                    .and(place.longitude.between(mapBound.getSwLng(), mapBound.getNeLng()))
                     .and(searchByQuery(query))
                     .and(searchByPlaceCategory(placeCategory))
                 )
                 .groupBy(place)
-                .orderBy(searchBySortType(sortType, currLat, currLon, place.latitude, place.longitude))
+                .orderBy(searchBySortType(sortType, currLat, currLng, place.latitude, place.longitude))
+//                .offset(pageable.getOffset())
+//                .limit(pageSize + 1)
                 .fetch();
         for (MapPlaceResponse mapPlace : mapPlaces) {
             String kakaoPlaceId = mapPlace.getKakaoPlaceId();
@@ -67,6 +70,13 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
             mapPlace.setBookmark(isBookmark(kakaoPlaceId, memberId));
         }
 
+/*        boolean hasNext = false;
+        if (mapPlaces.size() > pageSize) {
+            mapPlaces.remove(pageSize);
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(mapPlaces, pageable, hasNext);*/
         return mapPlaces;
     }
 
@@ -161,7 +171,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     }
 
     private OrderSpecifier<?> searchBySortType(
-            SortType sortType, Double currLat, Double currLon,
+            SortType sortType, Double currLat, Double currLng,
             NumberPath<Double> placeLat, NumberPath<Double> placeLon
     ) {
         switch (sortType) {
@@ -175,10 +185,10 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 return review.starRating.avg().asc();
             }
             default -> {
-                if (currLat == null || currLon == null) {
+                if (currLat == null || currLng == null) {
                     return review.createdAt.desc();
                 }
-                return calculateDistance(currLat, currLon, placeLat, placeLon).asc();
+                return calculateDistance(currLat, currLng, placeLat, placeLon).asc();
             }
         }
     }

@@ -2,7 +2,7 @@ package com.pinup.global.config.kakao;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pinup.domain.place.dto.response.EntirePlaceResponse;
+import com.pinup.domain.place.dto.response.PlaceResponse;
 import com.pinup.domain.place.entity.PlaceCategory;
 import com.pinup.domain.place.repository.PlaceRepository;
 import com.pinup.global.common.Formatter;
@@ -36,7 +36,7 @@ public class KakaoMapModule {
     @Value("${kakao.key}")
     private String apiKey;
 
-    public List<EntirePlaceResponse> search(Long memberId, String keyword) {
+    public List<PlaceResponse> search(Long memberId, String keyword) {
         URI uri = buildUri(keyword);
         return executeSearchRequest(uri, memberId);
     }
@@ -50,8 +50,8 @@ public class KakaoMapModule {
         return uriBuilder.encode().build().toUri();
     }
 
-    private List<EntirePlaceResponse> executeSearchRequest(URI uri, Long memberId) {
-        List<EntirePlaceResponse> placeInfoList = new ArrayList<>();
+    private List<PlaceResponse> executeSearchRequest(URI uri, Long memberId) {
+        List<PlaceResponse> placeInfoList = new ArrayList<>();
         try {
             RequestEntity<Void> apiRequest = RequestEntity
                     .get(uri)
@@ -61,7 +61,7 @@ public class KakaoMapModule {
             JsonNode jsonNode = objectMapper.readTree(apiResponse.getBody());
             JsonNode documentsNode = jsonNode.path("documents");
             for (JsonNode documentNode : documentsNode) {
-                EntirePlaceResponse placeInfo = extractPlaceInfo(documentNode, memberId);
+                PlaceResponse placeInfo = extractPlaceInfo(documentNode, memberId);
                 placeInfoList.add(placeInfo);
             }
         } catch (Exception e) {
@@ -71,14 +71,14 @@ public class KakaoMapModule {
         return placeInfoList;
     }
 
-    private EntirePlaceResponse extractPlaceInfo(JsonNode documentNode, Long memberId) {
+    private PlaceResponse extractPlaceInfo(JsonNode documentNode, Long memberId) {
         String kakaoPlaceId = documentNode.path("id").asText();
         String categoryGroupCode = documentNode.path("category_group_code").asText();
         PlaceCategory placeCategory = PlaceCategory.getCategoryByCode(categoryGroupCode);
         Long reviewCount = placeRepository.getReviewCount(memberId, kakaoPlaceId);
         Double averageStarRating = placeRepository.getAverageStarRating(memberId, kakaoPlaceId);
 
-        return EntirePlaceResponse.builder()
+        return PlaceResponse.builder()
                 .kakaoPlaceId(kakaoPlaceId)
                 .name(documentNode.path("place_name").asText())
                 .placeCategory(placeCategory)

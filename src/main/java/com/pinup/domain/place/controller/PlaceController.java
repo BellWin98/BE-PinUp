@@ -1,8 +1,8 @@
 package com.pinup.domain.place.controller;
 
-import com.pinup.domain.place.dto.response.EntirePlaceResponse;
-import com.pinup.domain.place.dto.response.MapPlaceDetailResponse;
-import com.pinup.domain.place.dto.response.MapPlaceResponse;
+import com.pinup.domain.place.dto.request.MapBoundDto;
+import com.pinup.domain.place.dto.request.MapViewDto;
+import com.pinup.domain.place.dto.response.*;
 import com.pinup.domain.place.service.PlaceService;
 import com.pinup.global.response.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +34,7 @@ public class PlaceController {
     @Operation(summary = "리뷰 있는 장소 목록 조회 API")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = MapPlaceResponse.class))})
     @GetMapping
-    public ResponseEntity<ResultResponse> getPlaces(
+    public ResponseEntity<ResultResponse> getMapPlaces(
             @Schema(description = "키워드", example = "스타벅스")
             @RequestParam(defaultValue = "", value = "query", required = false) String query,
 
@@ -61,17 +61,30 @@ public class PlaceController {
 
             @Schema(description = "현 위치 경도", example = "126.826539")
             @RequestParam(value = "currentLongitude", required = false) Double currentLongitude
+/*            @Schema(description = "현재 페이지", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Schema(description = "한 페이지에 노출할 데이터 건수", example = "20")
+            @RequestParam(defaultValue = "20") int size*/
     ) {
-        List<MapPlaceResponse> result = placeService.getMapPlaces(
-                query, category, sort, swLatitude, swLongitude, neLatitude, neLongitude, currentLatitude, currentLongitude
-        );
+//        Pageable pageable = PageRequest.of(page, size);
+        MapBoundDto mapBound = MapBoundDto.builder()
+                .neLat(neLatitude)
+                .neLng(neLongitude)
+                .swLat(swLatitude)
+                .swLng(swLongitude)
+                .currLat(currentLatitude)
+                .currLng(currentLongitude)
+                .build();
+        List<MapPlaceResponse> result = placeService.getMapPlaces(query, category, sort, mapBound);
+
         return ResponseEntity.ok(ResultResponse.of(GET_PLACES_SUCCESS, result));
     }
 
     @GetMapping("/{kakaoPlaceId}")
     @Operation(summary = "장소 상세 조회 API", description = "카카오맵에서 부여한 고유 ID로 장소 상세 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = MapPlaceDetailResponse.class))})
-    public ResponseEntity<ResultResponse> getPlaceDetail(
+    public ResponseEntity<ResultResponse> getMapPlaceDetail(
             @Schema(description = "카카오맵 장소 고유 ID", example = "1997608947")
             @PathVariable("kakaoPlaceId") String kakaoPlaceId,
 
@@ -86,9 +99,9 @@ public class PlaceController {
     }
 
     @Operation(summary = "전체 장소 목록 조회 API", description = "리뷰 작성할 장소 조회 시 사용 / 카카오맵 API 호출")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = EntirePlaceResponse.class))})
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = PlaceResponse.class))})
     @GetMapping("/keyword")
-    public ResponseEntity<ResultResponse> getPlacesByKeyword(
+    public ResponseEntity<ResultResponse> getEntirePlaces(
             @Schema(description = "검색어", example = "하루카페") @RequestParam(value = "query") String query
     ) {
         List<EntirePlaceResponse> result = placeService.getEntirePlaces(query);
