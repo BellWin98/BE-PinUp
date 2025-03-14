@@ -12,7 +12,7 @@ public interface BookMarkRepositoryQueryDsl {
             Member member,
             PlaceCategory category,
             SortType sortType,
-            double currentLatitude,
-            double currentLongitude
+            Double currentLatitude,
+            Double currentLongitude
     );
 }

@@ -21,18 +21,10 @@ public class BookMarkResponse {
     private PlaceCategory placeCategory;
     private String kakaoPlaceId;
 
-    public BookMarkResponse(
-            Long id,
-            Long placeId,
-            String placeName,
-            String placeAddress,
-            String placeRoadAddress,
-            String placeFirstReviewImageUrl,
-            Double placeLatitude,
-            Double placeLongitude,
-            String placeStatus,
-            PlaceCategory placeCategory,
-            String kakaoPlaceId
+    public BookMarkResponse(Long id, Long placeId, String placeName,
+            String placeAddress, String placeRoadAddress, String placeFirstReviewImageUrl,
+            Double placeLatitude, Double placeLongitude, String placeStatus,
+            PlaceCategory placeCategory, String kakaoPlaceId
     ) {
         this.id = id;
         this.placeId = placeId;
@@ -45,27 +37,5 @@ public class BookMarkResponse {
         this.placeStatus = placeStatus;
         this.placeCategory = placeCategory;
         this.kakaoPlaceId = kakaoPlaceId;
-    }
-
-    public static BookMarkResponse from(BookMark bookmark) {
-        String firstReviewImageUrl = bookmark.getPlace().getReviews().stream()
-                .filter(review -> !review.getReviewImages().isEmpty())
-                .findFirst()
-                .map(review -> review.getReviewImages().get(0).getUrl())
-                .orElse(bookmark.getPlace().getDefaultImgUrl());
-
-        return BookMarkResponse.builder()
-                .id(bookmark.getId())
-                .placeId(bookmark.getPlace().getId())
-                .placeName(bookmark.getPlace().getName())
-                .placeAddress(bookmark.getPlace().getAddress())
-                .placeRoadAddress(bookmark.getPlace().getRoadAddress())
-                .placeFirstReviewImageUrl(firstReviewImageUrl)
-                .placeLatitude(bookmark.getPlace().getLatitude())
-                .placeLongitude(bookmark.getPlace().getLongitude())
-                .placeStatus(bookmark.getPlace().getStatus())
-                .kakaoPlaceId(bookmark.getPlace().getKakaoPlaceId())
-                .placeCategory(bookmark.getPlace().getPlaceCategory())
-                .build();
     }
 }

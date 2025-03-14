@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,17 +37,9 @@ public class BookMarkController {
         );
     }
 
-    @Operation(summary = "내 북마크 목록 조회 API", description = "로그인한 사용자의 북마크 목록을 조회합니다")
+    @Operation(summary = "내 북마크 조회 API", description = "카테고리와 정렬 조건으로 북마크 목록을 필터링하여 조회합니다")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = BookMarkResponse.class))})
-    @GetMapping("/my")
-    public ResponseEntity<ResultResponse> getMyBookmarks() {
-        List<BookMarkResponse> bookmarks = bookMarkService.getMyBookmarks();
-        return ResponseEntity.ok(ResultResponse.of(ResultCode.GET_MY_BOOKMARK_SUCCESS, bookmarks));
-    }
-
-    @Operation(summary = "북마크 필터링 조회 API", description = "카테고리와 정렬 조건으로 북마크 목록을 필터링하여 조회합니다")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = BookMarkResponse.class))})
-    @GetMapping("/filter")
+    @GetMapping
     public ResponseEntity<ResultResponse> getFilteredBookmarks(
             @Schema(description = "카테고리 (ALL/RESTAURANT/CAFE)", example = "ALL")
             @RequestParam(defaultValue = "ALL", value = "category", required = false) String category,
@@ -57,10 +48,10 @@ public class BookMarkController {
             @RequestParam(defaultValue = "NEAR", value = "sort", required = false) String sort,
 
             @Schema(description = "현 위치 위도", example = "37.562651")
-            @RequestParam(value = "currentLatitude") double currentLatitude,
+            @RequestParam(value = "currentLatitude", required = false) Double currentLatitude,
 
             @Schema(description = "현 위치 경도", example = "126.826539")
-            @RequestParam(value = "currentLongitude") double currentLongitude
+            @RequestParam(value = "currentLongitude", required = false) Double currentLongitude
     ) {
         List<BookMarkResponse> bookmarks = bookMarkService.getFilteredBookmarks(
                 category, sort, currentLatitude, currentLongitude

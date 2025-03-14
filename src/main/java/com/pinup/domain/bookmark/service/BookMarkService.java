@@ -46,19 +46,11 @@ public class BookMarkService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookMarkResponse> getMyBookmarks() {
-        Member loginMember = authUtil.getLoginMember();
-        return bookMarkRepository.findAllByMember(loginMember).stream()
-                .map(BookMarkResponse::from)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
     public List<BookMarkResponse> getFilteredBookmarks(
             String category,
             String sort,
-            double currentLatitude,
-            double currentLongitude
+            Double currentLatitude,
+            Double currentLongitude
     ) {
         Member loginMember = authUtil.getLoginMember();
         PlaceCategory placeCategory = PlaceCategory.getCategory(category);
