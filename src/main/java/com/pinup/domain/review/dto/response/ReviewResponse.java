@@ -3,12 +3,12 @@ package com.pinup.domain.review.dto.response;
 import com.pinup.domain.review.entity.Review;
 import com.pinup.domain.review.entity.ReviewImage;
 import com.pinup.domain.review.entity.ReviewType;
+import com.pinup.global.common.Formatter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +22,8 @@ public class ReviewResponse {
     private Double starRating;
     private ReviewType type;
     private List<String> imageUrls;
-    private LocalDateTime createdAt;
+    private String createdAt;
+    private String visitedAt;
 
     public static ReviewResponse from(Review review) {
         return ReviewResponse.builder()
@@ -33,7 +34,8 @@ public class ReviewResponse {
                 .imageUrls(review.getReviewImages().stream()
                         .map(ReviewImage::getUrl)
                         .collect(Collectors.toList()))
-                .createdAt(review.getCreatedAt())
+                .createdAt(Formatter.formatDate(review.getCreatedAt()))
+                .visitedAt(review.getVisitedDate())
                 .build();
     }
 }

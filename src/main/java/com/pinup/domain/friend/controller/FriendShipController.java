@@ -23,14 +23,14 @@ public class FriendShipController {
 
     @Operation(summary = "유저 핀버디 목록 조회 API")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberResponse.class))})
-    @GetMapping("/{userId}")
-    public ResponseEntity<ResultResponse> getUserAllFriends(
+    @GetMapping("/{memberId}")
+    public ResponseEntity<ResultResponse> getAllFriendsOfMember(
             @Schema(description = "유저 ID", example = "1")
-            @PathVariable Long userId
+            @PathVariable Long memberId
     ) {
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_USER_PIN_BUDDY_LIST_SUCCESS,
-                friendShipService.getUserAllFriends(userId))
+                friendShipService.getAllFriendsOfMember(memberId))
         );
     }
 
@@ -43,16 +43,6 @@ public class FriendShipController {
         friendShipService.removeFriend(friendId);
 
         return ResponseEntity.ok(ResultResponse.of(ResultCode.REMOVE_PIN_BUDDY_SUCCESS));
-    }
-
-    @Operation(summary = "나의 핀버디 목록 조회 API")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberResponse.class))})
-    @GetMapping
-    public ResponseEntity<ResultResponse> getMyAllFriends() {
-        return ResponseEntity.ok(ResultResponse.of(
-                ResultCode.GET_MY_PIN_BUDDY_LIST_SUCCESS,
-                friendShipService.getMyAllFriends())
-        );
     }
 
     @Operation(summary = "나의 핀버디 정보 조회 API")

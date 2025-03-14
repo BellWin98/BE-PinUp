@@ -41,6 +41,16 @@ public class MemberController {
         );
     }
 
+    @Operation(summary = "내 정보 조회 API", description = "자동 로그인 시 사용")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberInfoResponse.class))})
+    @GetMapping
+    public ResponseEntity<ResultResponse> getMyInfo() {
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.GET_MY_INFO_SUCCESS,
+                memberService.getMyInfo())
+        );
+    }
+
     @Operation(summary = "유저 정보 조회 API")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberInfoResponse.class))})
     @GetMapping("/{memberId}")

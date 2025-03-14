@@ -25,20 +25,11 @@ public class FriendShipService {
     private final AuthUtil authUtil;
 
     @Transactional(readOnly = true)
-    public List<MemberResponse> getUserAllFriends(Long memberId) {
+    public List<MemberResponse> getAllFriendsOfMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         return friendShipRepository.findAllByMember(member)
-                .stream()
-                .map(friendShip -> MemberResponse.from(friendShip.getFriend()))
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<MemberResponse> getMyAllFriends() {
-        Member currentUser = authUtil.getLoginMember();
-        return friendShipRepository.findAllByMember(currentUser)
                 .stream()
                 .map(friendShip -> MemberResponse.from(friendShip.getFriend()))
                 .sorted(Comparator.comparing(MemberResponse::getNickname))

@@ -5,6 +5,7 @@ import com.pinup.global.common.Formatter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Schema(title = "리뷰 상세 조회 응답 DTO")
@@ -23,6 +24,9 @@ public class ReviewDetailResponse {
     @Schema(description = "리뷰 작성자가 해당 가게에 부여한 별점")
     private double starRating; // 해당 가게에 부여한 별점
 
+    @Schema(description = "리뷰 작성일자")
+    private String createdDate;
+
     @Schema(description = "장소 방문 날짜")
     private String visitedDate; // 방문날짜
 
@@ -36,11 +40,13 @@ public class ReviewDetailResponse {
     private List<String> reviewImageUrls; // 리뷰 이미지 목록
 
     public ReviewDetailResponse(Long reviewId, String writerName, int writerTotalReviewCount,
-                                double starRating, String visitedDate, String content, String writerProfileImageUrl) {
+                                double starRating, LocalDateTime createdAt, String visitedDate,
+                                String content, String writerProfileImageUrl) {
         this.reviewId = reviewId;
         this.writerName = writerName;
         this.writerTotalReviewCount = writerTotalReviewCount;
         this.starRating = Formatter.formatStarRating(starRating);
+        this.createdDate = Formatter.formatDate(createdAt);
         this.visitedDate = visitedDate;
         this.content = content;
         this.writerProfileImageUrl = writerProfileImageUrl;

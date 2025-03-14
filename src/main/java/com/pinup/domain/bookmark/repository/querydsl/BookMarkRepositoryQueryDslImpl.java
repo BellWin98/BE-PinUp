@@ -28,8 +28,8 @@ public class BookMarkRepositoryQueryDslImpl implements BookMarkRepositoryQueryDs
             Member member,
             PlaceCategory placeCategory,
             SortType sortType,
-            double currentLatitude,
-            double currentLongitude
+            Double currentLatitude,
+            Double currentLongitude
     ) {
         StringTemplate firstReviewImageUrl = Expressions.stringTemplate(
                 "COALESCE((SELECT ri.url FROM ReviewImage ri " +
@@ -73,33 +73,37 @@ public class BookMarkRepositoryQueryDslImpl implements BookMarkRepositoryQueryDs
     }
 
     private OrderSpecifier<?> searchBySortType(
-            SortType sortType,
-            double currLat,
-            double currLon,
-            NumberPath<Double> placeLat,
-            NumberPath<Double> placeLon
+            SortType sortType, Double currLat, Double currLng,
+            NumberPath<Double> placeLat, NumberPath<Double> placeLng
     ) {
-        if (sortType == null) {
-            return calculateDistance(currLat, currLon, placeLat, placeLon).asc();
+        switch (sortType) {
+            case LATEST -> {
+                return review.createdAt.desc();
+            }
+            case STAR_HIGH -> {
+                return review.starRating.avg().desc();
+            }
+            case STAR_LOW -> {
+                return review.starRating.avg().asc();
+            }
+            default -> {
+                if (currLat == null || currLng == null) {
+                    return review.createdAt.desc();
+                }
+                return calculateDistance(currLat, currLng, placeLat, placeLng).asc();
+            }
         }
-
-        return switch (sortType) {
-            case LATEST -> bookMark.createdAt.desc();
-            case STAR_HIGH -> review.starRating.avg().desc();
-            case STAR_LOW -> review.starRating.avg().asc();
-            default -> calculateDistance(currLat, currLon, placeLat, placeLon).asc();
-        };
     }
 
     private NumberTemplate<Double> calculateDistance(
-            double latitude1,
-            double longitude1,
-            NumberPath<Double> latitude2,
-            NumberPath<Double> longitude2
+            Double lat1, Double lng1, NumberPath<Double> lat2, NumberPath<Double> lng2
     ) {
+        if (lat1 == null || lng1 == null) {
+            return Expressions.numberTemplate(Double.class, "NULL");
+        }
         return Expressions.numberTemplate(Double.class,
                 "6371 * acos(cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({4})) * sin(radians({5})))",
-                latitude1, latitude2, longitude2, longitude1, latitude1, latitude2
+                lat1, lat2, lng2, lng1, lat1, lat2
         );
     }
 }
