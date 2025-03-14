@@ -19,7 +19,7 @@ public class ReviewRequest {
     private double starRating;
 
     @NotBlank(message = "방문 날짜를 입력해주세요.")
-    @Schema(description = "방문 날짜", example = "20241208")
+    @Schema(description = "방문 날짜", example = "25.03.14")
     private String visitedDate;
 
     public Review toEntity() {

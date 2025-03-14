@@ -120,6 +120,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                         review.member.nickname.as("writerName"),
                         review.member.reviews.size().as("writerTotalReviewCount"),
                         review.starRating,
+                        review.createdAt,
                         review.visitedDate,
                         review.content,
                         review.member.profileImageUrl.as("writerProfileImageUrl")
@@ -172,7 +173,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
     private OrderSpecifier<?> searchBySortType(
             SortType sortType, Double currLat, Double currLng,
-            NumberPath<Double> placeLat, NumberPath<Double> placeLon
+            NumberPath<Double> placeLat, NumberPath<Double> placeLng
     ) {
         switch (sortType) {
             case LATEST -> {
@@ -188,7 +189,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 if (currLat == null || currLng == null) {
                     return review.createdAt.desc();
                 }
-                return calculateDistance(currLat, currLng, placeLat, placeLon).asc();
+                return calculateDistance(currLat, currLng, placeLat, placeLng).asc();
             }
         }
     }
@@ -227,14 +228,14 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     }
 
     private NumberTemplate<Double> calculateDistance(
-            Double latitude1, Double longitude1, NumberPath<Double> latitude2, NumberPath<Double> longitude2
+            Double lat1, Double lng1, NumberPath<Double> lat2, NumberPath<Double> lng2
     ) {
-        if (latitude1 == null || longitude1 == null) {
+        if (lat1 == null || lng1 == null) {
             return Expressions.numberTemplate(Double.class, "NULL");
         }
         return Expressions.numberTemplate(Double.class,
                 "6371 * acos(cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({4})) * sin(radians({5})))",
-                latitude1, latitude2, longitude2, longitude1, latitude1, latitude2
+                lat1, lat2, lng2, lng1, lat1, lat2
         );
     }
 
