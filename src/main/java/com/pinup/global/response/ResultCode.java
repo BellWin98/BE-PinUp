@@ -24,6 +24,7 @@ public enum ResultCode {
     UPDATE_MEMBER_INFO_SUCCESS(200, "M006", "유저 정보 수정에 성공하였습니다."),
     GET_MY_FEED_SUCCESS(200, "M007", "내 피드 조회에 성공하였습니다."),
     GET_MEMBER_FEED_SUCCESS(200, "M008", "유저 피드 조회에 성공하였습니다."),
+    GET_MY_INFO_SUCCESS(200, "M009", "내 정보 조회에 성공하였습니다."),
 
     // Place
     GET_PLACES_SUCCESS(200, "P001", "장소 목록 조회에 성공하였습니다."),

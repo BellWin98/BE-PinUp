@@ -79,6 +79,17 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
+    public MemberInfoResponse getMyInfo() {
+        Member loginMember = authUtil.getLoginMember();
+
+        return MemberInfoResponse.builder()
+                .memberResponse(MemberResponse.from(loginMember))
+                .relationType(MemberRelationType.SELF)
+                .friendRequestId(null)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
     public Page<TextReviewResponse> getTextReviews(Pageable pageable, Long memberId) {
         Member member = authUtil.getValidMember(memberId);
         Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, member, ReviewType.TEXT);
