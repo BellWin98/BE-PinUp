@@ -2,7 +2,10 @@ package com.pinup.domain.member.dto.response;
 
 import com.pinup.domain.member.entity.MemberRelationType;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
@@ -16,4 +19,7 @@ public class MemberInfoResponse {
 
     @Schema(description = "관계")
     private MemberRelationType relationType;
+
+    @Schema(description = "친구요청 ID")
+    private Long friendRequestId;
 }

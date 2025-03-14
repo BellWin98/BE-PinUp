@@ -1,5 +1,6 @@
 package com.pinup.domain.member.service;
 
+import com.pinup.domain.friend.entity.FriendRequest;
 import com.pinup.domain.friend.entity.FriendRequestStatus;
 import com.pinup.domain.friend.repository.FriendRequestRepository;
 import com.pinup.domain.friend.repository.FriendShipRepository;
@@ -57,17 +58,23 @@ public class MemberService {
                         .memberResponse(MemberResponse.from(member))
                         .relationType(determineRelationType(loginMember, member))
                         .build())
+//                .filter(searchMemberResponse -> searchMemberResponse.getRelationType() != MemberRelationType.SELF)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public MemberInfoResponse getMemberInfo(Long memberId) {
         Member loginMember = authUtil.getLoginMember();
-        Member member = memberRepository.findById(memberId)
+        Member targetMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        Long friendRequestId = friendRequestRepository
+                .findBySenderAndReceiverAndFriendRequestStatus(loginMember, targetMember, FriendRequestStatus.PENDING)
+                .map(FriendRequest::getId).orElse(null);
+
         return MemberInfoResponse.builder()
-                .memberResponse(MemberResponse.from(member))
-                .relationType(determineRelationType(loginMember, member))
+                .memberResponse(MemberResponse.from(targetMember))
+                .relationType(determineRelationType(loginMember, targetMember))
+                .friendRequestId(friendRequestId)
                 .build();
     }
 
