@@ -18,11 +18,10 @@ import com.pinup.global.exception.EntityAlreadyExistException;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.pinup.domain.friend.entity.FriendRequestStatus.PENDING;
 
@@ -39,19 +38,19 @@ public class FriendRequestService {
     private final AuthUtil authUtil;
 
     @Transactional(readOnly = true)
-    public List<FriendRequestResponse> getReceivedFriendRequests() {
+    public Page<FriendRequestResponse> getReceivedFriendRequests(Pageable pageable) {
         Member loginMember = authUtil.getLoginMember();
-        return friendRequestRepository.findAllByReceiverAndFriendRequestStatus(loginMember, PENDING).stream()
-                .map(FriendRequestResponse::from)
-                .collect(Collectors.toList());
+
+        return friendRequestRepository.findAllByReceiverAndFriendRequestStatus(loginMember, PENDING, pageable)
+                .map(FriendRequestResponse::from);
     }
 
     @Transactional(readOnly = true)
-    public List<FriendRequestResponse> getSentFriendRequests() {
+    public Page<FriendRequestResponse> getSentFriendRequests(Pageable pageable) {
         Member loginMember = authUtil.getLoginMember();
-        return friendRequestRepository.findAllBySenderAndFriendRequestStatus(loginMember, PENDING).stream()
-                .map(FriendRequestResponse::from)
-                .collect(Collectors.toList());
+
+        return friendRequestRepository.findAllBySenderAndFriendRequestStatus(loginMember, PENDING, pageable)
+                .map(FriendRequestResponse::from);
     }
 
     @Transactional

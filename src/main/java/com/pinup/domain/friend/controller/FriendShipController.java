@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,11 +28,37 @@ public class FriendShipController {
     @GetMapping("/{memberId}")
     public ResponseEntity<ResultResponse> getAllFriendsOfMember(
             @Schema(description = "유저 ID", example = "1")
-            @PathVariable Long memberId
+            @PathVariable Long memberId,
+
+            @Schema(description = "현재 페이지", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Schema(description = "한 페이지에 노출할 데이터 건수", example = "20")
+            @RequestParam(defaultValue = "20") int size
     ) {
+        Pageable pageable = PageRequest.of(page, size);
+
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_USER_PIN_BUDDY_LIST_SUCCESS,
-                friendShipService.getAllFriendsOfMember(memberId))
+                friendShipService.getAllFriendsOfMember(memberId, pageable))
+        );
+    }
+
+    @Operation(summary = "나의 핀버디 목록 조회 API")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberResponse.class))})
+    @GetMapping("/me")
+    public ResponseEntity<ResultResponse> getAllFriendsOfMe(
+            @Schema(description = "현재 페이지", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Schema(description = "한 페이지에 노출할 데이터 건수", example = "20")
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.GET_USER_PIN_BUDDY_LIST_SUCCESS,
+                friendShipService.getAllFriendsOfMe(pageable))
         );
     }
 
