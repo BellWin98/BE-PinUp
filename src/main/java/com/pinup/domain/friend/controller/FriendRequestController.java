@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,20 +27,36 @@ public class FriendRequestController {
     @Operation(summary = "받은 핀버디 신청 목록 조회 API", description = "상태가 PENDING 인 받은 핀버디 신청 목록 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = FriendRequestResponse.class))})
     @GetMapping("/received")
-    public ResponseEntity<ResultResponse> getReceivedFriendRequests() {
+    public ResponseEntity<ResultResponse> getReceivedFriendRequests(
+            @Schema(description = "현재 페이지", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Schema(description = "한 페이지에 노출할 데이터 건수", example = "20")
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_RECEIVED_PIN_BUDDY_REQUEST_LIST_SUCCESS,
-                friendRequestService.getReceivedFriendRequests())
+                friendRequestService.getReceivedFriendRequests(pageable))
         );
     }
 
     @Operation(summary = "보낸 핀버디 신청 목록 조회 API", description = "상태가 PENDING 인 보낸 핀버디 신청 목록 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = FriendRequestResponse.class))})
     @GetMapping("/sent")
-    public ResponseEntity<ResultResponse> getSentFriendRequests() {
+    public ResponseEntity<ResultResponse> getSentFriendRequests(
+            @Schema(description = "현재 페이지", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Schema(description = "한 페이지에 노출할 데이터 건수", example = "20")
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_SENT_PIN_BUDDY_REQUEST_LIST_SUCCESS,
-                friendRequestService.getSentFriendRequests())
+                friendRequestService.getSentFriendRequests(pageable))
         );
     }
 

@@ -84,10 +84,10 @@ public class MemberController {
         );
     }
 
-    @Operation(summary = "텍스트 리뷰 조회 API")
+    @Operation(summary = "유저 텍스트 리뷰 조회 API")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = TextReviewResponse.class))})
     @GetMapping("/{memberId}/text-reviews")
-    public ResponseEntity<ResultResponse> getTextReviews(
+    public ResponseEntity<ResultResponse> getMemberTextReviews(
             @PathVariable Long memberId,
 
             @Schema(description = "현재 페이지", example = "0")
@@ -100,11 +100,29 @@ public class MemberController {
 
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_TEXT_REVIEW_SUCCESS,
-                memberService.getTextReviews(pageable, memberId))
+                memberService.getMemberTextReviews(pageable, memberId))
         );
     }
 
-    @Operation(summary = "포토 리뷰 조회 API")
+    @Operation(summary = "나의 텍스트 리뷰 조회 API")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = TextReviewResponse.class))})
+    @GetMapping("/me/text-reviews")
+    public ResponseEntity<ResultResponse> getMyTextReviews(
+            @Schema(description = "현재 페이지", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Schema(description = "한 페이지에 노출할 데이터 건수", example = "20")
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.GET_TEXT_REVIEW_SUCCESS,
+                memberService.getMyTextReviews(pageable))
+        );
+    }
+
+    @Operation(summary = "유저 포토 리뷰 조회 API")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = PhotoReviewResponse.class))})
     @GetMapping("/{memberId}/photo-reviews")
     public ResponseEntity<ResultResponse> getPhotoReviews(
@@ -121,6 +139,24 @@ public class MemberController {
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_PHOTO_REVIEW_SUCCESS,
                 memberService.getPhotoReviews(pageable, memberId))
+        );
+    }
+
+    @Operation(summary = "나의 포토 리뷰 조회 API")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = PhotoReviewResponse.class))})
+    @GetMapping("/me/photo-reviews")
+    public ResponseEntity<ResultResponse> getMyPhotoReviews(
+            @Schema(description = "현재 페이지", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Schema(description = "한 페이지에 노출할 데이터 건수", example = "20")
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.GET_PHOTO_REVIEW_SUCCESS,
+                memberService.getMyPhotoReviews(pageable))
         );
     }
 }

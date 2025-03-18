@@ -90,9 +90,17 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TextReviewResponse> getTextReviews(Pageable pageable, Long memberId) {
+    public Page<TextReviewResponse> getMemberTextReviews(Pageable pageable, Long memberId) {
         Member member = authUtil.getValidMember(memberId);
         Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, member, ReviewType.TEXT);
+
+        return reviewPage.map(TextReviewResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TextReviewResponse> getMyTextReviews(Pageable pageable) {
+        Member loginMember = authUtil.getLoginMember();
+        Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, loginMember, ReviewType.TEXT);
 
         return reviewPage.map(TextReviewResponse::from);
     }
@@ -101,6 +109,14 @@ public class MemberService {
     public Page<PhotoReviewResponse> getPhotoReviews(Pageable pageable, Long memberId) {
         Member member = authUtil.getValidMember(memberId);
         Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, member, ReviewType.PHOTO);
+
+        return reviewPage.map(PhotoReviewResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PhotoReviewResponse> getMyPhotoReviews(Pageable pageable) {
+        Member loginMember = authUtil.getLoginMember();
+        Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, loginMember, ReviewType.PHOTO);
 
         return reviewPage.map(PhotoReviewResponse::from);
     }
