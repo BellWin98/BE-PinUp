@@ -1,6 +1,7 @@
 package com.pinup.domain.member.dto.response;
 
 import com.pinup.domain.friend.entity.FriendShip;
+import com.pinup.domain.member.entity.LoginType;
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.review.entity.Review;
 import com.pinup.global.common.Formatter;
@@ -38,6 +39,9 @@ public class MemberResponse {
     @Schema(description = "소개글")
     private String bio;
 
+    @Schema(description = "로그인 타입")
+    private LoginType loginType;
+
     @Schema(description = "마케팅 정보 수신 동의")
     private String termsOfMarketing;
 
@@ -66,6 +70,7 @@ public class MemberResponse {
                 .profilePictureUrl(member.getProfileImageUrl())
                 .nickname(StringUtils.hasText(member.getNickname()) ? member.getNickname() : "")
                 .bio(StringUtils.hasText(member.getBio()) ? member.getBio() : "")
+                .loginType(member.getLoginType())
                 .termsOfMarketing(member.getTermsOfMarketing())
                 .reviewCount(reviews.size())
                 .averageStarRating(roundedAverageRating)
