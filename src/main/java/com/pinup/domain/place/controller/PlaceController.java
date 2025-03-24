@@ -2,7 +2,10 @@ package com.pinup.domain.place.controller;
 
 import com.pinup.domain.place.dto.request.MapBoundDto;
 import com.pinup.domain.place.dto.request.MapViewDto;
-import com.pinup.domain.place.dto.response.*;
+import com.pinup.domain.place.dto.response.MapPlaceDetailResponse;
+import com.pinup.domain.place.dto.response.MapPlaceResponse;
+import com.pinup.domain.place.dto.response.PlaceResponse;
+import com.pinup.domain.place.dto.response.TotalPlaceResponse;
 import com.pinup.domain.place.service.PlaceService;
 import com.pinup.global.response.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
