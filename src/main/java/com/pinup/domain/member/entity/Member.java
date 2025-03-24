@@ -41,7 +41,7 @@ public class Member extends BaseTimeEntity {
     @Column(columnDefinition = "VARCHAR(1)")
     private String status;
 
-    @Column(columnDefinition = "VARCHAR(100)")
+    @Column(columnDefinition = "VARCHAR(150)")
     private String bio;
 
     private LocalDateTime lastNicknameUpdateDate;

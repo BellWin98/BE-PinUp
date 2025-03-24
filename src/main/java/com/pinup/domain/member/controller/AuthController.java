@@ -30,8 +30,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(summary = "회원가입 API", description = "SocialId 반환")
-    @ApiResponse(content = {@Content(schema = @Schema(implementation = Long.class))})
+    @Operation(summary = "회원가입 API")
     @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResultResponse> signUp(
             @Valid @RequestPart SignUpRequest signUpRequest,
