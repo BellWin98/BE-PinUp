@@ -33,12 +33,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Make application.yml
-        run: |
-          cd ./src/main/resources
-          touch ./application.yml
-          echo "${{ secrets.APPLICATION }}" > ./application.yml
-        shell: bash
+#      - name: Make application.yml
+#        run: |
+#          cd ./src/main/resources
+#          touch ./application.yml
+#          echo "${{ secrets.APPLICATION }}" > ./application.yml
+#        shell: bash
 
       - name: Make application-dev.yml
         if: contains(github.ref, 'dev')
@@ -115,4 +115,5 @@ jobs:
             sudo docker stop pinup-prod
             sudo docker rm -f $(sudo docker ps --filter 'status=exited' -a -q)
             sudo docker pull ${{ secrets.DOCKER_REPO }}/pinup-prod
+            sudo docker rmi $(docker images -f "dangling=true" -q)
             sudo docker-compose -f $COMPOSE up -d            
