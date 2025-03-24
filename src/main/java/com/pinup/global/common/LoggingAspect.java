@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class LoggingAspect {
 
     // controller와 service method만 로그 적용
-    @Around("(execution(* com.pinup.domain..service..*(..))) && !execution(* com.pinup.domain.home.HomeController.*(..))")
+    @Around("(execution(* com.pinup.domain..service..*(..)))")
     public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
         log.info("START: {}", joinPoint.getSignature().getName());
         try {
