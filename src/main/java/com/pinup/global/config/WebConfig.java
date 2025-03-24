@@ -13,11 +13,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
+    private static final String[] PASS_URLS = {
+            "/",
+            "/api/auth/**",
+            "/api/members/nickname/check",
+            "/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**",
+    };
     private final RequestLoggingInterceptor requestLoggingInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(requestLoggingInterceptor).excludePathPatterns("/", "/api/auth/**");
+        registry.addInterceptor(requestLoggingInterceptor).excludePathPatterns(PASS_URLS);
     }
 
     @Bean
