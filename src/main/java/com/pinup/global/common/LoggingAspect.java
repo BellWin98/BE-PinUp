@@ -21,17 +21,17 @@ public class LoggingAspect {
         }
     }*/
 
-    @Before("execution(* com.pinup.domain..service..*(..))")
+    @Before("execution(* com.pinup.domain..service..*(..)) && !execution(* com.pinup.domain.home.HomeController.*(..))")
     public void logBeforeMethod(JoinPoint joinPoint) {
         log.info("START: {}", joinPoint.getSignature().getName());
     }
 
-    @After("execution(* com.pinup.domain..service..*(..))")
+    @After("execution(* com.pinup.domain..service..*(..)) && !execution(* com.pinup.domain.home.HomeController.*(..))")
     public void logAfterMethod(JoinPoint joinPoint) {
         log.info("END: {}", joinPoint.getSignature().getName());
     }
 
-    @AfterThrowing(pointcut = "execution(* com.pinup.domain..service..*(..))", throwing = "ex")
+    @AfterThrowing(pointcut = "execution(* com.pinup.domain..service..*(..)) && !execution(* com.pinup.domain.home.HomeController.*(..))", throwing = "ex")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable ex) {
         log.error("Exception in Method: {}", joinPoint.getSignature().getName(), ex);
     }
