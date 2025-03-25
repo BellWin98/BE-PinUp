@@ -52,7 +52,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .from(place)
                 .innerJoin(review).on(place.eq(review.place))
                 .where(place.status.eq("Y")
-                    .and(review.member.id.in(targetMemberIds))
+//                    .and(review.member.id.in(targetMemberIds))
                     .and(place.latitude.between(mapBound.getSwLat(), mapBound.getNeLat()))
                     .and(place.longitude.between(mapBound.getSwLng(), mapBound.getNeLng()))
                     .and(searchByQuery(query))
