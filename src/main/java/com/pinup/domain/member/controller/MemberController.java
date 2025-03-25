@@ -1,6 +1,7 @@
 package com.pinup.domain.member.controller;
 
 import com.pinup.domain.member.dto.request.UpdateMemberInfoAfterLoginRequest;
+import com.pinup.domain.member.dto.request.UpdateProfileRequest;
 import com.pinup.domain.member.dto.response.MemberInfoResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.dto.response.SearchMemberResponse;
@@ -69,6 +70,17 @@ public class MemberController {
                 ResultCode.GET_NICKNAME_DUPLICATE_SUCCESS,
                 memberService.checkNicknameDuplicate(nickname))
         );
+    }
+
+    @Operation(summary = "유저 프로필 수정 API")
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResultResponse> updateProfile(
+            @Valid @RequestPart UpdateProfileRequest updateProfileRequest,
+            @RequestPart(name = "multipartFile", required = false) MultipartFile multipartFile
+    ) {
+        memberService.updateProfile(updateProfileRequest, multipartFile);
+
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.UPDATE_MEMBER_INFO_SUCCESS));
     }
 
     @Operation(summary = "소셜 로그인 후처리 API", description = "닉네임, 프로필사진, 마케팅 수신동의 여부 등록")
