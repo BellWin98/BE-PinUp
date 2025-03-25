@@ -98,13 +98,10 @@ public class S3Service {
         if (fileUrl == null || fileUrl.isEmpty() || fileUrl.startsWith("https://lh3.googleusercontent.com")) {
             return;
         }
-
         try {
             String key = extractKeyFromUrl(fileUrl);
-            System.out.println(key);
             DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucket, key);
             amazonS3Client.deleteObject(deleteObjectRequest);
-
         } catch (AmazonServiceException e) {
             log.error("파일 삭제 실패: Amazon S3 서비스 에러", e);
             throw new FileDeleteErrorException();

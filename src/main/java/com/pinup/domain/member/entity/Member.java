@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class Member extends BaseTimeEntity {
     private String name;
 
     @Column(columnDefinition = "VARCHAR(12)", unique = true)
+    @Audited
     private String nickname;
 
     private String profileImageUrl;

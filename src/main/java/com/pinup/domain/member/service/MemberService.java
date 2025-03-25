@@ -5,6 +5,7 @@ import com.pinup.domain.friend.entity.FriendRequestStatus;
 import com.pinup.domain.friend.repository.FriendRequestRepository;
 import com.pinup.domain.friend.repository.FriendShipRepository;
 import com.pinup.domain.member.dto.request.UpdateMemberInfoAfterLoginRequest;
+import com.pinup.domain.member.dto.request.UpdateProfileRequest;
 import com.pinup.domain.member.dto.response.MemberInfoResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.dto.response.SearchMemberResponse;
@@ -87,6 +88,24 @@ public class MemberService {
                 .relationType(MemberRelationType.SELF)
                 .friendRequestId(null)
                 .build();
+    }
+
+    @Transactional
+    public void updateProfile(UpdateProfileRequest updateProfileRequest, MultipartFile multipartFile) {
+        Member loginMember = authUtil.getLoginMember();
+        String newNickname = updateProfileRequest.getNickname();
+        validateNicknameUpdate(loginMember, newNickname);
+        loginMember.updateNickname(newNickname);
+        loginMember.updateBio(updateProfileRequest.getBio());
+        String newProfileImageUrl = null;
+        if (multipartFile != null && !multipartFile.isEmpty()) {
+            s3Service.deleteFile(loginMember.getProfileImageUrl());
+            newProfileImageUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile);
+        }
+        if (newProfileImageUrl != null) {
+            loginMember.updateProfileImage(newProfileImageUrl);
+        }
+        memberRepository.save(loginMember);
     }
 
     @Transactional(readOnly = true)
