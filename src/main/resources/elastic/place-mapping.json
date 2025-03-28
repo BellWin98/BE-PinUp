@@ -1,0 +1,17 @@
+{
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "keywords": {
+      "type": "text",
+      "analyzer": "korean",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    }
+  }
+}

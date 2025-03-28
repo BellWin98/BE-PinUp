@@ -119,12 +119,13 @@ class MemberServiceTest {
         given(applicationContext.getBean(MemberService.class)).willReturn(memberService);
 
         // when
-        MemberInfoResponse response = memberService.getMyFeed();
+        MemberInfoResponse response = memberService.getMyInfo();
 
         // then
         assertThat(response.getMemberResponse().getNickname()).isEqualTo(TEST_NICKNAME);
-        assertThat(response.getReviewCount()).isZero();
-        assertThat(response.getPinBuddyCount()).isZero();
+        assertThat(response.getMemberResponse().getReviewCount()).isZero();
+        assertThat(response.getMemberResponse().getPinBuddyCount()).isZero();
+        assertThat(response.getRelationType()).isEqualTo(MemberRelationType.SELF);
     }
 
     @Test
@@ -132,16 +133,16 @@ class MemberServiceTest {
     void getMemberFeed_Success() {
         // given
         Long memberId = 1L;
-        given(memberRepository.findById(memberId)).willReturn(Optional.of(testMember));
+        given(authUtil.getValidMember(memberId)).willReturn(testMember);
         given(applicationContext.getBean(MemberService.class)).willReturn(memberService);
 
         // when
-        MemberInfoResponse response = memberService.getMemberFeed(memberId);
+        MemberInfoResponse response = memberService.getMemberInfo(memberId);
 
         // then
         assertThat(response.getMemberResponse().getNickname()).isEqualTo(TEST_NICKNAME);
-        assertThat(response.getReviewCount()).isZero();
-        assertThat(response.getPinBuddyCount()).isZero();
+        assertThat(response.getMemberResponse().getReviewCount()).isZero();
+        assertThat(response.getMemberResponse().getPinBuddyCount()).isZero();
     }
 
     @Test
@@ -152,7 +153,7 @@ class MemberServiceTest {
         given(memberRepository.findById(memberId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> memberService.getMemberFeed(memberId))
+        assertThatThrownBy(() -> memberService.getMemberInfo(memberId))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 

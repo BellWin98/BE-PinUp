@@ -12,12 +12,14 @@ import com.pinup.domain.review.entity.ReviewImage;
 import com.pinup.domain.review.entity.ReviewType;
 import com.pinup.domain.review.repository.ReviewRepository;
 import com.pinup.global.common.AuthUtil;
+import com.pinup.global.common.ElasticsearchAnalyzer;
 import com.pinup.global.config.s3.S3Service;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.exception.ImagesLimitExceededException;
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +41,8 @@ public class ReviewService {
     private final FriendShipRepository friendShipRepository;
     private final AuthUtil authUtil;
     private final S3Service s3Service;
+    private final ApplicationEventPublisher eventPublisher;
+    private final ElasticsearchAnalyzer elasticsearchAnalyzer;
 
     @Transactional
     public String register(ReviewRequest reviewRequest, PlaceRequest placeRequest, List<MultipartFile> images) {
@@ -47,7 +51,8 @@ public class ReviewService {
         List<String> uploadedFileUrls = uploadImages(images);
         Review newReview = createReview(reviewRequest, loginMember, place, uploadedFileUrls);
         newReview.setType(images != null && !images.isEmpty() ? ReviewType.PHOTO : ReviewType.TEXT);
-        reviewRepository.save(newReview);
+        Review savedReview = reviewRepository.save(newReview);
+        eventPublisher.publishEvent(savedReview);
 
         return place.getKakaoPlaceId();
     }
@@ -94,7 +99,11 @@ public class ReviewService {
             Place place,
             List<String> uploadedFileUrls
     ) {
-        Review newReview = reviewRequest.toEntity();
+        Review newReview = Review.builder()
+                .content(reviewRequest.getContent())
+                .starRating(reviewRequest.getStarRating())
+                .visitedDate(reviewRequest.getVisitedDate())
+                .build();
         newReview.attachMember(writer);
         newReview.attachPlace(place);
         for (String fileUrl : uploadedFileUrls) {

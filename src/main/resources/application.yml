@@ -13,7 +13,7 @@ server:
 
 spring:
   profiles:
-    active: dev
+    active: local
     include: secret
   servlet:
     multipart:
@@ -23,8 +23,6 @@ spring:
     database: mysql
     database-platform: org.hibernate.dialect.MariaDBDialect
     generate-ddl: true
-    hibernate:
-      ddl-auto: update # 콘솔창에 sql 출력
     properties:
       hibernate:
         default_batch_fetch_size: 500 # 1:N 컬렉션 조회 시 성능 최적화

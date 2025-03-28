@@ -14,6 +14,7 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = @Index(name = "idx_location", columnList = "latitude, longitude"))
 public class Place extends BaseTimeEntity {
 
     @Id
@@ -23,15 +24,26 @@ public class Place extends BaseTimeEntity {
     @Column(unique = true)
     private String kakaoPlaceId; // 카카오맵에서 부여된 장소 ID
 
+    @Column(nullable = false)
     private String name; // 장소명
+
+    @Column(nullable = false)
     private String address; // 주소
+
+    @Column(nullable = false)
     private String roadAddress; // 도로명 주소
+
     private String defaultImgUrl; // 기본 이미지
+
+    @Column(nullable = false)
     private Double latitude; // 위도(Y)
+
+    @Column(nullable = false)
     private Double longitude; // 경도(X)
     private String status; // 상태
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PlaceCategory placeCategory;
 
     @OneToMany(mappedBy = "place", fetch = FetchType.EAGER)

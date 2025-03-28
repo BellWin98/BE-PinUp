@@ -3,9 +3,11 @@ package com.pinup.domain.place.repository.querydsl;
 import com.pinup.domain.bookmark.entity.BookMark;
 import com.pinup.domain.place.dto.request.MapBoundDto;
 import com.pinup.domain.place.dto.response.MapPlaceResponse;
+import com.pinup.domain.place.entity.Place;
 import com.pinup.domain.place.entity.PlaceCategory;
 import com.pinup.domain.place.entity.SortType;
 import com.pinup.domain.review.dto.response.ReviewDetailResponse;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -25,12 +27,34 @@ import static com.pinup.domain.member.entity.QMember.member;
 import static com.pinup.domain.place.entity.QPlace.place;
 import static com.pinup.domain.review.entity.QReview.review;
 import static com.pinup.domain.review.entity.QReviewImage.reviewImage;
+import static com.pinup.domain.review.entity.QReviewKeyword.reviewKeyword;
 
 @RequiredArgsConstructor
 @Slf4j
 public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public List<Place> findPlacesByKeywordAndTargetIds(String keyword, List<Long> targetIds, double currLat, double currLng, double radius) {
+        BooleanBuilder keywordCond = new BooleanBuilder();
+        keywordCond.or(review.content.containsIgnoreCase(keyword));
+        keywordCond.or(reviewKeyword.keyword.containsIgnoreCase(keyword));
+        NumberTemplate<Double> distance = calculateDistance(currLat, currLng, place.latitude, place.longitude);
+
+        return queryFactory
+                .selectDistinct(place)
+                .from(place)
+                .join(review).on(review.place.eq(place))
+                .leftJoin(reviewKeyword).on(reviewKeyword.review.eq(review))
+                .where(
+                        review.member.id.in(targetIds)
+                        .and(keywordCond)
+                        .and(distance.loe(radius))
+                )
+                .orderBy(distance.asc())
+                .fetch();
+    }
 
     @Override
     public List<MapPlaceResponse> findMapPlacesWithinBounds(Long memberId, String query, PlaceCategory placeCategory, SortType sortType, MapBoundDto mapBound) {
@@ -52,7 +76,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .from(place)
                 .innerJoin(review).on(place.eq(review.place))
                 .where(place.status.eq("Y")
-//                    .and(review.member.id.in(targetMemberIds))
+                    .and(review.member.id.in(targetMemberIds))
                     .and(place.latitude.between(mapBound.getSwLat(), mapBound.getNeLat()))
                     .and(place.longitude.between(mapBound.getSwLng(), mapBound.getNeLng()))
                     .and(searchByQuery(query))
