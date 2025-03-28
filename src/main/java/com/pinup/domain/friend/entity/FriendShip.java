@@ -18,6 +18,10 @@ public class FriendShip extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FriendShipStatus status;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -30,5 +34,18 @@ public class FriendShip extends BaseTimeEntity {
     public FriendShip(Member member, Member friend) {
         this.member = member;
         this.friend = friend;
+        this.status = FriendShipStatus.PENDING;
+    }
+
+    public void acceptFriendShip() {
+        this.status = FriendShipStatus.ACCEPTED;
+    }
+
+    public void rejectFriendShip() {
+        this.status = FriendShipStatus.REJECTED;
+    }
+
+    public void deleteFriendShip() {
+        this.status = FriendShipStatus.DELETED;
     }
 }

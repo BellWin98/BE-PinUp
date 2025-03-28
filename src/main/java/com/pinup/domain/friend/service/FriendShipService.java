@@ -1,11 +1,18 @@
 package com.pinup.domain.friend.service;
 
+import com.pinup.domain.friend.dto.response.FriendshipResponse;
 import com.pinup.domain.friend.entity.FriendShip;
+import com.pinup.domain.friend.entity.FriendShipStatus;
+import com.pinup.domain.friend.exception.CannotRejectFriendRequestException;
+import com.pinup.domain.friend.exception.FriendRequestReceiverMismatchException;
+import com.pinup.domain.friend.exception.CannotAcceptFriendRequestException;
+import com.pinup.domain.friend.exception.SelfFriendRequestException;
 import com.pinup.domain.friend.repository.FriendShipRepository;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.member.repository.MemberRepository;
 import com.pinup.global.common.AuthUtil;
+import com.pinup.global.exception.EntityAlreadyExistException;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;

@@ -32,10 +32,10 @@ public class FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
     private final FriendShipRepository friendShipRepository;
     private final MemberRepository memberRepository;
-    private final FriendShipService friendShipService;
     private final NotificationService notificationService;
     private final AlarmRepository alarmRepository;
     private final AuthUtil authUtil;
+    private final FriendShipService friendShipService;
 
     @Transactional(readOnly = true)
     public Page<FriendRequestResponse> getReceivedFriendRequests(Pageable pageable) {
@@ -120,7 +120,10 @@ public class FriendRequestService {
 
     private void validateDuplicateFriendRequest(Member sender, Member receiver) {
         if (friendRequestRepository.existsBySenderAndReceiverAndFriendRequestStatus(sender, receiver, PENDING)) {
-            throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_FRIEND_REQUEST);
+            throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_FRIEND_REQUEST_BY_MEMBER);
+        }
+        if (friendRequestRepository.existsBySenderAndReceiverAndFriendRequestStatus(receiver, sender, PENDING)) {
+            throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_FRIEND_REQUEST_BY_FRIEND);
         }
     }
 
