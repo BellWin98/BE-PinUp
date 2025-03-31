@@ -124,7 +124,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .innerJoin(review).on(place.eq(review.place))
                 .where(place.status.eq("Y")
                         .and(place.kakaoPlaceId.eq(kakaoPlaceId))
-//                        .and(review.member.id.in(targetMemberIds))
+                        .and(review.member.id.in(targetMemberIds))
                 )
                 .fetchOne();
         if (mapPlaceDetail != null) {
@@ -152,7 +152,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .from(review)
                 .leftJoin(reviewImage).on(review.eq(reviewImage.review))
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
-//                        .and(review.member.id.in(targetMemberIds))
+                        .and(review.member.id.in(targetMemberIds))
                 )
                 .fetch();
         for (ReviewDetailResponse reviewDetail : reviewDetails) {
@@ -169,7 +169,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .select(review.count())
                 .from(review)
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
-//                        .and(review.member.id.in(fetchTargetMemberIds(memberId)))
+                        .and(review.member.id.in(fetchTargetMemberIds(memberId)))
                 )
                 .fetchOne();
     }
@@ -182,7 +182,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .join(review).on(place.eq(review.place))
                 .where(place.status.eq("Y")
                     .and(place.kakaoPlaceId.eq(kakaoPlaceId))
-//                    .and(review.member.id.in(fetchTargetMemberIds(memberId)))
+                    .and(review.member.id.in(fetchTargetMemberIds(memberId)))
                 )
                 .fetchOne();
     }
@@ -231,7 +231,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .selectDistinct(reviewImage.url)
                 .from(reviewImage)
                 .where(reviewImage.review.place.kakaoPlaceId.eq(kakaoPlaceId)
-//                        .and(reviewImage.review.member.id.in(targetMemberUrls))
+                        .and(reviewImage.review.member.id.in(targetMemberUrls))
                 )
                 .orderBy(reviewImage.createdAt.asc())
                 .limit(3)
@@ -244,7 +244,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .from(member)
                 .innerJoin(review).on(member.eq(review.member))
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
-//                        .and(review.member.id.in(targetMemberIds))
+                        .and(review.member.id.in(targetMemberIds))
                 )
                 .orderBy(review.updatedAt.desc())
                 .limit(3)
