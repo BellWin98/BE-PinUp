@@ -18,6 +18,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisService redisService;
     private final S3Service s3Service;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${oauth2.google.client-id}")
     private String googleClientId;
@@ -65,8 +67,8 @@ public class AuthService {
             String imageUploadUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile);
             createdMember.updateProfileImage(imageUploadUrl);
         }
-
-        memberRepository.save(createdMember);
+        Member savedMember = memberRepository.save(createdMember);
+        eventPublisher.publishEvent(savedMember);
     }
 
     @Transactional
@@ -88,14 +90,17 @@ public class AuthService {
         String email = (String) userInfo.get("email");
         String name = (String) userInfo.get("name");
         String profilePictureUrl = (String) userInfo.get("picture");
-        Member member = memberRepository.findBySocialId(socialId)
-                .orElseGet(() -> memberRepository.save(Member.builder()
-                        .email(email)
-                        .name(name)
-                        .profileImageUrl(profilePictureUrl)
-                        .loginType(LoginType.GOOGLE)
-                        .socialId(socialId)
-                        .build()));
+        Member member = memberRepository.findBySocialId(socialId).orElse(null);
+        if (member == null) {
+            member = memberRepository.save(Member.builder()
+                    .email(email)
+                    .name(name)
+                    .profileImageUrl(profilePictureUrl)
+                    .loginType(LoginType.GOOGLE)
+                    .socialId(socialId)
+                    .build());
+            eventPublisher.publishEvent(member);
+        }
         String jwtToken = jwtTokenProvider.createAccessToken(member.getSocialId(), member.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(socialId);
         redisService.setValues(REFRESH_TOKEN_PREFIX+member.getSocialId(), refreshToken);

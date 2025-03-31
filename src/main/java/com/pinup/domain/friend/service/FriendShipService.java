@@ -77,6 +77,7 @@ public class FriendShipService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FRIEND_NOT_FOUND));
     }
 
+    @Transactional
     public void createFriendShip(Member member, Member friend) {
         FriendShip friendShip1 = FriendShip.builder()
                 .member(member)
