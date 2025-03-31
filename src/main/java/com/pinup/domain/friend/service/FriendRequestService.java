@@ -120,7 +120,10 @@ public class FriendRequestService {
 
     private void validateDuplicateFriendRequest(Member sender, Member receiver) {
         if (friendRequestRepository.existsBySenderAndReceiverAndFriendRequestStatus(sender, receiver, PENDING)) {
-            throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_FRIEND_REQUEST);
+            throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_FRIEND_REQUEST_BY_MEMBER);
+        }
+        if (friendRequestRepository.existsBySenderAndReceiverAndFriendRequestStatus(receiver, sender, PENDING)) {
+            throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_FRIEND_REQUEST_BY_FRIEND);
         }
     }
 
