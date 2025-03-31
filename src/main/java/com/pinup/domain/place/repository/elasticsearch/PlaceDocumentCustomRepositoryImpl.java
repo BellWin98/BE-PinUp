@@ -4,6 +4,7 @@ import com.pinup.domain.place.entity.PlaceDocument;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -20,15 +21,16 @@ public class PlaceDocumentCustomRepositoryImpl implements PlaceDocumentCustomRep
 
     private final ElasticsearchOperations elasticsearchOperations;
 
-/*    @Override
+    @Override
     public List<PlaceDocument> findByKeyword(String keyword) {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
                 .should(QueryBuilders.matchQuery("keywords", keyword).boost(3.0f));
         Query query = new StringQuery(boolQuery.toString());
         SearchHits<PlaceDocument> searchHits = elasticsearchOperations.search(query, PlaceDocument.class);
 
+
         return searchHits.getSearchHits().stream()
                 .map(SearchHit::getContent)
                 .collect(Collectors.toList());
-    }*/
+    }
 }

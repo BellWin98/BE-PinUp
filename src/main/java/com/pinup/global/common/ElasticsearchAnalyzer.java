@@ -59,9 +59,10 @@ public class ElasticsearchAnalyzer {
         if (term.length() < MIN_WORD_LENGTH) {
             return false;
         }
+
         return true;
 //        String type = token.type();
-//
+
 //        return type != null && (isNoun(token) || isAdjective(token) || isVerb(token));
     }
 

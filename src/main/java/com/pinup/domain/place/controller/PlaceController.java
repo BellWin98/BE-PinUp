@@ -6,6 +6,7 @@ import com.pinup.domain.place.dto.response.MapPlaceDetailResponse;
 import com.pinup.domain.place.dto.response.MapPlaceResponse;
 import com.pinup.domain.place.dto.response.PlaceResponse;
 import com.pinup.domain.place.dto.response.TotalPlaceResponse;
+import com.pinup.domain.place.entity.PlaceDocument;
 import com.pinup.domain.place.service.PlaceService;
 import com.pinup.global.response.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +14,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.elasticsearch.common.geo.GeoPoint;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

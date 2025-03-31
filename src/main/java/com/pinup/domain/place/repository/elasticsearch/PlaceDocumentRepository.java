@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface PlaceDocumentRepository extends ElasticsearchRepository<PlaceDocument, String>, PlaceDocumentCustomRepository {
-    @Query("{ \"bool\": { \"should\": [ { \"match\": { \"keywords\": \"?0\" } } ] } }")
-    List<PlaceDocument> findByKeyword(String keyword);
+    /*@Query("{ \"bool\": { \"should\": [ { \"match\": { \"keywords\": \"?0\" } } ] } }")
+    List<PlaceDocument> findByKeyword(String keyword);*/
 }
