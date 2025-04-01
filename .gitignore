@@ -37,7 +37,6 @@ out/
 .vscode/
 
 ### Pin Up ###
-application-local.yml
 application-dev.yml
-application-prod.yml
+application-local.yml
 application-secret.yml

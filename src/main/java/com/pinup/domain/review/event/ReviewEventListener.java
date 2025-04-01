@@ -1,5 +1,6 @@
 package com.pinup.domain.review.event;
 
+import com.pinup.domain.place.entity.Place;
 import com.pinup.domain.place.entity.PlaceDocument;
 import com.pinup.domain.place.repository.elasticsearch.PlaceDocumentRepository;
 import com.pinup.domain.review.entity.Review;
@@ -29,15 +30,16 @@ public class ReviewEventListener {
         try {
             log.info("리뷰 생성 이벤트 수신: 리뷰 ID={}", review.getId());
             Set<String> newKeywords = analyzer.extractKeywords(review.getContent());
-            String documentId = review.getPlace().getId().toString();
-            PlaceDocument existingDocument = placeDocumentRepository.findById(documentId).orElse(null);
+            Place place = review.getPlace();
+            PlaceDocument existingDocument = placeDocumentRepository.findById(place.getId()).orElse(null);
             if (existingDocument != null) {
                 newKeywords.addAll(existingDocument.getKeywords());
                 existingDocument.updateKeywords(newKeywords);
                 placeDocumentRepository.save(existingDocument);
             } else {
                 PlaceDocument newDocument = PlaceDocument.builder()
-                        .id(documentId)
+                        .id(place.getId())
+                        .placeName(place.getName())
                         .keywords(newKeywords)
                         .build();
                 placeDocumentRepository.save(newDocument);

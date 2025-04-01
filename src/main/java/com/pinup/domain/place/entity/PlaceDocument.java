@@ -21,12 +21,14 @@ import java.util.Set;
 public class PlaceDocument {
 
     @Id
-    private String id;
+    private Long id;
+    private String placeName;
     private Set<String> keywords = new HashSet<>();
 
     @Builder
-    public PlaceDocument(String id, Set<String> keywords) {
+    public PlaceDocument(Long id, String placeName, Set<String> keywords) {
         this.id = id;
+        this.placeName = placeName;
         this.keywords = keywords;
     }
 

@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface PlaceDocumentCustomRepository {
 //    List<PlaceDocument> findByKeyword(String keyword);
+    List<PlaceDocument> findAutoCompleteSuggestion(String keyword, int size);
 }

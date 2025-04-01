@@ -66,9 +66,6 @@ public enum ErrorCode {
     FRIEND_REQUEST_RECEIVER_MISMATCH(403, "F008", "권한이 없습니다"),
     FRIEND_REQUEST_SENDER_MISMATCH(403, "F009", "현재 사용자가 친구 요청의 발신자가 아닙니다."),
     ALREADY_EXIST_FRIEND_REQUEST_BY_FRIEND(400, "F010", "상대방이 이미 친구 요청을 보냈습니다. 수락해주세요."),
-    CANNOT_ACCEPT_FRIEND_REQUEST(400, "F011", "수락할 수 있는 요청이 아닙니다."),
-    CANNOT_REJECT_FRIEND_REQUEST(400, "F012", "거절할 수 있는 요청이 아닙니다."),
-
 
     // Alarm
     SSE_CONNECTION_ERROR(500, "AL001", "SSE 연결 중 오류가 발생했습니다."),

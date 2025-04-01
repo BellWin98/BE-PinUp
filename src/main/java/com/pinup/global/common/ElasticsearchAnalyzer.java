@@ -29,7 +29,7 @@ public class ElasticsearchAnalyzer {
         try {
             AnalyzeResponse response = elasticsearchClient.indices().analyze(a -> a
                     .index(INDEX_NAME)
-                    .analyzer("korean")
+                    .analyzer("pinup-ngram-analyzer")
                     .text(text)
             );
             Map<String, Long> tokenFrequency = response.tokens().stream()

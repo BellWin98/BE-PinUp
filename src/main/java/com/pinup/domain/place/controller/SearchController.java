@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import static com.pinup.global.response.ResultCode.GET_PLACES_SUCCESS;
@@ -18,6 +19,15 @@ import static com.pinup.global.response.ResultCode.GET_PLACES_SUCCESS;
 public class SearchController {
 
     private final SearchService searchService;
+
+    @GetMapping("/autocomplete")
+    public ResponseEntity<ResultResponse> suggestByKeyword(
+            @RequestParam String keyword,
+            @RequestParam int size
+    ) {
+        return ResponseEntity.ok(ResultResponse.of(GET_PLACES_SUCCESS,
+                searchService.suggestByKeyword(keyword, size)));
+    }
 
     @GetMapping
     public ResponseEntity<ResultResponse> searchPlacesByKeyword(@Valid SearchRequestDto searchRequestDto) {

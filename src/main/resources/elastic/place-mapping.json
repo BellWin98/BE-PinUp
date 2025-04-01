@@ -1,11 +1,24 @@
 {
   "properties": {
     "id": {
-      "type": "keyword"
+      "type": "long"
+    },
+    "placeName": {
+      "type": "text",
+      "fields": {
+        "ngram": {
+          "type": "text",
+          "analyzer": "pinup-ngram-analyzer"
+        },
+        "nori": {
+          "type": "text",
+          "analyzer": "pinup-nori-analyzer"
+        }
+      }
     },
     "keywords": {
       "type": "text",
-      "analyzer": "korean",
+      "analyzer": "pinup-nori-analyzer",
       "fields": {
         "keyword": {
           "type": "keyword",

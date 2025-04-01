@@ -30,12 +30,21 @@ public class SearchService {
     private final FriendShipRepository friendShipRepository;
 
     @Transactional(readOnly = true)
+    public List<String> suggestByKeyword(String keyword, int size) {
+        return placeDocumentRepository.findAutoCompleteSuggestion(keyword, size)
+                .stream()
+                .map(PlaceDocument::getPlaceName)
+                .toList();
+    }
+
+
+    @Transactional(readOnly = true)
     public List<PlaceResponseDto> searchPlacesByKeyword(SearchRequestDto requestDto) {
         Member loginMember = authUtil.getLoginMember();
         List<Long> friendIds = getFriendList(loginMember);
         List<Long> targetIds = new ArrayList<>(friendIds);
         targetIds.add(loginMember.getId());
-        List<PlaceDocument> placeDocuments = placeDocumentRepository.findByKeyword(requestDto.getKeyword());
+//        List<PlaceDocument> placeDocuments = placeDocumentRepository.findByKeyword(requestDto.getKeyword());
         List<Place> filteredPlaces = placeRepository.findPlacesByKeywordAndTargetIds(
                 requestDto.getKeyword(),
                 targetIds,

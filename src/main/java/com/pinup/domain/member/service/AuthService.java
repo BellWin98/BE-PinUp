@@ -18,6 +18,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisService redisService;
     private final S3Service s3Service;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${oauth2.google.client-id}")
     private String googleClientId;
@@ -55,6 +57,9 @@ public class AuthService {
     @Value("${oauth2.google.resource-uri}")
     private String googleResourceUri;
 
+    @Value("${jwt.refresh-token-validity-in-seconds}")
+    private long refreshTokenValidityInSeconds;
+
 /*    @Value("${oauth2.google.auth-uri}")
     private String googleAuthUri;*/
 
@@ -65,8 +70,8 @@ public class AuthService {
             String imageUploadUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile);
             createdMember.updateProfileImage(imageUploadUrl);
         }
-
-        memberRepository.save(createdMember);
+        Member savedMember = memberRepository.save(createdMember);
+        eventPublisher.publishEvent(savedMember);
     }
 
     @Transactional
@@ -75,7 +80,7 @@ public class AuthService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         String accessToken = jwtTokenProvider.createAccessToken(findMember.getSocialId(), findMember.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(findMember.getSocialId());
-        redisService.setValues(REFRESH_TOKEN_PREFIX+findMember.getSocialId(), refreshToken);
+        redisService.setValues(REFRESH_TOKEN_PREFIX+findMember.getSocialId(), refreshToken, refreshTokenValidityInSeconds);
 
         return new LoginResponse(accessToken, refreshToken, MemberResponse.from(findMember));
     }
@@ -88,17 +93,20 @@ public class AuthService {
         String email = (String) userInfo.get("email");
         String name = (String) userInfo.get("name");
         String profilePictureUrl = (String) userInfo.get("picture");
-        Member member = memberRepository.findBySocialId(socialId)
-                .orElseGet(() -> memberRepository.save(Member.builder()
-                        .email(email)
-                        .name(name)
-                        .profileImageUrl(profilePictureUrl)
-                        .loginType(LoginType.GOOGLE)
-                        .socialId(socialId)
-                        .build()));
+        Member member = memberRepository.findBySocialId(socialId).orElse(null);
+        if (member == null) {
+            member = memberRepository.save(Member.builder()
+                    .email(email)
+                    .name(name)
+                    .profileImageUrl(profilePictureUrl)
+                    .loginType(LoginType.GOOGLE)
+                    .socialId(socialId)
+                    .build());
+            eventPublisher.publishEvent(member);
+        }
         String jwtToken = jwtTokenProvider.createAccessToken(member.getSocialId(), member.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(socialId);
-        redisService.setValues(REFRESH_TOKEN_PREFIX+member.getSocialId(), refreshToken);
+        redisService.setValues(REFRESH_TOKEN_PREFIX+member.getSocialId(), refreshToken, refreshTokenValidityInSeconds);
 
         return new LoginResponse(jwtToken, refreshToken, MemberResponse.from(member));
     }
@@ -113,7 +121,7 @@ public class AuthService {
             }
             String newAccessToken = jwtTokenProvider.createAccessToken(socialId, member.getRole());
             String newRefreshToken = jwtTokenProvider.createRefreshToken(socialId);
-            redisService.setValues(REFRESH_TOKEN_PREFIX+member.getSocialId(), newRefreshToken);
+            redisService.setValues(REFRESH_TOKEN_PREFIX+member.getSocialId(), newRefreshToken, refreshTokenValidityInSeconds);
 
             return new LoginResponse(newAccessToken, newRefreshToken, MemberResponse.from(member));
         }
