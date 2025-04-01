@@ -1,37 +1,35 @@
 {
-  "settings": {
-    "analysis": {
-      "analyzer": {
-        "pinup-nori-analyzer": {
-          "type": "custom",
-          "tokenizer": "pinup-nori-tokenizer",
-          "filter": [
-            "lowercase",
-            "stop",
-            "trim",
-            "nori_part_of_speech"
-          ]
-        },
-        "pinup-ngram-analyzer": {
-          "type": "custom",
-          "tokenizer": "pinup-ngram-tokenizer",
-          "filter": [
-            "lowercase",
-            "trim"
-          ]
-        }
+  "analysis": {
+    "tokenizer": {
+      "my-nori-tokenizer": {
+        "type": "nori_tokenizer",
+        "decompound_mode": "mixed"
       },
-      "tokenizer": {
-        "pinup-nori-tokenizer": {
-          "type": "nori_tokenizer",
-          "decompound_mode": "mixed"
-        },
-        "pinup-ngram-tokenizer": {
-          "type": "ngram",
-          "min_gram": 2,
-          "max_gram": 3,
-          "token_chars": ["letter", "digit"]
-        }
+      "my-ngram-tokenizer": {
+        "type": "ngram",
+        "min_gram": 2,
+        "max_gram": 3,
+        "token_chars": ["letter", "digit"]
+      }
+    },
+    "analyzer": {
+      "my-nori-analyzer": {
+        "type": "custom",
+        "tokenizer": "my-nori-tokenizer",
+        "filter": [
+          "lowercase",
+          "stop",
+          "trim",
+          "nori_part_of_speech"
+        ]
+      },
+      "my-ngram-analyzer": {
+        "type": "custom",
+        "tokenizer": "my-ngram-tokenizer",
+        "filter": [
+          "lowercase",
+          "trim"
+        ]
       }
     }
   }

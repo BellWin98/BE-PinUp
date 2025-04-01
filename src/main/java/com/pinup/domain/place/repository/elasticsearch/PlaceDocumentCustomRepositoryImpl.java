@@ -68,10 +68,14 @@ public class PlaceDocumentCustomRepositoryImpl implements PlaceDocumentCustomRep
         Query matchNgramQuery = MatchQuery.of(m ->
                 m.field("placeName.ngram")
                         .query(keyword))._toQuery();
+        Query matchKeyword = MatchQuery.of(m ->
+                m.field("keywords.keyword")
+                        .query(keyword))._toQuery();
         Query boolQuery = BoolQuery.of(b ->
                 b.should(matchPhraseQuery)
                         .should(matchNoriQuery)
                         .should(matchNgramQuery)
+                        .should(matchKeyword)
                         .minimumShouldMatch("1"))._toQuery();
 
         return builder.index(PLACE_INDEX).size(size).query(boolQuery);
