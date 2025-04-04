@@ -10,9 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Entity
@@ -23,7 +21,7 @@ public class Review extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "VARCHAR(200)", nullable = false)
     private String content;
 
     @Column(nullable = false)
@@ -42,9 +40,6 @@ public class Review extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
-
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReviewKeyword> keywords = new ArrayList<>();
 
     @OneToMany(mappedBy = "review", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> reviewImages = new ArrayList<>();
@@ -68,5 +63,14 @@ public class Review extends BaseTimeEntity {
     public void attachMember(Member member){
         this.member = member;
         member.getReviews().add(this);
+    }
+
+    public void update(String content, double starRating) {
+        this.content = content;
+        this.starRating = starRating;
+    }
+
+    public void clearImages() {
+        this.reviewImages.clear();
     }
 }

@@ -67,7 +67,7 @@ public class AuthService {
     public void signUp(final SignUpRequest signUpRequest, final MultipartFile multipartFile) {
         Member createdMember = signUpRequest.toEntity();
         if (multipartFile != null && !multipartFile.isEmpty()) {
-            String imageUploadUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile);
+            String imageUploadUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile).imageUrl();
             createdMember.updateProfileImage(imageUploadUrl);
         }
         Member savedMember = memberRepository.save(createdMember);
