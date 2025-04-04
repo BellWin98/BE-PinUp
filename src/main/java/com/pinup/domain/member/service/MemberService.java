@@ -100,7 +100,7 @@ public class MemberService {
         String newProfileImageUrl = null;
         if (multipartFile != null && !multipartFile.isEmpty()) {
             s3Service.deleteFile(loginMember.getProfileImageUrl());
-            newProfileImageUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile);
+            newProfileImageUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile).imageUrl();
         }
         if (newProfileImageUrl != null) {
             loginMember.updateProfileImage(newProfileImageUrl);
@@ -152,7 +152,7 @@ public class MemberService {
         String termsOfMarketing = request.getTermsOfMarketing();
         loginMember.updateNickname(nickname);
         loginMember.updateTermsOfMarketing(termsOfMarketing);
-        String imageUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile);
+        String imageUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile).imageUrl();
         loginMember.updateProfileImage(imageUrl);
 
         return MemberResponse.from(memberRepository.save(loginMember));
