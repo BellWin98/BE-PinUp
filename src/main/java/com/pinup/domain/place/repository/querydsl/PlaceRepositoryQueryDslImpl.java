@@ -27,7 +27,6 @@ import static com.pinup.domain.member.entity.QMember.member;
 import static com.pinup.domain.place.entity.QPlace.place;
 import static com.pinup.domain.review.entity.QReview.review;
 import static com.pinup.domain.review.entity.QReviewImage.reviewImage;
-import static com.pinup.domain.review.entity.QReviewKeyword.reviewKeyword;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -39,14 +38,12 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     public List<Place> findPlacesByKeywordAndTargetIds(String keyword, List<Long> targetIds, double currLat, double currLng, double radius) {
         BooleanBuilder keywordCond = new BooleanBuilder();
         keywordCond.or(review.content.containsIgnoreCase(keyword));
-        keywordCond.or(reviewKeyword.keyword.containsIgnoreCase(keyword));
         NumberTemplate<Double> distance = calculateDistance(currLat, currLng, place.latitude, place.longitude);
 
         return queryFactory
                 .selectDistinct(place)
                 .from(place)
                 .join(review).on(review.place.eq(place))
-                .leftJoin(reviewKeyword).on(reviewKeyword.review.eq(review))
                 .where(
                         review.member.id.in(targetIds)
                         .and(keywordCond)
