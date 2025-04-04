@@ -5,13 +5,12 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.pinup.global.exception.FileDeleteErrorException;
-import com.pinup.global.exception.FileExtensionInvalidException;
-import com.pinup.global.exception.FileUploadErrorException;
-import com.pinup.global.exception.InvalidFileUrlException;
+import com.pinup.global.exception.*;
+import com.pinup.global.response.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,68 +21,40 @@ import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class S3Service {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-
     private final AmazonS3Client amazonS3Client;
 
-    @Autowired
-    public S3Service(AmazonS3Client amazonS3Client) {
-        this.amazonS3Client = amazonS3Client;
-    }
-
-    public String uploadFile(String fileType, MultipartFile multipartFile) {
-
-        String uploadFileName = "";
+    public S3ImageInfo uploadFile(String fileType, MultipartFile file) {
+        String originalFilename = null;
+        String uploadFileName = null;
         String uploadFileUrl;
-
-        if (multipartFile.getOriginalFilename() != null) {
-            String originalFilename = multipartFile.getOriginalFilename();
-            uploadFileName = getUuidFileName(originalFilename);
+        if (file.getOriginalFilename() != null) {
+            originalFilename = file.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            uploadFileName = UUID.randomUUID() + extension;
         }
-
-        try (InputStream inputStream = multipartFile.getInputStream()){
-
-            String uploadFilePath = fileType + "/" + getFolderName();
-            String key = uploadFilePath + "/" + uploadFileName;
-
+        String uploadFilePath = fileType + "/" + getFolderName();
+        String key = uploadFilePath + "/" + uploadFileName;
+        try (InputStream inputStream = file.getInputStream()){
             ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentLength(multipartFile.getSize());
-            objectMetadata.setContentType(multipartFile.getContentType());
-
+            objectMetadata.setContentLength(file.getSize());
+            objectMetadata.setContentType(file.getContentType());
             // S3에 폴더 및 파일 업로드
             amazonS3Client.putObject(new PutObjectRequest(bucket, key, inputStream, objectMetadata));
             uploadFileUrl = getFileUrl(key);
 
+            return new S3ImageInfo(key, uploadFileUrl, originalFilename);
         } catch (IOException e){
-            throw new FileUploadErrorException();
+            throw new FileProcessingException(ErrorCode.FILE_UPLOAD_ERROR);
         }
-        return uploadFileUrl;
     }
 
     public String getFileUrl(String key) {
         return amazonS3Client.getUrl(bucket, key).toString();
-    }
-
-    private String getUuidFileName(String fileName) {
-        String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-        validateFileFormat(extension);
-
-        return UUID.randomUUID() + "." + extension;
-    }
-
-    private void validateFileFormat(String extension) {
-        List<String> fileValidate = new ArrayList<>();
-        fileValidate.add("jpg");
-        fileValidate.add("jpeg");
-        fileValidate.add("png");
-        fileValidate.add("gif");
-
-        if (!fileValidate.contains(extension)) {
-            throw new FileExtensionInvalidException();
-        }
     }
 
     private String getFolderName() {
@@ -104,30 +75,58 @@ public class S3Service {
             amazonS3Client.deleteObject(deleteObjectRequest);
         } catch (AmazonServiceException e) {
             log.error("파일 삭제 실패: Amazon S3 서비스 에러", e);
-            throw new FileDeleteErrorException();
+            throw new FileProcessingException(ErrorCode.FILE_DELETE_ERROR);
         } catch (Exception e) {
             log.error("파일 삭제 실패", e);
-            throw new FileDeleteErrorException();
+            throw new FileProcessingException(ErrorCode.FILE_DELETE_ERROR);
         }
+    }
+
+    public void deleteImage(String imageKey) {
+        DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucket, imageKey);
+        amazonS3Client.deleteObject(deleteObjectRequest);
+        log.info("Image deleted successfully. Key: {}", imageKey);
+    }
+
+    public void deleteImages(List<String> imageKeys) {
+        if (imageKeys == null || imageKeys.isEmpty()) {
+            return;
+        }
+        for (String imageKey : imageKeys) {
+            deleteImage(imageKey);
+        }
+
+        log.info("Deleted {} images from S3", imageKeys.size());
+    }
+
+    @Async("imageProcessingExecutor")
+    public void deleteImagesAsync(List<String> imageKeys) {
+        if (imageKeys == null || imageKeys.isEmpty()) {
+            return;
+        }
+        log.info("Starting async deletion of {} images", imageKeys.size());
+        deleteImages(imageKeys);
+        log.info("Completed async deletion of images");
     }
 
     private String extractKeyFromUrl(String fileUrl) {
         try {
             int startIndex = fileUrl.indexOf("amazonaws.com/") + "amazonaws.com/".length();
             String path = fileUrl.substring(startIndex);
-
             if (path.startsWith(bucket + "/")) {
                 path = path.substring(bucket.length() + 1);
             }
-
             log.info("Original URL: {}", fileUrl);
             log.info("Extracted key: {}", path);
 
             return path;
-
         } catch (StringIndexOutOfBoundsException e) {
             log.error("잘못된 파일 URL 형식: {}", fileUrl, e);
-            throw new InvalidFileUrlException();
+            throw new FileProcessingException(ErrorCode.FILE_EXTENSION_INVALID);
         }
+    }
+
+    public record S3ImageInfo(String imageKey, String imageUrl, String originFilename) {
+
     }
 }

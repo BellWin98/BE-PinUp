@@ -2,6 +2,7 @@ package com.pinup.domain.review.controller;
 
 import com.pinup.domain.place.dto.request.PlaceRequest;
 import com.pinup.domain.review.dto.request.ReviewRequest;
+import com.pinup.domain.review.dto.request.UpdateReviewRequest;
 import com.pinup.domain.review.dto.response.ReviewResponse;
 import com.pinup.domain.review.service.ReviewService;
 import com.pinup.global.response.ResultCode;
@@ -28,7 +29,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @Operation(summary = "리뷰 등록 API", description = "리뷰 등록 성공 시 리뷰 ID 반환")
+    @Operation(summary = "리뷰 등록", description = "리뷰 등록 성공 시 kakaoPlaceId 반환")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = String.class))})
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResultResponse> register(
@@ -42,7 +43,7 @@ public class ReviewController {
         );
     }
 
-    @Operation(summary = "리뷰 상세 조회 API")
+    @Operation(summary = "리뷰 상세 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = ReviewResponse.class))})
     @GetMapping("/{reviewId}")
     public ResponseEntity<ResultResponse> getReviewDetail(@PathVariable Long reviewId) {
@@ -50,5 +51,25 @@ public class ReviewController {
                 ResultCode.GET_REVIEW_DETAIL_SUCCESS,
                 reviewService.getReviewById(reviewId))
         );
+    }
+
+    @Operation(summary = "리뷰 수정", description = "기존에 작성된 리뷰 수정")
+    @PutMapping(value = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResultResponse> update(
+            @PathVariable Long reviewId,
+            @Valid @RequestPart UpdateReviewRequest updateReviewRequest,
+            @RequestPart(name = "images", required = false) List<MultipartFile> images
+    ) {
+        reviewService.update(reviewId, updateReviewRequest, images);
+
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.UPDATE_REVIEW_SUCCESS));
+    }
+
+    @Operation(summary = "리뷰 삭제", description = "Hard Delete")
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<ResultResponse> delete(@PathVariable Long reviewId) {
+        reviewService.delete(reviewId);
+
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.DELETE_REVIEW_SUCCESS));
     }
 }

@@ -21,7 +21,7 @@ public class Review extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "VARCHAR(200)", nullable = false)
     private String content;
 
     @Column(nullable = false)
@@ -41,7 +41,7 @@ public class Review extends BaseTimeEntity {
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
 
-    @OneToMany(mappedBy = "review", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "review", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> reviewImages = new ArrayList<>();
 
     @Builder
@@ -63,5 +63,14 @@ public class Review extends BaseTimeEntity {
     public void attachMember(Member member){
         this.member = member;
         member.getReviews().add(this);
+    }
+
+    public void update(String content, double starRating) {
+        this.content = content;
+        this.starRating = starRating;
+    }
+
+    public void clearImages() {
+        this.reviewImages.clear();
     }
 }
