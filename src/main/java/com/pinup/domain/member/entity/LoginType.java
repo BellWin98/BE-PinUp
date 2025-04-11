@@ -4,7 +4,7 @@ import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 
 public enum LoginType {
-    KAKAO, GOOGLE, NAVER
+    NORMAL, KAKAO, GOOGLE, NAVER
 
     ;
 

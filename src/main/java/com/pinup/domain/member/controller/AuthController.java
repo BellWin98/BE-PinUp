@@ -1,6 +1,7 @@
 package com.pinup.domain.member.controller;
 
 import com.pinup.domain.member.dto.request.LoginRequest;
+import com.pinup.domain.member.dto.request.RegisterRequest;
 import com.pinup.domain.member.dto.request.SignUpRequest;
 import com.pinup.domain.member.dto.response.LoginResponse;
 import com.pinup.domain.member.service.AuthService;
@@ -30,7 +31,17 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(summary = "회원가입 API")
+    @Operation(summary = "일반 회원가입")
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResultResponse> register(
+            @Valid @RequestPart RegisterRequest registerRequest,
+            @RequestPart(name = "multipartFile", required = false) MultipartFile multipartFile
+    ) {
+        authService.register(registerRequest, multipartFile);
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.SIGN_UP_SUCCESS));
+    }
+
+    @Operation(summary = "앱 소셜 로그인으로 회원가입")
     @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResultResponse> signUp(
             @Valid @RequestPart SignUpRequest signUpRequest,
@@ -40,7 +51,7 @@ public class AuthController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.SIGN_UP_SUCCESS));
     }
 
-    @Operation(summary = "로그인 API", description = "AT, RT, 유저정보 반환")
+    @Operation(summary = "앱 소셜 로그인", description = "AT, RT, 유저정보 반환")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     @PostMapping("/login")
     public ResponseEntity<ResultResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -51,7 +62,7 @@ public class AuthController {
     }
 
     @GetMapping("/login/google/callback")
-    @Operation(summary = "소셜 로그인 API", description = "AT, RT, 유저정보 반환")
+    @Operation(summary = "웹 구글 로그인", description = "구글 서버에서 code 받아와야 함")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     public ResponseEntity<ResultResponse> googleLogin(@RequestParam("code") String code) {
         return ResponseEntity.ok(ResultResponse.of(
@@ -59,7 +70,7 @@ public class AuthController {
         );
     }
 
-    @Operation(summary = "토큰 재발급 API", description = "헤더에 refreshToken 필요")
+    @Operation(summary = "토큰 재발급", description = "헤더에 refreshToken 필요")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     @PostMapping("/refresh")
     public ResponseEntity<ResultResponse> refresh(@RequestHeader("Refresh") String refreshToken) {
@@ -68,7 +79,7 @@ public class AuthController {
         );
     }
 
-    @Operation(summary = "로그아웃 API", description = "헤더에 accessToken 필요")
+    @Operation(summary = "로그아웃", description = "헤더에 accessToken 필요")
     @PostMapping("/logout")
     public ResponseEntity<ResultResponse> logout(@RequestHeader("Access") String accessToken) {
         authService.logout(accessToken);

@@ -1,6 +1,7 @@
 package com.pinup.domain.member.service;
 
 import com.pinup.domain.member.dto.request.LoginRequest;
+import com.pinup.domain.member.dto.request.RegisterRequest;
 import com.pinup.domain.member.dto.request.SignUpRequest;
 import com.pinup.domain.member.dto.response.LoginResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
@@ -12,14 +13,17 @@ import com.pinup.domain.member.repository.MemberRepository;
 import com.pinup.global.config.jwt.JwtTokenProvider;
 import com.pinup.global.config.redis.RedisService;
 import com.pinup.global.config.s3.S3Service;
+import com.pinup.global.exception.EntityAlreadyExistException;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -31,6 +35,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class AuthService {
     private static final String PROFILE_IMAGE_DIRECTORY = "profiles";
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
@@ -41,6 +46,7 @@ public class AuthService {
     private final RedisService redisService;
     private final S3Service s3Service;
     private final ApplicationEventPublisher eventPublisher;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${oauth2.google.client-id}")
     private String googleClientId;
@@ -59,6 +65,27 @@ public class AuthService {
 
 /*    @Value("${oauth2.google.auth-uri}")
     private String googleAuthUri;*/
+
+    @Transactional
+    public void register(RegisterRequest registerRequest, MultipartFile multipartFile) {
+        String email = registerRequest.getEmail();
+        String nickname = registerRequest.getNickname();
+        if (memberRepository.existsByEmail(email)) {
+            log.warn("이미 등록된 이메일: {}", email);
+            throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_EMAIL);
+        }
+        if (memberRepository.existsByNickname(nickname)) {
+            log.warn("이미 사용 중인 닉네임: {}", nickname);
+            throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_NICKNAME);
+        }
+        Member createdMember = registerRequest.toEntity(passwordEncoder);
+        if (multipartFile != null && !multipartFile.isEmpty()) {
+            String imageUploadUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile).imageUrl();
+            createdMember.updateProfileImage(imageUploadUrl);
+        }
+        Member savedMember = memberRepository.save(createdMember);
+        eventPublisher.publishEvent(savedMember);
+    }
 
     @Transactional
     public void signUp(final SignUpRequest signUpRequest, final MultipartFile multipartFile) {

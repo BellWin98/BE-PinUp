@@ -34,6 +34,8 @@ public class Member extends BaseTimeEntity {
     @Audited
     private String nickname;
 
+    private String password;
+
     private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
@@ -71,11 +73,13 @@ public class Member extends BaseTimeEntity {
     @Builder
     public Member(
             String email, String name, String nickname,
-            String profileImageUrl, String socialId, String termsOfMarketing, LoginType loginType
+            String password, String profileImageUrl, String socialId,
+            String termsOfMarketing, LoginType loginType
     ) {
         this.email = email;
         this.name = name;
         this.nickname = nickname;
+        this.password = password;
         this.profileImageUrl = profileImageUrl;
         this.socialId = socialId;
         this.termsOfMarketing = termsOfMarketing;
