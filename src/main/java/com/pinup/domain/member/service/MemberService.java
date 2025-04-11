@@ -93,10 +93,17 @@ public class MemberService {
     @Transactional
     public void updateProfile(UpdateProfileRequest updateProfileRequest, MultipartFile multipartFile) {
         Member loginMember = authUtil.getLoginMember();
+        String prevNickname = loginMember.getNickname();
+        String prevBio = loginMember.getBio();
         String newNickname = updateProfileRequest.getNickname();
-        validateNicknameUpdate(loginMember, newNickname);
-        loginMember.updateNickname(newNickname);
-        loginMember.updateBio(updateProfileRequest.getBio());
+        String newBio = updateProfileRequest.getBio();
+        if (!prevNickname.equals(newNickname)) {
+            validateNicknameUpdate(loginMember, newNickname);
+            loginMember.updateNickname(newNickname);
+        }
+        if (!prevBio.equals(newBio)) {
+            loginMember.updateBio(updateProfileRequest.getBio());
+        }
         String newProfileImageUrl = null;
         if (multipartFile != null && !multipartFile.isEmpty()) {
             s3Service.deleteFile(loginMember.getProfileImageUrl());
@@ -140,7 +147,6 @@ public class MemberService {
         return reviewPage.map(PhotoReviewResponse::from);
     }
 
-    @Transactional(readOnly = true)
     public boolean checkNicknameDuplicate(String nickname) {
         return memberRepository.existsByNickname(nickname);
     }
