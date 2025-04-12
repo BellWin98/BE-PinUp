@@ -63,6 +63,10 @@ public enum ResultCode {
     CREATE_BOOKMARK_SUCCESS(201, "S_BOOKMARK001", "북마크 등록에 성공하였습니다."),
     GET_MY_BOOKMARK_SUCCESS(200, "S_BOOKMARK002", "내 북마크 목록 조회에 성공하였습니다."),
     DELETE_BOOKMARK_SUCCESS(200, "S_BOOKMARK003", "북마크 삭제에 성공하였습니다."),
+
+    // Image
+    UPLOAD_IMAGE_SUCCESS(200, "S_IMAGE001", "이미지 업로드에 성공하였습니다."),
+
     ;
 
     private final int status;

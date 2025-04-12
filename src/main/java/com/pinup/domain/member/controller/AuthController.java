@@ -13,12 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "인증(Auth) API", description = "소셜 로그인, 로그아웃, 토큰 재발급")
+@Tag(name = "인증(Auth) API", description = "회원가입, 소셜 로그인, 로그아웃, 토큰 재발급")
 @RequestMapping("/api/auth")
 @RestController
 public class AuthController {
@@ -30,28 +28,27 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(summary = "회원가입 API")
-    @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "회원가입")
+    @PostMapping(value = "/sign-up")
     public ResponseEntity<ResultResponse> signUp(
-            @Valid @RequestPart SignUpRequest signUpRequest,
-            @RequestPart(name = "multipartFile", required = false) MultipartFile multipartFile
+            @Valid @RequestBody SignUpRequest signUpRequest
     ) {
-        authService.signUp(signUpRequest, multipartFile);
+        authService.signUp(signUpRequest);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.SIGN_UP_SUCCESS));
     }
 
-    @Operation(summary = "로그인 API", description = "AT, RT, 유저정보 반환")
+    @Operation(summary = "소셜 로그인", description = "AT, RT, 유저정보 반환")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     @PostMapping("/login")
-    public ResponseEntity<ResultResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ResultResponse> socialLogin(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.SOCIAL_LOGIN_SUCCESS,
-                authService.login(loginRequest))
+                authService.socialLogin(loginRequest))
         );
     }
 
     @GetMapping("/login/google/callback")
-    @Operation(summary = "소셜 로그인 API", description = "AT, RT, 유저정보 반환")
+    @Operation(summary = "구글 로그인", description = "AT, RT, 유저정보 반환")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     public ResponseEntity<ResultResponse> googleLogin(@RequestParam("code") String code) {
         return ResponseEntity.ok(ResultResponse.of(

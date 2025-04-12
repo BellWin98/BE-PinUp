@@ -5,6 +5,7 @@ import com.pinup.domain.article.entity.Article;
 import com.pinup.domain.friend.entity.FriendShip;
 import com.pinup.domain.review.entity.Review;
 import com.pinup.global.common.BaseTimeEntity;
+import com.pinup.global.common.image.entity.Image;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -34,8 +35,6 @@ public class Member extends BaseTimeEntity {
     @Audited
     private String nickname;
 
-    private String profileImageUrl;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -56,6 +55,10 @@ public class Member extends BaseTimeEntity {
     @Column(columnDefinition = "VARCHAR(1)")
     private String termsOfMarketing = "Y";
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_image_id")
+    private Image profileImage;
+
     @OneToMany(mappedBy = "member")
     private List<Review> reviews = new ArrayList<>();
 
@@ -71,12 +74,11 @@ public class Member extends BaseTimeEntity {
     @Builder
     public Member(
             String email, String name, String nickname,
-            String profileImageUrl, String socialId, String termsOfMarketing, LoginType loginType
+            String socialId, String termsOfMarketing, LoginType loginType
     ) {
         this.email = email;
         this.name = name;
         this.nickname = nickname;
-        this.profileImageUrl = profileImageUrl;
         this.socialId = socialId;
         this.termsOfMarketing = termsOfMarketing;
         this.loginType = loginType;
@@ -93,16 +95,20 @@ public class Member extends BaseTimeEntity {
         this.lastNicknameUpdateDate = LocalDateTime.now();
     }
 
-    public void updateProfileImage(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
-    }
-
     public void updateTermsOfMarketing(String termsOfMarketing) {
         this.termsOfMarketing = termsOfMarketing;
     }
 
     public boolean canUpdateNickname() {
         return this.lastNicknameUpdateDate == null || LocalDateTime.now().isAfter(this.lastNicknameUpdateDate.plusDays(30));
+    }
+
+    public void updateProfileImage(Image profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public void removeProfileImage() {
+        this.profileImage = null;
     }
 }
 

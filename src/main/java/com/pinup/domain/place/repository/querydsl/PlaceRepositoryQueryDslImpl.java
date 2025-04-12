@@ -123,7 +123,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                         review.createdAt,
                         review.visitedDate,
                         review.content,
-                        review.member.profileImageUrl.as("writerProfileImageUrl")
+                        review.member.profileImage.imageUrl.as("writerProfileImageUrl")
                 ))
                 .from(review)
                 .leftJoin(reviewImage).on(review.eq(reviewImage.review))
@@ -216,7 +216,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
     private List<String> fetchThreeLatestReviewerProfileImageUrls(List<Long> targetMemberIds, String kakaoPlaceId) {
         return queryFactory
-                .selectDistinct(member.profileImageUrl)
+                .selectDistinct(member.profileImage.imageUrl)
                 .from(member)
                 .innerJoin(review).on(member.eq(review.member))
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
