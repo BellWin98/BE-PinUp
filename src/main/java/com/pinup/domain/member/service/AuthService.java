@@ -6,6 +6,7 @@ import com.pinup.domain.member.dto.response.LoginResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.entity.LoginType;
 import com.pinup.domain.member.entity.Member;
+import com.pinup.domain.member.entity.ProfileImage;
 import com.pinup.domain.member.exception.ExpiredTokenException;
 import com.pinup.domain.member.exception.InvalidTokenException;
 import com.pinup.domain.member.repository.MemberRepository;
@@ -32,7 +33,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Service
 public class AuthService {
-    private static final String PROFILE_IMAGE_DIRECTORY = "profiles";
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
 
     private final ProfileImageService profileImageService;
@@ -96,7 +96,8 @@ public class AuthService {
                     .loginType(LoginType.GOOGLE)
                     .socialId(socialId)
                     .build());
-            member.updateProfileImage(new Image(new S3Service.S3FileInfo("", profilePictureUrl, "")));
+            Image image = new Image(new S3Service.S3FileInfo("", profilePictureUrl, ""));
+            member.updateProfileImage(new ProfileImage(image));
             eventPublisher.publishEvent(member);
         }
         String jwtToken = jwtTokenProvider.createAccessToken(member.getSocialId(), member.getRole());

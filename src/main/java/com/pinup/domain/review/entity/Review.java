@@ -41,7 +41,7 @@ public class Review extends BaseTimeEntity {
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
 
-    @OneToMany(mappedBy = "review", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> reviewImages = new ArrayList<>();
 
     @Builder
@@ -70,7 +70,11 @@ public class Review extends BaseTimeEntity {
         this.starRating = starRating;
     }
 
-    public void clearImages() {
+    public void addImages(List<ReviewImage> reviewImages) {
+        this.reviewImages.addAll(reviewImages);
+    }
+
+    public void removeAllImages() {
         this.reviewImages.clear();
     }
 }

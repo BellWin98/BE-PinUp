@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class UpdateReviewRequest {
     @NotBlank(message = "리뷰 내용을 입력하세요")
@@ -16,4 +18,6 @@ public class UpdateReviewRequest {
     @NotNull(message = "별점을 입력하세요")
     @Schema(description = "별점(최소 0.5 ~ 최대 5.0 / 0.5점 단위)", example = "3.5")
     private double starRating;
+
+    private List<String> reviewImageUrls;
 }

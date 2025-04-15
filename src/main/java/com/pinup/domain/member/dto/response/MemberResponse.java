@@ -67,7 +67,7 @@ public class MemberResponse {
                 .memberId(member.getId())
                 .email(member.getEmail())
                 .name(member.getName())
-                .profilePictureUrl(member.getProfileImage().getImageUrl())
+                .profilePictureUrl(member.getProfileImageUrl())
                 .nickname(StringUtils.hasText(member.getNickname()) ? member.getNickname() : "")
                 .bio(StringUtils.hasText(member.getBio()) ? member.getBio() : "")
                 .loginType(member.getLoginType())

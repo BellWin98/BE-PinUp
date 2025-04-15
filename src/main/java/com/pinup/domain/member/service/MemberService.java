@@ -13,7 +13,6 @@ import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.member.entity.MemberRelationType;
 import com.pinup.domain.member.repository.MemberRepository;
 import com.pinup.global.common.AuthUtil;
-import com.pinup.global.common.image.repository.ImageRepository;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -119,5 +118,12 @@ public class MemberService {
             return MemberRelationType.PENDING;
         }
         return MemberRelationType.STRANGER;
+    }
+
+    @Transactional
+    public void delete() {
+        Member loginMember = authUtil.getLoginMember();
+        profileImageService.deleteProfileImage(loginMember);
+        memberRepository.deleteById(loginMember.getId());
     }
 }

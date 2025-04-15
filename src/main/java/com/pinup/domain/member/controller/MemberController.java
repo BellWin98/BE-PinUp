@@ -80,6 +80,14 @@ public class MemberController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.UPDATE_MEMBER_INFO_SUCCESS));
     }
 
+    @Operation(summary = "회원 탈퇴")
+    @DeleteMapping
+    public ResponseEntity<ResultResponse> delete() {
+        memberService.delete();
+
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.DELETE_USER_SUCCESS));
+    }
+
     @Operation(summary = "구글 로그인 후 정보 업데이트", description = "닉네임, 마케팅 수신동의 여부 등록, 이미지 URL")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberResponse.class))})
     @PatchMapping

@@ -91,17 +91,6 @@ public class S3Service {
         log.info("Image deleted successfully. Key: {}", imageKey);
     }
 
-    public void deleteFiles(List<String> imageKeys) {
-        if (imageKeys == null || imageKeys.isEmpty()) {
-            return;
-        }
-        for (String imageKey : imageKeys) {
-            deleteFile(imageKey);
-        }
-
-        log.info("Deleted {} images from S3", imageKeys.size());
-    }
-
     @Async("imageProcessingExecutor")
     public void deleteFilesAsync(List<String> imageKeys) {
         if (imageKeys == null || imageKeys.isEmpty()) {
@@ -127,6 +116,17 @@ public class S3Service {
             log.error("잘못된 파일 URL 형식: {}", fileUrl, e);
             throw new FileProcessingException(ErrorCode.FILE_EXTENSION_INVALID);
         }
+    }
+
+    private void deleteFiles(List<String> imageKeys) {
+        if (imageKeys == null || imageKeys.isEmpty()) {
+            return;
+        }
+        for (String imageKey : imageKeys) {
+            deleteFile(imageKey);
+        }
+
+        log.info("Deleted {} images from S3", imageKeys.size());
     }
 
     public record S3FileInfo(String fileKey, String fileUrl, String originFilename) {

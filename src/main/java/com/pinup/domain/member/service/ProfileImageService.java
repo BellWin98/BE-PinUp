@@ -1,6 +1,7 @@
 package com.pinup.domain.member.service;
 
 import com.pinup.domain.member.entity.Member;
+import com.pinup.domain.member.entity.ProfileImage;
 import com.pinup.global.common.image.entity.Image;
 import com.pinup.global.common.image.repository.ImageRepository;
 import com.pinup.global.config.s3.S3Service;
@@ -20,26 +21,32 @@ public class ProfileImageService {
         if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
             Image image = imageRepository.findByImageUrl(profileImageUrl)
                     .orElseThrow(() -> new FileProcessingException(ErrorCode.IMAGE_IS_EMPTY));
-            member.updateProfileImage(image);
+            member.updateProfileImage(new ProfileImage(image));
         }
     }
 
     public void updateProfileImage(Member member, String newProfileImageUrl) {
-        String prevProfileImageUrl = member.getProfileImage().getImageUrl();
+        Image prevImage = member.getProfileImage().getImage();
+        String prevProfileImageUrl = prevImage.getImageUrl();
         if (newProfileImageUrl != null && !newProfileImageUrl.isEmpty()) {
             if (!prevProfileImageUrl.equals(newProfileImageUrl)) {
-                Image image = imageRepository.findByImageUrl(newProfileImageUrl)
+                Image newImage = imageRepository.findByImageUrl(newProfileImageUrl)
                         .orElseThrow(() -> new FileProcessingException(ErrorCode.IMAGE_IS_EMPTY));
-                s3Service.deleteFile(member.getProfileImage().getImageKey());
-                member.updateProfileImage(image);
+                s3Service.deleteFile(prevImage.getImageKey());
+                imageRepository.delete(prevImage);
+                member.getProfileImage().updateImage(newImage);
             }
         } else {
-            if (!member.getProfileImage().getImageKey().isEmpty()) {
-                s3Service.deleteFile(member.getProfileImage().getImageKey());
+            if (!prevImage.getImageKey().isEmpty()) {
+                s3Service.deleteFile(prevImage.getImageKey());
+                imageRepository.delete(prevImage);
                 member.removeProfileImage();
             }
         }
     }
 
-
+    public void deleteProfileImage(Member member) {
+        Image image = member.getProfileImage().getImage();
+        s3Service.deleteFile(image.getImageKey());
+    }
 }
