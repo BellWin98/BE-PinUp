@@ -12,9 +12,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.NumberTemplate;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +40,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
         Double currLat = mapBound.getCurrLat();
         Double currLng = mapBound.getCurrLng();
         List<Long> targetMemberIds = fetchTargetMemberIds(memberId);
-        List<MapPlaceResponse> mapPlaces = queryFactory
+        JPAQuery<MapPlaceResponse> jpaQuery = queryFactory
                 .select(Projections.constructor(MapPlaceResponse.class,
                         place.kakaoPlaceId.as("kakaoPlaceId"),
                         place.name.as("name"),
@@ -52,12 +54,17 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                 .from(place)
                 .innerJoin(review).on(place.eq(review.place))
                 .where(place.status.eq("Y")
-                    .and(review.member.id.in(targetMemberIds))
-                    .and(place.latitude.between(mapBound.getSwLat(), mapBound.getNeLat()))
-                    .and(place.longitude.between(mapBound.getSwLng(), mapBound.getNeLng()))
-                    .and(searchByQuery(query))
-                    .and(searchByPlaceCategory(placeCategory))
-                )
+                        .and(review.member.id.in(targetMemberIds))
+                        .and(searchByQuery(query))
+                        .and(searchByPlaceCategory(placeCategory))
+                );
+        if (!StringUtils.hasText(query)) {
+            jpaQuery.where(
+                    place.latitude.between(mapBound.getSwLat(), mapBound.getNeLat())
+                            .and(place.longitude.between(mapBound.getSwLng(), mapBound.getNeLng()))
+            );
+        }
+        List<MapPlaceResponse> mapPlaces = jpaQuery
                 .groupBy(place)
                 .orderBy(searchBySortType(sortType, currLat, currLng, place.latitude, place.longitude))
 //                .offset(pageable.getOffset())
@@ -164,7 +171,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
     }
 
     private BooleanExpression searchByQuery(String query) {
-        return !query.isEmpty() ? place.name.containsIgnoreCase(query) : null;
+        return StringUtils.hasText(query) ? place.name.containsIgnoreCase(query) : null;
     }
 
     private BooleanExpression searchByPlaceCategory(PlaceCategory placeCategory) {
