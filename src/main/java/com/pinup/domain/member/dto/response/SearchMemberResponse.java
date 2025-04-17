@@ -14,10 +14,4 @@ public class SearchMemberResponse {
 
     @Schema(description = "관계")
     private MemberRelationType relationType;
-
-    @Schema(description = "작성한 리뷰 수")
-    private int reviewCount;
-
-    @Schema(description = "핀버디 수")
-    private int pinBuddyCount;
 }
