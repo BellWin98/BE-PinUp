@@ -42,19 +42,19 @@ public class AuthService {
     private final RedisService redisService;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Value("${oauth2.google.client-id}")
+    @Value("${oauth2.provider.google.client-id}")
     private String googleClientId;
 
-    @Value("${oauth2.google.client-secret}")
+    @Value("${oauth2.provider.google.client-secret}")
     private String googleClientSecret;
 
-    @Value("${oauth2.google.redirect-uri}")
+    @Value("${oauth2.provider.google.redirect-uri}")
     private String googleRedirectUri;
 
-    @Value("${oauth2.google.token-uri}")
+    @Value("${oauth2.provider.google.token-uri}")
     private String googleTokenUri;
 
-    @Value("${oauth2.google.resource-uri}")
+    @Value("${oauth2.provider.google.user-info-uri}")
     private String googleResourceUri;
 
 /*    @Value("${oauth2.google.auth-uri}")
