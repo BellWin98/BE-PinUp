@@ -1,10 +1,10 @@
 package com.pinup.global.config.s3;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.pinup.global.common.image.util.ImageValidator;
 import com.pinup.global.exception.*;
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +26,18 @@ public class S3Service {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    private final AmazonS3Client amazonS3Client;
 
-    public S3ImageInfo uploadFile(String fileType, MultipartFile file) {
+    private final AmazonS3Client amazonS3Client;
+    private final ImageValidator imageValidator;
+
+    public S3FileInfo uploadFile(String fileType, MultipartFile file) {
+        imageValidator.validate(file);
         String originalFilename = null;
         String uploadFileName = null;
         String uploadFileUrl;
         if (file.getOriginalFilename() != null) {
             originalFilename = file.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
             uploadFileName = UUID.randomUUID() + extension;
         }
         String uploadFilePath = fileType + "/" + getFolderName();
@@ -47,7 +50,7 @@ public class S3Service {
             amazonS3Client.putObject(new PutObjectRequest(bucket, key, inputStream, objectMetadata));
             uploadFileUrl = getFileUrl(key);
 
-            return new S3ImageInfo(key, uploadFileUrl, originalFilename);
+            return new S3FileInfo(key, uploadFileUrl, originalFilename);
         } catch (IOException e){
             throw new FileProcessingException(ErrorCode.FILE_UPLOAD_ERROR);
         }
@@ -65,7 +68,7 @@ public class S3Service {
         return str.replace("-", "/");
     }
 
-    public void deleteFile(String fileUrl) {
+    /*public void deleteFile(String fileUrl) {
         if (fileUrl == null || fileUrl.isEmpty() || fileUrl.startsWith("https://lh3.googleusercontent.com")) {
             return;
         }
@@ -80,32 +83,21 @@ public class S3Service {
             log.error("파일 삭제 실패", e);
             throw new FileProcessingException(ErrorCode.FILE_DELETE_ERROR);
         }
-    }
+    }*/
 
-    public void deleteImage(String imageKey) {
+    public void deleteFile(String imageKey) {
         DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucket, imageKey);
         amazonS3Client.deleteObject(deleteObjectRequest);
         log.info("Image deleted successfully. Key: {}", imageKey);
     }
 
-    public void deleteImages(List<String> imageKeys) {
-        if (imageKeys == null || imageKeys.isEmpty()) {
-            return;
-        }
-        for (String imageKey : imageKeys) {
-            deleteImage(imageKey);
-        }
-
-        log.info("Deleted {} images from S3", imageKeys.size());
-    }
-
     @Async("imageProcessingExecutor")
-    public void deleteImagesAsync(List<String> imageKeys) {
+    public void deleteFilesAsync(List<String> imageKeys) {
         if (imageKeys == null || imageKeys.isEmpty()) {
             return;
         }
         log.info("Starting async deletion of {} images", imageKeys.size());
-        deleteImages(imageKeys);
+        deleteFiles(imageKeys);
         log.info("Completed async deletion of images");
     }
 
@@ -126,7 +118,18 @@ public class S3Service {
         }
     }
 
-    public record S3ImageInfo(String imageKey, String imageUrl, String originFilename) {
+    private void deleteFiles(List<String> imageKeys) {
+        if (imageKeys == null || imageKeys.isEmpty()) {
+            return;
+        }
+        for (String imageKey : imageKeys) {
+            deleteFile(imageKey);
+        }
+
+        log.info("Deleted {} images from S3", imageKeys.size());
+    }
+
+    public record S3FileInfo(String fileKey, String fileUrl, String originFilename) {
 
     }
 }

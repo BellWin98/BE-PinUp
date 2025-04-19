@@ -5,6 +5,7 @@ import com.pinup.domain.article.entity.Article;
 import com.pinup.domain.friend.entity.FriendShip;
 import com.pinup.domain.review.entity.Review;
 import com.pinup.global.common.BaseTimeEntity;
+import com.pinup.global.common.image.entity.Image;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -34,8 +35,6 @@ public class Member extends BaseTimeEntity {
     @Audited
     private String nickname;
 
-    private String profileImageUrl;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -56,27 +55,30 @@ public class Member extends BaseTimeEntity {
     @Column(columnDefinition = "VARCHAR(1)")
     private String termsOfMarketing = "Y";
 
-    @OneToMany(mappedBy = "member")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_image_id")
+    private ProfileImage profileImage;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<FriendShip> friendships = new ArrayList<>();
 
-    @OneToMany(mappedBy = "receiver")
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Alarm> alarms = new ArrayList<>();
 
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Article> editorArticles = new ArrayList<>();
 
     @Builder
     public Member(
             String email, String name, String nickname,
-            String profileImageUrl, String socialId, String termsOfMarketing, LoginType loginType
+            String socialId, String termsOfMarketing, LoginType loginType
     ) {
         this.email = email;
         this.name = name;
         this.nickname = nickname;
-        this.profileImageUrl = profileImageUrl;
         this.socialId = socialId;
         this.termsOfMarketing = termsOfMarketing;
         this.loginType = loginType;
@@ -93,16 +95,24 @@ public class Member extends BaseTimeEntity {
         this.lastNicknameUpdateDate = LocalDateTime.now();
     }
 
-    public void updateProfileImage(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
-    }
-
     public void updateTermsOfMarketing(String termsOfMarketing) {
         this.termsOfMarketing = termsOfMarketing;
     }
 
     public boolean canUpdateNickname() {
         return this.lastNicknameUpdateDate == null || LocalDateTime.now().isAfter(this.lastNicknameUpdateDate.plusDays(30));
+    }
+
+    public void updateProfileImage(ProfileImage profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public void removeProfileImage() {
+        this.profileImage = null;
+    }
+
+    public String getProfileImageUrl() {
+        return this.profileImage.getImageUrl();
     }
 }
 

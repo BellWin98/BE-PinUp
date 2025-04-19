@@ -1,8 +1,7 @@
 package com.pinup.global.config;
 
-import com.pinup.global.common.RequestLoggingInterceptor;
+import com.pinup.global.common.logging.RequestLoggingInterceptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
             "/",
             "/api/auth/**",
             "/api/members/nickname/check",
+            "/api/*/image",
             "/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**",
     };
     private final RequestLoggingInterceptor requestLoggingInterceptor;

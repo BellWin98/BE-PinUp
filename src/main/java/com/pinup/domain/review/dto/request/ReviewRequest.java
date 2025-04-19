@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Schema(title = "리뷰 등록 DTO")
 @Data
 public class ReviewRequest {
@@ -21,6 +23,8 @@ public class ReviewRequest {
     @NotBlank(message = "방문 날짜를 입력해주세요.")
     @Schema(description = "방문 날짜", example = "25.03.14")
     private String visitedDate;
+
+    private List<String> reviewImageUrls;
 
     public Review toEntity() {
         return Review.builder()

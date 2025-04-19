@@ -11,24 +11,13 @@ import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.dto.response.SearchMemberResponse;
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.member.entity.MemberRelationType;
-import com.pinup.domain.member.exception.NicknameUpdateTimeLimitException;
 import com.pinup.domain.member.repository.MemberRepository;
-import com.pinup.domain.review.dto.response.PhotoReviewResponse;
-import com.pinup.domain.review.dto.response.TextReviewResponse;
-import com.pinup.domain.review.entity.Review;
-import com.pinup.domain.review.entity.ReviewType;
-import com.pinup.domain.review.repository.ReviewRepository;
 import com.pinup.global.common.AuthUtil;
-import com.pinup.global.config.s3.S3Service;
-import com.pinup.global.exception.EntityAlreadyExistException;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,14 +26,14 @@ import java.util.stream.Collectors;
 @Service
 public class MemberService {
 
-    private static final String PROFILE_IMAGE_DIRECTORY = "profiles";
+    private final AuthUtil authUtil;
+
+    private final NicknameService nicknameService;
+    private final ProfileImageService profileImageService;
 
     private final MemberRepository memberRepository;
     private final FriendRequestRepository friendRequestRepository;
     private final FriendShipRepository friendShipRepository;
-    private final AuthUtil authUtil;
-    private final S3Service s3Service;
-    private final ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
     public List<SearchMemberResponse> searchMembers(String nickname) {
@@ -91,75 +80,28 @@ public class MemberService {
     }
 
     @Transactional
-    public void updateProfile(UpdateProfileRequest updateProfileRequest, MultipartFile multipartFile) {
+    public void updateProfile(UpdateProfileRequest updateProfileRequest) {
         Member loginMember = authUtil.getLoginMember();
-        String prevNickname = loginMember.getNickname();
-        String prevBio = loginMember.getBio();
         String newNickname = updateProfileRequest.getNickname();
-        String newBio = updateProfileRequest.getBio();
-        if (!prevNickname.equals(newNickname)) {
-            validateNicknameUpdate(loginMember, newNickname);
+        if (!nicknameService.isNicknameEqual(loginMember.getNickname(), newNickname)) {
+            nicknameService.validateNicknameUpdate(loginMember, newNickname);
             loginMember.updateNickname(newNickname);
         }
-        if (!prevBio.equals(newBio)) {
-            loginMember.updateBio(updateProfileRequest.getBio());
-        }
-        String newProfileImageUrl = null;
-        if (multipartFile != null && !multipartFile.isEmpty()) {
-            s3Service.deleteFile(loginMember.getProfileImageUrl());
-            newProfileImageUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile).imageUrl();
-        }
-        if (newProfileImageUrl != null) {
-            loginMember.updateProfileImage(newProfileImageUrl);
-        }
-        memberRepository.save(loginMember);
+        loginMember.updateBio(updateProfileRequest.getBio());
+        profileImageService.updateProfileImage(loginMember, updateProfileRequest.getProfileImageUrl());
     }
 
     @Transactional(readOnly = true)
-    public Page<TextReviewResponse> getMemberTextReviews(Pageable pageable, Long memberId) {
-        Member member = authUtil.getValidMember(memberId);
-        Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, member, ReviewType.TEXT);
-
-        return reviewPage.map(TextReviewResponse::from);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<TextReviewResponse> getMyTextReviews(Pageable pageable) {
-        Member loginMember = authUtil.getLoginMember();
-        Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, loginMember, ReviewType.TEXT);
-
-        return reviewPage.map(TextReviewResponse::from);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<PhotoReviewResponse> getPhotoReviews(Pageable pageable, Long memberId) {
-        Member member = authUtil.getValidMember(memberId);
-        Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, member, ReviewType.PHOTO);
-
-        return reviewPage.map(PhotoReviewResponse::from);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<PhotoReviewResponse> getMyPhotoReviews(Pageable pageable) {
-        Member loginMember = authUtil.getLoginMember();
-        Page<Review> reviewPage = reviewRepository.findAllByMemberAndTypeOrderByCreatedAtDesc(pageable, loginMember, ReviewType.PHOTO);
-
-        return reviewPage.map(PhotoReviewResponse::from);
-    }
-
     public boolean checkNicknameDuplicate(String nickname) {
         return memberRepository.existsByNickname(nickname);
     }
 
     @Transactional
-    public MemberResponse updateInfoAfterLogin(UpdateMemberInfoAfterLoginRequest request, MultipartFile multipartFile) {
+    public MemberResponse updateInfoAfterLogin(UpdateMemberInfoAfterLoginRequest request) {
         Member loginMember = authUtil.getLoginMember();
-        String nickname = request.getNickname();
-        String termsOfMarketing = request.getTermsOfMarketing();
-        loginMember.updateNickname(nickname);
-        loginMember.updateTermsOfMarketing(termsOfMarketing);
-        String imageUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile).imageUrl();
-        loginMember.updateProfileImage(imageUrl);
+        loginMember.updateNickname(request.getNickname());
+        loginMember.updateTermsOfMarketing(request.getTermsOfMarketing());
+        profileImageService.updateProfileImage(loginMember, request.getProfileImageUrl());
 
         return MemberResponse.from(memberRepository.save(loginMember));
     }
@@ -178,20 +120,10 @@ public class MemberService {
         return MemberRelationType.STRANGER;
     }
 
-    private void validateNicknameUpdate(Member member, String newNickname) {
-        validateNicknameUpdateTimeLimit(member);
-        validateNicknameDuplicate(newNickname);
-    }
-
-    private void validateNicknameUpdateTimeLimit(Member member) {
-        if (!member.canUpdateNickname()) {
-            throw new NicknameUpdateTimeLimitException();
-        }
-    }
-
-    private void validateNicknameDuplicate(String nickname) {
-        if (checkNicknameDuplicate(nickname)) {
-            throw new EntityAlreadyExistException(ErrorCode.ALREADY_EXIST_NICKNAME);
-        }
+    @Transactional
+    public void delete() {
+        Member loginMember = authUtil.getLoginMember();
+        profileImageService.deleteProfileImage(loginMember);
+        memberRepository.deleteById(loginMember.getId());
     }
 }

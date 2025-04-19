@@ -7,7 +7,6 @@ import com.pinup.domain.place.entity.SortType;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +15,6 @@ import java.util.List;
 import static com.pinup.domain.bookmark.entity.QBookMark.bookMark;
 import static com.pinup.domain.place.entity.QPlace.place;
 import static com.pinup.domain.review.entity.QReview.review;
-import static com.pinup.domain.review.entity.QReviewImage.reviewImage;
 
 @RequiredArgsConstructor
 public class BookMarkRepositoryQueryDslImpl implements BookMarkRepositoryQueryDsl {

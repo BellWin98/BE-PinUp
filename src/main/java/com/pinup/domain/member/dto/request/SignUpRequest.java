@@ -23,6 +23,8 @@ public class SignUpRequest {
     @NotEmpty(message = "소셜 ID는 필수 입력값입니다.")
     private String socialId;
 
+    private String profileImageUrl;
+
     @NotEmpty(message = "로그인 타입은 필수 입력값입니다.")
     private String loginType;
 

@@ -1,4 +1,4 @@
-package com.pinup.global.common;
+package com.pinup.global.config.swagger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;

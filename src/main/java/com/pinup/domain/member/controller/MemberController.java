@@ -5,6 +5,7 @@ import com.pinup.domain.member.dto.request.UpdateProfileRequest;
 import com.pinup.domain.member.dto.response.MemberInfoResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.dto.response.SearchMemberResponse;
+import com.pinup.domain.member.service.MemberReviewService;
 import com.pinup.domain.member.service.MemberService;
 import com.pinup.domain.review.dto.response.PhotoReviewResponse;
 import com.pinup.domain.review.dto.response.TextReviewResponse;
@@ -19,10 +20,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "유저 API")
 @RequiredArgsConstructor
@@ -31,8 +30,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberReviewService memberReviewService;
 
-    @Operation(summary = "닉네임으로 유저 조회 API")
+    @Operation(summary = "닉네임으로 유저 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = SearchMemberResponse.class))})
     @GetMapping("/search")
     public ResponseEntity<ResultResponse> searchMembers(@RequestParam("nickname") String nickname) {
@@ -42,7 +42,7 @@ public class MemberController {
         );
     }
 
-    @Operation(summary = "내 정보 조회 API", description = "자동 로그인 시 사용")
+    @Operation(summary = "내 정보 조회", description = "자동 로그인 시 사용")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberInfoResponse.class))})
     @GetMapping
     public ResponseEntity<ResultResponse> getMyInfo() {
@@ -52,7 +52,7 @@ public class MemberController {
         );
     }
 
-    @Operation(summary = "유저 정보 조회 API")
+    @Operation(summary = "유저 정보 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberInfoResponse.class))})
     @GetMapping("/{memberId}")
     public ResponseEntity<ResultResponse> getMemberInfo(@PathVariable("memberId") Long memberId) {
@@ -62,7 +62,7 @@ public class MemberController {
         );
     }
 
-    @Operation(summary = "닉네임 중복 여부 확인 API", description = "true: 닉네임 중복 / false: 사용 가능한 닉네임")
+    @Operation(summary = "닉네임 중복 여부 확인", description = "true: 닉네임 중복 / false: 사용 가능한 닉네임")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = boolean.class))})
     @GetMapping("/nickname/check")
     public ResponseEntity<ResultResponse> checkNicknameDuplicate(@RequestParam(value = "nickname") String nickname) {
@@ -72,31 +72,33 @@ public class MemberController {
         );
     }
 
-    @Operation(summary = "유저 프로필 수정 API")
-    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResultResponse> updateProfile(
-            @Valid @RequestPart UpdateProfileRequest updateProfileRequest,
-            @RequestPart(name = "multipartFile", required = false) MultipartFile multipartFile
-    ) {
-        memberService.updateProfile(updateProfileRequest, multipartFile);
+    @Operation(summary = "유저 프로필 수정")
+    @PutMapping
+    public ResponseEntity<ResultResponse> updateProfile(@Valid @RequestBody UpdateProfileRequest updateProfileRequest) {
+        memberService.updateProfile(updateProfileRequest);
 
         return ResponseEntity.ok(ResultResponse.of(ResultCode.UPDATE_MEMBER_INFO_SUCCESS));
     }
 
-    @Operation(summary = "소셜 로그인 후처리 API", description = "닉네임, 프로필사진, 마케팅 수신동의 여부 등록")
+    @Operation(summary = "회원 탈퇴")
+    @DeleteMapping
+    public ResponseEntity<ResultResponse> delete() {
+        memberService.delete();
+
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.DELETE_USER_SUCCESS));
+    }
+
+    @Operation(summary = "구글 로그인 후 정보 업데이트", description = "닉네임, 마케팅 수신동의 여부 등록, 이미지 URL")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = MemberResponse.class))})
-    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResultResponse> updateInfoAfterLogin(
-            @Valid @RequestPart UpdateMemberInfoAfterLoginRequest request,
-            @RequestPart(name = "multipartFile", required = false) MultipartFile multipartFile
-    ){
+    @PatchMapping
+    public ResponseEntity<ResultResponse> updateInfoAfterLogin(@Valid @RequestBody UpdateMemberInfoAfterLoginRequest request){
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.UPDATE_MEMBER_INFO_SUCCESS,
-                memberService.updateInfoAfterLogin(request, multipartFile))
+                memberService.updateInfoAfterLogin(request))
         );
     }
 
-    @Operation(summary = "유저 텍스트 리뷰 조회 API")
+    @Operation(summary = "유저 텍스트 리뷰 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = TextReviewResponse.class))})
     @GetMapping("/{memberId}/text-reviews")
     public ResponseEntity<ResultResponse> getMemberTextReviews(
@@ -112,11 +114,11 @@ public class MemberController {
 
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_TEXT_REVIEW_SUCCESS,
-                memberService.getMemberTextReviews(pageable, memberId))
+                memberReviewService.getMemberTextReviews(pageable, memberId))
         );
     }
 
-    @Operation(summary = "나의 텍스트 리뷰 조회 API")
+    @Operation(summary = "나의 텍스트 리뷰 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = TextReviewResponse.class))})
     @GetMapping("/me/text-reviews")
     public ResponseEntity<ResultResponse> getMyTextReviews(
@@ -130,11 +132,11 @@ public class MemberController {
 
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_TEXT_REVIEW_SUCCESS,
-                memberService.getMyTextReviews(pageable))
+                memberReviewService.getMyTextReviews(pageable))
         );
     }
 
-    @Operation(summary = "유저 포토 리뷰 조회 API")
+    @Operation(summary = "유저 포토 리뷰 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = PhotoReviewResponse.class))})
     @GetMapping("/{memberId}/photo-reviews")
     public ResponseEntity<ResultResponse> getPhotoReviews(
@@ -150,11 +152,11 @@ public class MemberController {
 
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_PHOTO_REVIEW_SUCCESS,
-                memberService.getPhotoReviews(pageable, memberId))
+                memberReviewService.getPhotoReviews(pageable, memberId))
         );
     }
 
-    @Operation(summary = "나의 포토 리뷰 조회 API")
+    @Operation(summary = "나의 포토 리뷰 조회")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = PhotoReviewResponse.class))})
     @GetMapping("/me/photo-reviews")
     public ResponseEntity<ResultResponse> getMyPhotoReviews(
@@ -168,7 +170,7 @@ public class MemberController {
 
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.GET_PHOTO_REVIEW_SUCCESS,
-                memberService.getMyPhotoReviews(pageable))
+                memberReviewService.getMyPhotoReviews(pageable))
         );
     }
 }

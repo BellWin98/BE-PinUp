@@ -34,7 +34,7 @@ public class Place extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private PlaceCategory placeCategory;
 
-    @OneToMany(mappedBy = "place", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "place", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
     @Builder
