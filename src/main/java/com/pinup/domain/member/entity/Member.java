@@ -52,6 +52,8 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true)
     private String socialId;
 
+    private String profileImageUrl;
+
     @Column(columnDefinition = "VARCHAR(1)")
     private String termsOfMarketing = "Y";
 
@@ -111,9 +113,9 @@ public class Member extends BaseTimeEntity {
         this.profileImage = null;
     }
 
-    public String getProfileImageUrl() {
+/*    public String getProfileImageUrl() {
         return this.profileImage.getImageUrl();
-    }
+    }*/
 }
 
 
