@@ -1,8 +1,8 @@
-# PIN UP - BACKEND
+# 📌 핀업(PIN UP) - BACKEND
 
 <img src="assets/images/thumbnail.jpeg">
 
-## 0. 목차
+# 🔗 목차
 1. [**서비스 소개**](#1)
 2. [**주요 기능**](#2)
 3. [**기술 스택**](#3)
@@ -14,7 +14,7 @@
 
 ## <span id="1">✨ 1. 서비스 소개
 
-### 📌 핀업(PIN UP)
+
 <img src="assets/images/goal.jpeg">
 
 ### 🚀 개요
