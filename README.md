@@ -6,9 +6,10 @@
 1. [**서비스 소개**](#1)
 2. [**주요 기능**](#2)
 3. [**기술 스택**](#3)
-4. [**ER Diagram**](#4)
-5. [**시스템 아키텍처**](#5)
-6. [**기능 시연**](#6)
+4. [**API 명세서**](#4)
+5. [**ER Diagram**](#5)
+6. [**시스템 아키텍처**](#6)
+7. [**기능 시연**](#7)
 
 <br />
 
@@ -34,7 +35,7 @@
 
 | Category   | TechStack                                      |
 |------------|------------------------------------------------|
-| Framework  | Java, Spring Boot                              |
+| Language & Framework  | Java, Spring Boot                   |
 | DB & ORM   | MariaDB, Redis, JPA, QueryDSL                  |
 | API Docs   | Swagger                                        |
 | Infra      | Docker, GitHub Actions, AWS                    |
@@ -42,17 +43,28 @@
 
 <br />
 
-## <span id="4">🏢 4. ER Diagram
+## <span id="4">📑 4. API 명세서
+<img src="assets/images/인증api.png">
+<img src="assets/images/유저api.png">
+<img src="assets/images/핀맵api.png">
+<img src="assets/images/핀로그api.png">
+<img src="assets/images/마이플레이스api.png">
+<img src="assets/images/핀버디api.png">
+<img src="assets/images/핀버디신청api.png">
+
+<br />
+
+## <span id="5">🏢 5. ER Diagram
 <img src="assets/images/pinup_erd.png">
 
 <br />
 
-## <span id="5">🏛️ 5. 시스템 아키텍처
-<img src="img/architecture.png">
+## <span id="6">🏗️ 6. 시스템 아키텍처
+- 도식 중
 
 <br />
 
-## <span id="6">📷 6. 기능 시연
+## <span id="7">📷 7. 기능 시연
 
 ### 1. 간편 회원가입 (구글 로그인)
 <img src="assets/functions/구글회원가입.gif">
