@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -28,11 +30,17 @@ public class FriendShipService {
 
     @Transactional(readOnly = true)
     public Page<MemberResponse> getAllFriendsOfMember(Long memberId, Pageable pageable) {
-        Member member = memberRepository.findById(memberId)
+        Member loginMember = authUtil.getLoginMember();
+        Member targetMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        Set<Long> friendIdsOfLoginMember = friendShipRepository.findAllByMember(loginMember).stream()
+                .map(friendShip -> friendShip.getFriend().getId())
+                .collect(Collectors.toSet());
 
-        List<MemberResponse> memberResponses = friendShipRepository.findAllByMember(member).stream()
-                .map(friendShip -> MemberResponse.from(friendShip.getFriend()))
+        List<MemberResponse> memberResponses = friendShipRepository.findAllByMember(targetMember).stream()
+                .map(FriendShip::getFriend)
+                .filter(friend -> friendIdsOfLoginMember.contains(friend.getId()))
+                .map(MemberResponse::from)
                 .sorted(Comparator.comparing(MemberResponse::getNickname))
                 .toList();
 
