@@ -11,20 +11,15 @@ import com.pinup.domain.review.dto.response.ReviewResponse;
 import com.pinup.domain.review.entity.Review;
 import com.pinup.domain.review.entity.ReviewImage;
 import com.pinup.domain.review.entity.ReviewType;
-import com.pinup.domain.review.repository.ReviewImageRepository;
 import com.pinup.domain.review.repository.ReviewRepository;
 import com.pinup.global.common.AuthUtil;
-import com.pinup.global.common.ImageValidator;
-import com.pinup.global.config.s3.S3Service;
 import com.pinup.global.exception.EntityNotFoundException;
-import com.pinup.global.exception.FileProcessingException;
 import com.pinup.global.exception.UnauthorizedAccessException;
 import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -33,28 +28,25 @@ import java.util.List;
 @Service
 public class ReviewService {
 
-    private static final String FILE_TYPE = "reviews";
-    private static final int IMAGES_LIMIT = 3;
-
     private final PlaceRepository placeRepository;
     private final ReviewRepository reviewRepository;
-    private final ReviewImageRepository reviewImageRepository;
     private final FriendShipRepository friendShipRepository;
     private final AuthUtil authUtil;
-    private final S3Service s3Service;
-    private final ImageValidator imageValidator;
+    private final ReviewImageService reviewImageService;
 
     @Transactional
-    public String register(ReviewRequest reviewRequest, PlaceRequest placeRequest, List<MultipartFile> images) {
+    public String register(ReviewRequest reviewRequest, PlaceRequest placeRequest) {
         Member loginMember = authUtil.getLoginMember();
         Place place = findOrCreatePlace(placeRequest);
+        List<String> reviewImageUrls = reviewRequest.getReviewImageUrls();
         Review newReview = reviewRequest.toEntity();
         newReview.attachPlace(place);
         newReview.attachMember(loginMember);
-        newReview.setType(images != null && !images.isEmpty() ? ReviewType.PHOTO : ReviewType.TEXT);
-        if (images != null && !images.isEmpty()) {
-            validateImages(images);
-            uploadReviewImages(newReview, images);
+        if (reviewImageUrls != null && !reviewImageUrls.isEmpty()) {
+            reviewImageService.saveReviewImages(newReview, reviewImageUrls);
+            newReview.setType(ReviewType.PHOTO);
+        } else {
+            newReview.setType(ReviewType.TEXT);
         }
         reviewRepository.save(newReview);
 
@@ -71,21 +63,17 @@ public class ReviewService {
     }
 
     @Transactional
-    public void update(Long reviewId, UpdateReviewRequest req, List<MultipartFile> images) {
+    public void update(Long reviewId, UpdateReviewRequest updateReviewRequest) {
         Member loginMember = authUtil.getLoginMember();
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.REVIEW_NOT_FOUND));
         if (!loginMember.equals(review.getMember())) {
             throw new UnauthorizedAccessException(ErrorCode.UNAUTHORIZED_REVIEW_ACCESS);
         }
-        review.update(req.getContent(), req.getStarRating());
-        review.setType(images != null && !images.isEmpty() ? ReviewType.PHOTO : ReviewType.TEXT);
-        if (images != null && !images.isEmpty()) {
-            validateImages(images);
-            deleteReviewImages(review);
-            uploadReviewImages(review, images);
-        }
-        reviewRepository.save(review);
+        review.update(updateReviewRequest.getContent(), updateReviewRequest.getStarRating());
+        reviewImageService.updateReviewImages(review, updateReviewRequest.getReviewImageUrls());
+        List<ReviewImage> updatedReviewImages = review.getReviewImages();
+        review.setType(updatedReviewImages != null && !updatedReviewImages.isEmpty() ? ReviewType.PHOTO : ReviewType.TEXT);
     }
 
     @Transactional
@@ -97,7 +85,7 @@ public class ReviewService {
             throw new UnauthorizedAccessException(ErrorCode.UNAUTHORIZED_REVIEW_ACCESS);
         }
         if (!review.getReviewImages().isEmpty()) {
-            deleteReviewImages(review);
+            reviewImageService.deleteReviewImages(review);
         }
         reviewRepository.delete(review);
     }
@@ -117,35 +105,6 @@ public class ReviewService {
         if (!review.getMember().equals(currentUser) &&
                 !friendShipRepository.existsByMemberAndFriend(currentUser, review.getMember())) {
             throw new EntityNotFoundException(ErrorCode.FRIEND_NOT_FOUND);
-        }
-    }
-
-    private void uploadReviewImages(Review review, List<MultipartFile> images) {
-        for (MultipartFile image : images) {
-            S3Service.S3ImageInfo imageInfo = s3Service.uploadFile(FILE_TYPE, image);
-            ReviewImage reviewImage = new ReviewImage(
-                    imageInfo.imageUrl(), imageInfo.imageKey(), imageInfo.originFilename());
-            reviewImage.attachReview(review);
-        }
-    }
-
-    private void deleteReviewImages(Review review) {
-        List<String> imageKeys = reviewImageRepository.findImageKeysByReviewId(review.getId());
-        s3Service.deleteImagesAsync(imageKeys);
-        reviewImageRepository.deleteAllByReviewId(review.getId());
-        review.clearImages();
-    }
-
-    private void validateImages(List<MultipartFile> images) {
-        validateImagesLimit(images);
-        for (MultipartFile image : images) {
-            imageValidator.validate(image);
-        }
-    }
-
-    private void validateImagesLimit(List<MultipartFile> images) {
-        if (images.size() > IMAGES_LIMIT) {
-            throw new FileProcessingException(ErrorCode.IMAGES_LIMIT_EXCEEDED);
         }
     }
 }

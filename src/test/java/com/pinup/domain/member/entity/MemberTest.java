@@ -77,12 +77,12 @@ class MemberTest {
 
     @Test
     @DisplayName("프로필 이미지 수정 테스트")
-    void updateProfileImage() {
+    void updateProfileImageUrl() {
         // given
         Member member = createTestMember();
 
         // when
-        member.updateProfileImage(NEW_PROFILE_IMAGE_URL);
+        member.updateProfileImageUrl(NEW_PROFILE_IMAGE_URL);
 
         // then
         assertThat(member.getProfileImageUrl()).isEqualTo(NEW_PROFILE_IMAGE_URL);

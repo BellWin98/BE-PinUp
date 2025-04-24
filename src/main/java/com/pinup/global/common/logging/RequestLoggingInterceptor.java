@@ -1,5 +1,6 @@
-package com.pinup.global.common;
+package com.pinup.global.common.logging;
 
+import com.pinup.global.common.AuthUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

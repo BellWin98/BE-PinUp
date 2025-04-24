@@ -1,4 +1,4 @@
-package com.pinup.global.common;
+package com.pinup.global.common.image.util;
 
 import com.pinup.global.exception.FileProcessingException;
 import com.pinup.global.response.ErrorCode;
@@ -34,7 +34,7 @@ public class ImageValidator {
         try {
             BufferedImage image = ImageIO.read(file.getInputStream());
             validateImageIsEmpty(image);
-            validateImagePixel(image);
+//            validateImagePixel(image);
         } catch (IOException e) {
             log.error("이미지 검증 중 오류 발생", e);
             throw new FileProcessingException(ErrorCode.IMAGE_PROCESSING_ERROR);

@@ -6,9 +6,11 @@ import com.pinup.domain.member.dto.response.LoginResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.entity.LoginType;
 import com.pinup.domain.member.entity.Member;
+import com.pinup.domain.member.entity.ProfileImage;
 import com.pinup.domain.member.exception.ExpiredTokenException;
 import com.pinup.domain.member.exception.InvalidTokenException;
 import com.pinup.domain.member.repository.MemberRepository;
+import com.pinup.global.common.image.entity.Image;
 import com.pinup.global.config.jwt.JwtTokenProvider;
 import com.pinup.global.config.redis.RedisService;
 import com.pinup.global.config.s3.S3Service;
@@ -25,21 +27,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
 public class AuthService {
-    private static final String PROFILE_IMAGE_DIRECTORY = "profiles";
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
 
+    private final ProfileImageService profileImageService;
     private final RestTemplate restTemplate;
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisService redisService;
-    private final S3Service s3Service;
     private final ApplicationEventPublisher eventPublisher;
 
     @Value("${oauth2.google.client-id}")
@@ -61,18 +61,16 @@ public class AuthService {
     private String googleAuthUri;*/
 
     @Transactional
-    public void signUp(final SignUpRequest signUpRequest, final MultipartFile multipartFile) {
+    public void signUp(SignUpRequest signUpRequest) {
         Member createdMember = signUpRequest.toEntity();
-        if (multipartFile != null && !multipartFile.isEmpty()) {
-            String imageUploadUrl = s3Service.uploadFile(PROFILE_IMAGE_DIRECTORY, multipartFile).imageUrl();
-            createdMember.updateProfileImage(imageUploadUrl);
-        }
+        String profileImageUrl = signUpRequest.getProfileImageUrl();
+        profileImageService.saveProfileImage(createdMember, profileImageUrl);
         Member savedMember = memberRepository.save(createdMember);
         eventPublisher.publishEvent(savedMember);
     }
 
     @Transactional
-    public LoginResponse login(final LoginRequest loginRequest) {
+    public LoginResponse socialLogin(final LoginRequest loginRequest) {
         Member findMember = memberRepository.findBySocialId(loginRequest.getSocialId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         String accessToken = jwtTokenProvider.createAccessToken(findMember.getSocialId(), findMember.getRole());
@@ -95,10 +93,11 @@ public class AuthService {
             member = memberRepository.save(Member.builder()
                     .email(email)
                     .name(name)
-                    .profileImageUrl(profilePictureUrl)
                     .loginType(LoginType.GOOGLE)
                     .socialId(socialId)
                     .build());
+            Image image = new Image(new S3Service.S3FileInfo("", profilePictureUrl, ""));
+            member.updateProfileImage(new ProfileImage(image));
             eventPublisher.publishEvent(member);
         }
         String jwtToken = jwtTokenProvider.createAccessToken(member.getSocialId(), member.getRole());
