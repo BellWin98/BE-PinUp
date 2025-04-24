@@ -34,7 +34,7 @@
 
 | Category   | TechStack                                      |
 |------------|------------------------------------------------|
-| Framework  | Java, SpringBoot                               |
+| Framework  | Java, Spring Boot                              |
 | DB & ORM   | MariaDB, Redis, JPA, QueryDSL                  |
 | API Docs   | Swagger                                        |
 | Infra      | Docker, GitHub Actions, AWS                    |
@@ -43,12 +43,12 @@
 <br />
 
 ## <span id="4">🏢 4. ER Diagram
+<img src="assets/images/pinup_erd.png">
 
 <br />
 
 ## <span id="5">🏛️ 5. 시스템 아키텍처
-
-<img src="img/architecture.png" style="width: 100%; height: auto">
+<img src="img/architecture.png">
 
 <br />
 
