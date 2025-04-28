@@ -58,7 +58,7 @@ public class FriendRequestService {
         Member sender = authUtil.getLoginMember();
         Member receiver = memberRepository.findById(receiverId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-        validateSelfFriendRequest(sender.getSocialId(), receiver.getSocialId());
+        validateSelfFriendRequest(sender.getProviderId(), receiver.getProviderId());
         validateDuplicateFriendRequest(sender, receiver);
         validateAlreadyFriend(sender, receiver);
         FriendRequest savedFriendRequest = friendRequestRepository.save(new FriendRequest(sender, receiver));
@@ -74,7 +74,7 @@ public class FriendRequestService {
         Member loginMember = authUtil.getLoginMember();
         FriendRequest friendRequest = friendRequestRepository.findById(friendRequestId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
-        validateRequestSenderIsCurrentUser(loginMember.getSocialId(), friendRequest.getSender().getSocialId());
+        validateRequestSenderIsCurrentUser(loginMember.getProviderId(), friendRequest.getSender().getProviderId());
         friendRequestRepository.delete(friendRequest);
     }
 
@@ -83,7 +83,7 @@ public class FriendRequestService {
         Member loginMember = authUtil.getLoginMember();
         FriendRequest friendRequest = friendRequestRepository.findById(friendRequestId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
-        validateRequestReceiverIsCurrentUser(loginMember.getSocialId(), friendRequest.getReceiver().getSocialId());
+        validateRequestReceiverIsCurrentUser(loginMember.getProviderId(), friendRequest.getReceiver().getProviderId());
         validateFriendRequestStatus(friendRequest.getFriendRequestStatus());
         friendRequest.accept();
         friendRequestRepository.save(friendRequest);
@@ -100,7 +100,7 @@ public class FriendRequestService {
         Member loginMember = authUtil.getLoginMember();
         FriendRequest friendRequest = friendRequestRepository.findById(friendRequestId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
-        validateRequestReceiverIsCurrentUser(loginMember.getSocialId(), friendRequest.getReceiver().getSocialId());
+        validateRequestReceiverIsCurrentUser(loginMember.getProviderId(), friendRequest.getReceiver().getProviderId());
         validateFriendRequestStatus(friendRequest.getFriendRequestStatus());
         friendRequest.reject();
         friendRequestRepository.save(friendRequest);

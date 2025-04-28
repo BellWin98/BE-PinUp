@@ -7,7 +7,7 @@ import java.util.Map;
 public interface OAuth2UserInfo {
 
     String getProviderId();
-    String getProvider();
+    LoginType getProvider();
     String getEmail();
     String getName();
     String getProfileImageUrl();

@@ -4,40 +4,38 @@ import com.pinup.domain.member.entity.LoginType;
 
 import java.util.Map;
 
-public class NaverOAuth2UserInfo implements OAuth2UserInfo{
+public class GoogleOAuth2UserInfo implements OAuth2UserInfo{
 
     private final Map<String, Object> attributes;
-    private final Map<String, Object> response;
 
     @SuppressWarnings("unchecked")
-    public NaverOAuth2UserInfo(Map<String, Object> attributes) {
+    public GoogleOAuth2UserInfo(Map<String, Object> attributes) {
         this.attributes = attributes;
-        this.response = (Map<String, Object>) attributes.get("response");
     }
 
     @Override
     public String getProviderId() {
-        return (String) response.get("id");
+        return (String) attributes.get("sub");
     }
 
     @Override
     public LoginType getProvider() {
-        return LoginType.NAVER;
+        return LoginType.GOOGLE;
     }
 
     @Override
     public String getEmail() {
-        return (String) response.get("email");
+        return (String) attributes.get("email");
     }
 
     @Override
     public String getName() {
-        return (String) response.get("name");
+        return (String) attributes.get("name");
     }
 
     @Override
     public String getProfileImageUrl() {
-        return (String) response.get("profile_image");
+        return (String) attributes.get("picture");
     }
 
     @Override

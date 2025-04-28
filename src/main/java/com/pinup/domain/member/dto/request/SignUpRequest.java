@@ -35,7 +35,7 @@ public class SignUpRequest {
                 .email(email)
                 .name(name)
                 .nickname(nickname)
-                .socialId(socialId)
+                .providerId(socialId)
                 .loginType(LoginType.getLoginType(loginType))
                 .termsOfMarketing(termsOfMarketing)
                 .build();

@@ -5,7 +5,6 @@ import com.pinup.domain.article.entity.Article;
 import com.pinup.domain.friend.entity.FriendShip;
 import com.pinup.domain.review.entity.Review;
 import com.pinup.global.common.BaseTimeEntity;
-import com.pinup.global.common.image.entity.Image;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -50,7 +49,7 @@ public class Member extends BaseTimeEntity {
     private LoginType loginType;
 
     @Column(unique = true)
-    private String socialId;
+    private String providerId;
 
     private String profileImageUrl;
 
@@ -76,12 +75,12 @@ public class Member extends BaseTimeEntity {
     @Builder
     public Member(
             String email, String name, String nickname,
-            String socialId, String termsOfMarketing, LoginType loginType
+            String providerId, String termsOfMarketing, LoginType loginType
     ) {
         this.email = email;
         this.name = name;
         this.nickname = nickname;
-        this.socialId = socialId;
+        this.providerId = providerId;
         this.termsOfMarketing = termsOfMarketing;
         this.loginType = loginType;
         this.role = Role.ROLE_USER;
