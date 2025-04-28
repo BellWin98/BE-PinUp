@@ -80,17 +80,17 @@ class MemberRepositoryTest {
 
     @Test
     @DisplayName("소셜 ID로 회원 찾기 테스트")
-    void findBySocialId() {
+    void findByProviderId() {
         // given
         memberRepository.save(testMember);
         flushAndClear();
 
         // when
-        Optional<Member> foundMember = memberRepository.findBySocialId(TEST_SOCIAL_ID);
+        Optional<Member> foundMember = memberRepository.findByProviderId(TEST_SOCIAL_ID);
 
         // then
         assertThat(foundMember).isPresent();
-        assertThat(foundMember.get().getSocialId()).isEqualTo(TEST_SOCIAL_ID);
+        assertThat(foundMember.get().getProviderId()).isEqualTo(TEST_SOCIAL_ID);
     }
 
     @Test
@@ -136,13 +136,13 @@ class MemberRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 소셜 ID로 회원 찾기 테스트")
-    void findBySocialId_NotFound() {
+    void findByProviderId_NotFound() {
         // given
         memberRepository.save(testMember);
         flushAndClear();
 
         // when
-        Optional<Member> foundMember = memberRepository.findBySocialId("nonexistent");
+        Optional<Member> foundMember = memberRepository.findByProviderId("nonexistent");
 
         // then
         assertThat(foundMember).isEmpty();

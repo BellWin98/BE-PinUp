@@ -41,7 +41,7 @@ class MemberTest {
         assertThat(member.getName()).isEqualTo(NAME);
         assertThat(member.getNickname()).isEqualTo(NICKNAME);
         assertThat(member.getProfileImageUrl()).isEqualTo(PROFILE_IMAGE_URL);
-        assertThat(member.getSocialId()).isEqualTo(SOCIAL_ID);
+        assertThat(member.getProviderId()).isEqualTo(SOCIAL_ID);
         assertThat(member.getTermsOfMarketing()).isEqualTo(TERMS_OF_MARKETING);
         assertThat(member.getLoginType()).isEqualTo(LOGIN_TYPE);
         assertThat(member.getRole()).isEqualTo(Role.ROLE_USER);
