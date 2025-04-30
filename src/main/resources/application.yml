@@ -1,31 +1,36 @@
-server:
-  port: 8080
-  # 웹 애플리케이션을 구분할 때 사용
-  servlet:
-    encoding:
-      charset: UTF-8
-      force: true
-    context-path: /
-  # 예외 처리를 커스텀하게 진행하기 위해 Whitelabel Error Page 옵션 OFF
-  error:
-    whitelabel:
-      enabled: false
-
 spring:
+  config:
+    import: application-secret.yml
   profiles:
-    active: dev
-    include: secret
+    default: local
+    group:
+      local:
+        - application-secret
+      dev:
+        - application-secret
   servlet:
     multipart:
       max-file-size: 20MB
       max-request-size: 100MB
   jpa:
-    database: mysql
     database-platform: org.hibernate.dialect.MariaDBDialect
-    generate-ddl: true
     properties:
-      hibernate:
-        default_batch_fetch_size: 500 # 1:N 컬렉션 조회 시 성능 최적화
-    open-in-view: false # 영속성 컨텍스트의 생존 범위를 트랜잭션 범위로 한정
+      default_batch_fetch_size: 500
+    open-in-view: false
   cache:
     type: redis
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+    context-path: /
+  error:
+    whitelabel:
+      enabled: false
+
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}

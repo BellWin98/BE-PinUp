@@ -1,0 +1,27 @@
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: pinup-mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: pinup
+      TZ: Asia/seoul
+    ports:
+      - "53306:3306"
+
+  redis:
+    image: redis:7.4.1-alpine3.20
+    container_name: pinup-redis
+    restart: always
+    ports:
+      - "56379:6379"
+    command: >
+      redis-server 
+      --save "" 
+      --appendonly yes
+      --auto-aof-rewrite-percentage 0
+      --requirepass 1234
+    environment:
+      TZ: Asia/Seoul

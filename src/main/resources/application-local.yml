@@ -1,0 +1,29 @@
+spring:
+  docker:
+    compose:
+      lifecycle-management: start-and-stop
+      file: ./compose.yml
+  datasource:
+    url: jdbc:mariadb://localhost:53306/pinup?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF-8
+    username: ENC(QXs0cSGl0KV+6bsff+G8kg==)
+    password: ENC(+wnBePOEvnX41weBk+aSyQ==)
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  data:
+    redis:
+      host: localhost
+      port: 56379
+      password: ENC(wlKYt3feiMPgmU2hqCEAFg==)
+
+logging:
+  level:
+    root: info
+    com.pinup: debug
+    org.springframework: info
