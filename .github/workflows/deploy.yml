@@ -33,42 +33,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-#      - name: Make application.yml
-#        run: |
-#          cd ./src/main/resources
-#          touch ./application.yml
-#          echo "${{ secrets.APPLICATION }}" > ./application.yml
-#        shell: bash
-
-      - name: Make application-dev.yml
-        if: contains(github.ref, 'dev')
-        run: |
-          cd ./src/main/resources
-          touch ./application-dev.yml
-          echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
-        shell: bash
-
-      - name: Make application-prod.yml
-        if: contains(github.ref, 'main')
-        run: |
-          cd ./src/main/resources
-          touch ./application-prod.yml
-          echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
-        shell: bash
-
-      - name: Make application-secret.yml
-        run: |
-          cd ./src/main/resources
-          touch ./application-secret.yml
-          echo "${{ secrets.APPLICATION_SECRET }}" > ./application-secret.yml
-        shell: bash
-          
       - name: Grant Execute Permission For Gradlew
         run: chmod +x ./gradlew
-        
+
       - name: Build With Gradle
-        run: ./gradlew clean build -x test --no-daemon
-        
+        run: ./gradlew clean build -x test --no-daemon -Djasypt.encryptor.password=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}
+
       - name: Docker build & Push to Docker Hub dev repo
         if: contains(github.ref, 'dev')
         run: |
@@ -82,7 +52,7 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -t ${{ secrets.DOCKER_REPO }}/pinup-prod:latest .
           docker push ${{ secrets.DOCKER_REPO }}/pinup-prod:latest
-      
+
       - name: Deploy to dev
         uses: appleboy/ssh-action@master
         id: deploy-dev
