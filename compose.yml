@@ -9,14 +9,14 @@ services:
       MYSQL_DATABASE: pinup
       TZ: Asia/seoul
     ports:
-      - "53306:3306"
+      - "23306:3306"
 
   redis:
     image: redis:7.4.1-alpine3.20
     container_name: pinup-redis
     restart: always
     ports:
-      - "56379:6379"
+      - "26379:6379"
     command: >
       redis-server 
       --save "" 

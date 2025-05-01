@@ -4,8 +4,8 @@ spring:
       lifecycle-management: start-and-stop
       file: ./compose.yml
   datasource:
-    url: jdbc:mariadb://localhost:53306/pinup?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF-8
-    username: ENC(QXs0cSGl0KV+6bsff+G8kg==)
+    url: jdbc:mariadb://localhost:23306/pinup?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF-8
+    username: ENC(/YFRskhsZnxSQNxsXYf6UA==)
     password: ENC(+wnBePOEvnX41weBk+aSyQ==)
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
@@ -19,7 +19,7 @@ spring:
   data:
     redis:
       host: localhost
-      port: 56379
+      port: 26379
       password: ENC(wlKYt3feiMPgmU2hqCEAFg==)
 
 logging:
