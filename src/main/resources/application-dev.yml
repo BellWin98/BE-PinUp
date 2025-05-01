@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mariadb://pinup-db.cr6y8igo40mo.ap-northeast-2.rds.amazonaws.com:3306/pinup?pinup?useSSL=true&characterEncoding=UTF-8&serverTimezone=UTC&connectTimeout=30000
+    url: jdbc:mariadb://pinup-db.cr6y8igo40mo.ap-northeast-2.rds.amazonaws.com:3306/pinup?useSSL=true&characterEncoding=UTF-8&serverTimezone=UTC&connectTimeout=30000
     username: ENC(FK458xVf7duUzV5GF9uLwg==)
     password: ENC(pSr2TAgjPBAKg2+PNeqFQc9+wxQ/aJmyLmgxXt/BIbQ=)
     driver-class-name: org.mariadb.jdbc.Driver
