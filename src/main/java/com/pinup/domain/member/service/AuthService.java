@@ -131,7 +131,7 @@ public class AuthService {
         }
         String jwtToken = jwtTokenProvider.createAccessToken(member.getId(), member.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
-        redisService.setValues(REFRESH_TOKEN_PREFIX+member.getProviderId(), refreshToken);
+        redisService.setValues(REFRESH_TOKEN_PREFIX+member.getId(), refreshToken);
 
         return new LoginResponse(jwtToken, refreshToken, MemberResponse.from(member));
     }
