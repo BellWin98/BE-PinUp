@@ -1,7 +1,5 @@
 package com.pinup.domain.member.entity;
 
-import com.pinup.domain.alarm.entity.Alarm;
-import com.pinup.domain.article.entity.Article;
 import com.pinup.domain.friend.entity.FriendShip;
 import com.pinup.domain.review.entity.Review;
 import com.pinup.global.common.BaseTimeEntity;
@@ -56,21 +54,11 @@ public class Member extends BaseTimeEntity {
     @Column(columnDefinition = "VARCHAR(1)")
     private String termsOfMarketing = "Y";
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "profile_image_id")
-    private ProfileImage profileImage;
-
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<FriendShip> friendships = new ArrayList<>();
-
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Alarm> alarms = new ArrayList<>();
-
-    @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Article> editorArticles = new ArrayList<>();
 
     @Builder
     public Member(
@@ -104,17 +92,13 @@ public class Member extends BaseTimeEntity {
         return this.lastNicknameUpdateDate == null || LocalDateTime.now().isAfter(this.lastNicknameUpdateDate.plusDays(30));
     }
 
-    public void updateProfileImage(ProfileImage profileImage) {
-        this.profileImage = profileImage;
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     public void removeProfileImage() {
-        this.profileImage = null;
+        this.profileImageUrl = "";
     }
-
-/*    public String getProfileImageUrl() {
-        return this.profileImage.getImageUrl();
-    }*/
 }
 
 

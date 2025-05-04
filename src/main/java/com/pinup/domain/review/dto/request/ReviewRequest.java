@@ -2,10 +2,12 @@ package com.pinup.domain.review.dto.request;
 
 import com.pinup.domain.review.entity.Review;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Schema(title = "리뷰 등록 DTO")
 @Data
@@ -24,7 +26,7 @@ public class ReviewRequest {
     @Schema(description = "방문 날짜", example = "25.03.14")
     private String visitedDate;
 
-    private List<String> reviewImageUrls;
+    private Set<String> reviewImageUrls;
 
     public Review toEntity() {
         return Review.builder()

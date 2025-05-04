@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,7 +39,7 @@ public class ReviewService {
     public String register(ReviewRequest reviewRequest, PlaceRequest placeRequest) {
         Member loginMember = authUtil.getLoginMember();
         Place place = findOrCreatePlace(placeRequest);
-        List<String> reviewImageUrls = reviewRequest.getReviewImageUrls();
+        Set<String> reviewImageUrls = reviewRequest.getReviewImageUrls();
         Review newReview = reviewRequest.toEntity();
         newReview.attachPlace(place);
         newReview.attachMember(loginMember);

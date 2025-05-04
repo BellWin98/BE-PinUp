@@ -6,16 +6,13 @@ import com.pinup.domain.member.dto.response.LoginResponse;
 import com.pinup.domain.member.dto.response.MemberResponse;
 import com.pinup.domain.member.entity.LoginType;
 import com.pinup.domain.member.entity.Member;
-import com.pinup.domain.member.entity.ProfileImage;
 import com.pinup.domain.member.exception.ExpiredTokenException;
 import com.pinup.domain.member.exception.InvalidTokenException;
 import com.pinup.domain.member.repository.MemberRepository;
-import com.pinup.global.common.image.entity.Image;
 import com.pinup.global.config.jwt.JwtTokenProvider;
 import com.pinup.global.config.oauth.service.OAuth2Service;
 import com.pinup.global.config.oauth.util.OAuth2UserInfo;
 import com.pinup.global.config.redis.RedisService;
-import com.pinup.global.config.s3.S3Service;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -129,8 +126,7 @@ public class AuthService {
                     .loginType(LoginType.GOOGLE)
                     .providerId(socialId)
                     .build());
-            Image image = new Image(new S3Service.S3FileInfo("", profilePictureUrl, ""));
-            member.updateProfileImage(new ProfileImage(image));
+            member.updateProfileImage(profilePictureUrl);
             eventPublisher.publishEvent(member);
         }
         String jwtToken = jwtTokenProvider.createAccessToken(member.getId(), member.getRole());

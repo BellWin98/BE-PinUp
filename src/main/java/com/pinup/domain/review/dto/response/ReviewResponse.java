@@ -1,6 +1,7 @@
 package com.pinup.domain.review.dto.response;
 
 import com.pinup.domain.review.entity.Review;
+import com.pinup.domain.review.entity.ReviewImage;
 import com.pinup.domain.review.entity.ReviewType;
 import com.pinup.global.common.Formatter;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,7 @@ public class ReviewResponse {
                 .starRating(review.getStarRating())
                 .type(review.getType())
                 .imageUrls(review.getReviewImages().stream()
-                        .map(reviewImage -> reviewImage.getImage().getImageUrl())
+                        .map(ReviewImage::getUrl)
                         .collect(Collectors.toList()))
                 .createdAt(Formatter.formatDate(review.getCreatedAt()))
                 .visitedAt(review.getVisitedDate())
