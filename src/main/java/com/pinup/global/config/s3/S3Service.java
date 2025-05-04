@@ -30,9 +30,9 @@ public class S3Service {
     private final AmazonS3Client amazonS3Client;
     private final ImageValidator imageValidator;
 
-    public S3FileInfo uploadFile(String fileType, MultipartFile file) {
+    public String uploadFile(String fileType, MultipartFile file) {
         imageValidator.validate(file);
-        String originalFilename = null;
+        String originalFilename;
         String uploadFileName = null;
         String uploadFileUrl;
         if (file.getOriginalFilename() != null) {
@@ -50,7 +50,7 @@ public class S3Service {
             amazonS3Client.putObject(new PutObjectRequest(bucket, key, inputStream, objectMetadata));
             uploadFileUrl = getFileUrl(key);
 
-            return new S3FileInfo(key, uploadFileUrl, originalFilename);
+            return uploadFileUrl;
         } catch (IOException e){
             throw new FileProcessingException(ErrorCode.FILE_UPLOAD_ERROR);
         }
@@ -101,7 +101,7 @@ public class S3Service {
         log.info("Completed async deletion of images");
     }
 
-    private String extractKeyFromUrl(String fileUrl) {
+    public String extractKeyFromUrl(String fileUrl) {
         try {
             int startIndex = fileUrl.indexOf("amazonaws.com/") + "amazonaws.com/".length();
             String path = fileUrl.substring(startIndex);
@@ -127,9 +127,5 @@ public class S3Service {
         }
 
         log.info("Deleted {} images from S3", imageKeys.size());
-    }
-
-    public record S3FileInfo(String fileKey, String fileUrl, String originFilename) {
-
     }
 }

@@ -1,12 +1,7 @@
 package com.pinup.domain.member.service;
 
 import com.pinup.domain.member.entity.Member;
-import com.pinup.domain.member.entity.ProfileImage;
-import com.pinup.global.common.image.entity.Image;
-import com.pinup.global.common.image.repository.ImageRepository;
 import com.pinup.global.config.s3.S3Service;
-import com.pinup.global.exception.FileProcessingException;
-import com.pinup.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,38 +10,34 @@ import org.springframework.stereotype.Service;
 public class ProfileImageService {
 
     private final S3Service s3Service;
-    private final ImageRepository imageRepository;
 
     public void saveProfileImage(Member member, String profileImageUrl) {
         if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-            Image image = imageRepository.findByImageUrl(profileImageUrl)
-                    .orElseThrow(() -> new FileProcessingException(ErrorCode.IMAGE_IS_EMPTY));
-            member.updateProfileImage(new ProfileImage(image));
+            member.updateProfileImage(profileImageUrl);
         }
     }
 
     public void updateProfileImage(Member member, String newProfileImageUrl) {
-        Image prevImage = member.getProfileImage().getImage();
-        String prevProfileImageUrl = prevImage.getImageUrl();
+        String prevProfileImageUrl = "";
+        if (member.getProfileImageUrl() != null && !member.getProfileImageUrl().isEmpty()) {
+            prevProfileImageUrl = member.getProfileImageUrl();
+        }
+        String prevProfileImageKey = s3Service.extractKeyFromUrl(prevProfileImageUrl);
         if (newProfileImageUrl != null && !newProfileImageUrl.isEmpty()) {
             if (!prevProfileImageUrl.equals(newProfileImageUrl)) {
-                Image newImage = imageRepository.findByImageUrl(newProfileImageUrl)
-                        .orElseThrow(() -> new FileProcessingException(ErrorCode.IMAGE_IS_EMPTY));
-                s3Service.deleteFile(prevImage.getImageKey());
-                imageRepository.delete(prevImage);
-                member.getProfileImage().updateImage(newImage);
+                s3Service.deleteFile(prevProfileImageKey);
+                member.updateProfileImage(newProfileImageUrl);
             }
         } else {
-            if (!prevImage.getImageKey().isEmpty()) {
-                s3Service.deleteFile(prevImage.getImageKey());
-                imageRepository.delete(prevImage);
+            if (!prevProfileImageUrl.isEmpty()) {
+                s3Service.deleteFile(prevProfileImageKey);
                 member.removeProfileImage();
             }
         }
     }
 
     public void deleteProfileImage(Member member) {
-        Image image = member.getProfileImage().getImage();
-        s3Service.deleteFile(image.getImageKey());
+        String prevProfileImageKey = s3Service.extractKeyFromUrl(member.getProfileImageUrl());
+        s3Service.deleteFile(prevProfileImageKey);
     }
 }

@@ -6,7 +6,6 @@ import com.pinup.domain.place.dto.response.MapPlaceResponse;
 import com.pinup.domain.place.entity.PlaceCategory;
 import com.pinup.domain.place.entity.SortType;
 import com.pinup.domain.review.dto.response.ReviewDetailResponse;
-import com.pinup.domain.review.repository.ReviewRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -131,7 +130,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
                         review.createdAt,
                         review.visitedDate,
                         review.content,
-                        review.member.profileImage.image.imageUrl.as("writerProfileImageUrl")
+                        review.member.profileImageUrl.as("writerProfileImageUrl")
                 ))
                 .from(review)
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
@@ -203,7 +202,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
     private List<String> fetchReviewImageUrls(Long reviewId) {
         return queryFactory
-                .selectDistinct(reviewImage.image.imageUrl)
+                .selectDistinct(reviewImage.url)
                 .from(reviewImage)
                 .where(reviewImage.review.id.eq(reviewId))
                 .fetch();
@@ -211,7 +210,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
     private List<String> fetchThreeEarliestReviewImageUrls(List<Long> targetMemberIds, String kakaoPlaceId) {
         return queryFactory
-                .selectDistinct(reviewImage.image.imageUrl)
+                .selectDistinct(reviewImage.url)
                 .from(reviewImage)
                 .innerJoin(review).on(reviewImage.review.eq(review))
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
@@ -240,7 +239,7 @@ public class PlaceRepositoryQueryDslImpl implements PlaceRepositoryQueryDsl{
 
     private List<String> fetchThreeLatestReviewerProfileImageUrls(List<Long> targetMemberIds, String kakaoPlaceId) {
         return queryFactory
-                .selectDistinct(member.profileImage.image.imageUrl)
+                .selectDistinct(member.profileImageUrl)
                 .from(member)
                 .innerJoin(review).on(member.eq(review.member))
                 .where(review.place.kakaoPlaceId.eq(kakaoPlaceId)
