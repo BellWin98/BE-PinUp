@@ -15,6 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private static final String[] PASS_URLS = {
             "/",
+            "/login/**",
             "/api/auth/**",
             "/api/members/nickname/check",
             "/api/*/image",

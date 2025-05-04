@@ -171,8 +171,7 @@ public class AuthService {
                             .providerId(userInfo.getProviderId())
                             .loginType(userInfo.getProvider())
                             .build();
-                    Image image = new Image(new S3Service.S3FileInfo("", userInfo.getProfileImageUrl(), ""));
-                    newMember.updateProfileImage(new ProfileImage(image));
+                    newMember.updateProfileImage(userInfo.getProfileImageUrl());
                     eventPublisher.publishEvent(newMember);
 
                     return memberRepository.save(newMember);
