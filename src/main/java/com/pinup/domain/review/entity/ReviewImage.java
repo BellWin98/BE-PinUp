@@ -1,7 +1,6 @@
 package com.pinup.domain.review.entity;
 
 import com.pinup.global.common.BaseTimeEntity;
-import com.pinup.global.common.image.entity.Image;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,16 +15,14 @@ public class ReviewImage extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String url;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JoinColumn(name = "image_id", nullable = false)
-    private Image image;
-
-    public ReviewImage(Review review, Image image) {
+    public ReviewImage(Review review, String url) {
         this.review = review;
-        this.image = image;
+        this.url = url;
     }
 }

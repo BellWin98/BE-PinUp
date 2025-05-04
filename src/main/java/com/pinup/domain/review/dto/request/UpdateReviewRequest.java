@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class UpdateReviewRequest {
@@ -19,5 +19,5 @@ public class UpdateReviewRequest {
     @Schema(description = "별점(최소 0.5 ~ 최대 5.0 / 0.5점 단위)", example = "3.5")
     private double starRating;
 
-    private List<String> reviewImageUrls;
+    private Set<String> reviewImageUrls;
 }
