@@ -1,6 +1,7 @@
 package com.pinup.domain.review.dto.response;
 
 import com.pinup.domain.review.entity.Review;
+import com.pinup.domain.review.entity.ReviewImage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,7 +38,7 @@ public class PhotoReviewResponse {
                 .content(review.getContent())
                 .starRating(review.getStarRating())
                 .reviewImageUrls(review.getReviewImages().stream()
-                        .map(reviewImage -> reviewImage.getImage().getImageUrl())
+                        .map(ReviewImage::getUrl)
                         .toList())
                 .createdAt(DateTimeFormatter.ofPattern("yy.MM.dd").format(review.getCreatedAt()))
                 .visitedDate(review.getVisitedDate())
