@@ -4,6 +4,7 @@ import com.pinup.domain.alarm.dto.response.AlarmResponse;
 import com.pinup.domain.alarm.entity.Alarm;
 import com.pinup.domain.member.entity.Member;
 import com.pinup.domain.alarm.exception.UnauthorizedAlarmAccessException;
+import com.pinup.global.common.AuthUtil;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import com.pinup.domain.alarm.repository.AlarmRepository;
@@ -21,16 +22,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class AlarmService {
 
     private final AlarmRepository alarmRepository;
+    private final AuthUtil authUtil;
     private final MemberRepository memberRepository;
 
     public Page<AlarmResponse> getMyAlarms(Pageable pageable) {
-        Member currentMember = getCurrentMember();
+        Member currentMember = authUtil.getLoginMember();
         return alarmRepository.findAllByReceiver(currentMember, pageable)
                 .map(AlarmResponse::from);
     }
 
     public AlarmResponse getAlarm(Long alarmId) {
-        Member currentMember = getCurrentMember();
+        Member currentMember = authUtil.getLoginMember();
         Alarm alarm = alarmRepository.findById(alarmId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ALARM_NOT_FOUND));
 
@@ -40,11 +42,5 @@ public class AlarmService {
         alarm.read();
         alarmRepository.save(alarm);
         return AlarmResponse.from(alarm);
-    }
-
-    private Member getCurrentMember() {
-        String socialId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findByProviderId(socialId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }

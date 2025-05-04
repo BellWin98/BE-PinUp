@@ -85,10 +85,10 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-        String socialId = claims.getSubject();
+        String memberId = claims.getSubject();
         String role = claims.get("role", String.class);
 
-        return new UsernamePasswordAuthenticationToken(socialId, null,
+        return new UsernamePasswordAuthenticationToken(memberId, null,
                 Collections.singletonList(new SimpleGrantedAuthority(role)));
     }
 }

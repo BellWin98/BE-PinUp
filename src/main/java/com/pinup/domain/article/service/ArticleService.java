@@ -4,6 +4,7 @@ import com.pinup.domain.article.dto.request.ArticleCreateRequest;
 import com.pinup.domain.article.dto.response.ArticleResponse;
 import com.pinup.domain.article.entity.Article;
 import com.pinup.domain.member.entity.Member;
+import com.pinup.global.common.AuthUtil;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import com.pinup.global.config.s3.S3Service;
@@ -29,13 +30,13 @@ public class ArticleService {
     private static final String FILE_TYPE = "articles";
 
     private final S3Service s3Service;
-
+    private final AuthUtil authUtil;
     private final ArticleRepository articleRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
     public ArticleResponse create(ArticleCreateRequest articleCreateRequest, MultipartFile multipartFile) {
-        Member currentMember = getCurrentMember();
+        Member currentMember = authUtil.getLoginMember();
         String uploadedFileUrl = s3Service.uploadFile(FILE_TYPE, multipartFile);
 
         Article newArticle = Article.builder()
@@ -54,12 +55,6 @@ public class ArticleService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ARTICLE_NOT_FOUND));
 
         return ArticleResponse.from(article);
-    }
-
-    private Member getCurrentMember() {
-        String socialId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findByProviderId(socialId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)

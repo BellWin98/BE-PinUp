@@ -91,7 +91,7 @@ public class AuthService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         String accessToken = jwtTokenProvider.createAccessToken(findMember.getId(), findMember.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(findMember.getId());
-        redisService.setValues(REFRESH_TOKEN_PREFIX+findMember.getProviderId(), refreshToken);
+        redisService.setValues(REFRESH_TOKEN_PREFIX+findMember.getId(), refreshToken);
 
         return new LoginResponse(accessToken, refreshToken, MemberResponse.from(findMember));
     }
@@ -114,17 +114,17 @@ public class AuthService {
     public LoginResponse googleLogin(String code) {
         String accessToken = getAccessToken(code);
         Map<String, Object> userInfo = getUserInfo(accessToken);
-        String socialId = (String) userInfo.get("sub");
+        String providerId = (String) userInfo.get("sub");
         String email = (String) userInfo.get("email");
         String name = (String) userInfo.get("name");
         String profilePictureUrl = (String) userInfo.get("picture");
-        Member member = memberRepository.findByProviderId(socialId).orElse(null);
+        Member member = memberRepository.findByProviderId(providerId).orElse(null);
         if (member == null) {
             member = memberRepository.save(Member.builder()
                     .email(email)
                     .name(name)
                     .loginType(LoginType.GOOGLE)
-                    .providerId(socialId)
+                    .providerId(providerId)
                     .build());
             member.updateProfileImage(profilePictureUrl);
             eventPublisher.publishEvent(member);
@@ -140,13 +140,13 @@ public class AuthService {
         if (isTokenValidate(refreshToken)) {
             Long memberId = getMemberIdByToken(refreshToken);
             Member member = getMemberByMemberId(memberId);
-            String storedRefreshToken = redisService.getValues(REFRESH_TOKEN_PREFIX+member.getProviderId());
+            String storedRefreshToken = redisService.getValues(REFRESH_TOKEN_PREFIX+member.getId());
             if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
                 throw new InvalidTokenException();
             }
             String newAccessToken = jwtTokenProvider.createAccessToken(memberId, member.getRole());
             String newRefreshToken = jwtTokenProvider.createRefreshToken(memberId);
-            redisService.setValues(REFRESH_TOKEN_PREFIX+member.getProviderId(), newRefreshToken);
+            redisService.setValues(REFRESH_TOKEN_PREFIX+member.getId(), newRefreshToken);
 
             return new LoginResponse(newAccessToken, newRefreshToken, MemberResponse.from(member));
         }

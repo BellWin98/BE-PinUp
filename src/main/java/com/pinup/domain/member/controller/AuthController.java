@@ -29,7 +29,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(summary = "회원가입")
+    @Operation(summary = "앱 회원가입")
     @PostMapping(value = "/sign-up")
     public ResponseEntity<ResultResponse> signUp(
             @Valid @RequestBody SignUpRequest signUpRequest
@@ -59,7 +59,7 @@ public class AuthController {
     }
 
     @GetMapping("/login/google/callback")
-    @Operation(summary = "구글 로그인", description = "AT, RT, 유저정보 반환")
+    @Operation(summary = "웹 구글 로그인", description = "AT, RT, 유저정보 반환")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     public ResponseEntity<ResultResponse> googleLogin(@RequestParam("code") String code) {
         return ResponseEntity.ok(ResultResponse.of(
