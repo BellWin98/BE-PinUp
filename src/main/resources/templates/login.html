@@ -1,0 +1,18 @@
+<div class="text-center">
+    <a href="https://kauth.kakao.com/oauth/authorize"
+       th:href="@{https://kauth.kakao.com/oauth/authorize(client_id=${kakaoApiKey}, redirect_uri=${redirectUri}, response_type='code')}">
+        카카오
+    </a>
+</div>
+<div>
+    <a href="https://nid.naver.com/oauth2.0/authorize"
+       th:href="@{https://nid.naver.com/oauth2.0/authorize(client_id=${naverApiKey}, redirect_uri=${redirectUri}, response_type='code')}">
+        네이버
+    </a>
+</div>
+<div>
+    <a href="https://accounts.google.com/o/oauth2/auth"
+       th:href="@{https://accounts.google.com/o/oauth2/auth(client_id=${googleApiKey}, redirect_uri=${redirectUri}, response_type='code')}">
+        구글
+    </a>
+</div>

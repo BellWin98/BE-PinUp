@@ -29,3 +29,11 @@ spring:
     open-in-view: false # 영속성 컨텍스트의 생존 범위를 트랜잭션 범위로 한정
   cache:
     type: redis
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+    check-template-location: true
+  devtools:
+    livereload:
+      enabled: true

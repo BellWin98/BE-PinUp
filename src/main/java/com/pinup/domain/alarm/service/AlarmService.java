@@ -44,7 +44,7 @@ public class AlarmService {
 
     private Member getCurrentMember() {
         String socialId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findBySocialId(socialId)
+        return memberRepository.findByProviderId(socialId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }

@@ -36,8 +36,8 @@ public class JwtTokenProvider {
         this.objectMapper = objectMapper;
     }
 
-    public String createAccessToken(String socialId, Role role) {
-        Claims claims = Jwts.claims().setSubject(socialId);
+    public String createAccessToken(Long memberId, Role role) {
+        Claims claims = Jwts.claims().setSubject(memberId.toString());
         claims.put("role", role);
 
         Date now = new Date();
@@ -51,8 +51,8 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String createRefreshToken(String socialId) {
-        Claims claims = Jwts.claims().setSubject(socialId);
+    public String createRefreshToken(Long memberId) {
+        Claims claims = Jwts.claims().setSubject(memberId.toString());
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidityInMilliseconds);
@@ -70,7 +70,7 @@ public class JwtTokenProvider {
         return !claims.getBody().getExpiration().before(new Date());
     }
 
-    public String getSocialId(String token) {
+    public String getMemberId(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
         } catch (JwtException | IllegalArgumentException e) {

@@ -29,6 +29,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
 
     private static final String[] PERMITTED_API_URL = {
+            "/login/**",
             "/api/auth/**",
             "/api/members/nickname/check",
             "/api/*/image",
