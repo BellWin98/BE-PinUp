@@ -10,12 +10,16 @@ import com.pinup.domain.member.exception.ExpiredTokenException;
 import com.pinup.domain.member.exception.InvalidTokenException;
 import com.pinup.domain.member.repository.MemberRepository;
 import com.pinup.global.config.jwt.JwtTokenProvider;
+import com.pinup.global.config.oauth.service.OAuth2Service;
+import com.pinup.global.config.oauth.util.OAuth2UserInfo;
 import com.pinup.global.config.redis.RedisService;
 import com.pinup.global.exception.EntityNotFoundException;
 import com.pinup.global.response.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.*;
@@ -25,10 +29,14 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class AuthService {
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
 
@@ -38,24 +46,35 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisService redisService;
     private final ApplicationEventPublisher eventPublisher;
+    private final List<OAuth2Service> oAuth2Services;
 
-    @Value("${oauth2.google.client-id}")
+    @Value("${oauth2.provider.google.client-id}")
     private String googleClientId;
 
-    @Value("${oauth2.google.client-secret}")
+    @Value("${oauth2.provider.google.client-secret}")
     private String googleClientSecret;
 
-    @Value("${oauth2.google.redirect-uri}")
+    @Value("${oauth2.provider.google.redirect-uri}")
     private String googleRedirectUri;
 
-    @Value("${oauth2.google.token-uri}")
+    @Value("${oauth2.provider.google.token-uri}")
     private String googleTokenUri;
 
-    @Value("${oauth2.google.resource-uri}")
+    @Value("${oauth2.provider.google.user-info-uri}")
     private String googleResourceUri;
+
+    private Map<String, OAuth2Service> oAuth2ServiceMap;
+
+    @PostConstruct
+    private void initializeOAuth2ServiceMap() {
+        this.oAuth2ServiceMap = oAuth2Services.stream()
+                .collect(Collectors.toMap(OAuth2Service::getProvider, Function.identity()));
+        log.info("Registered OAuth2 Services: {}", String.join(", ", oAuth2ServiceMap.keySet()));
+    }
 
 /*    @Value("${oauth2.google.auth-uri}")
     private String googleAuthUri;*/
+
 
     @Transactional
     public void signUp(SignUpRequest signUpRequest) {
@@ -67,53 +86,67 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResponse socialLogin(final LoginRequest loginRequest) {
-        Member findMember = memberRepository.findBySocialId(loginRequest.getSocialId())
+    public LoginResponse appSocialLogin(LoginRequest loginRequest) {
+        Member findMember = memberRepository.findByProviderId(loginRequest.getSocialId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-        String accessToken = jwtTokenProvider.createAccessToken(findMember.getSocialId(), findMember.getRole());
-        String refreshToken = jwtTokenProvider.createRefreshToken(findMember.getSocialId());
-        redisService.setValues(REFRESH_TOKEN_PREFIX+findMember.getSocialId(), refreshToken);
+        String accessToken = jwtTokenProvider.createAccessToken(findMember.getId(), findMember.getRole());
+        String refreshToken = jwtTokenProvider.createRefreshToken(findMember.getId());
+        redisService.setValues(REFRESH_TOKEN_PREFIX+findMember.getId(), refreshToken);
 
         return new LoginResponse(accessToken, refreshToken, MemberResponse.from(findMember));
+    }
+
+    @Transactional
+    public LoginResponse webSocialLogin(String provider, String code) {
+        OAuth2Service oAuth2Service = oAuth2ServiceMap.get(provider);
+        if (oAuth2Service == null) {
+            throw new EntityNotFoundException(ErrorCode.LOGIN_TYPE_NOT_FOUND);
+        }
+        OAuth2UserInfo userInfo = oAuth2Service.getUserInfo(code);
+        Member member = processOAuth2User(userInfo);
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getRole());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+
+        return new LoginResponse(accessToken, refreshToken, MemberResponse.from(member));
     }
 
     @Transactional
     public LoginResponse googleLogin(String code) {
         String accessToken = getAccessToken(code);
         Map<String, Object> userInfo = getUserInfo(accessToken);
-        String socialId = (String) userInfo.get("sub");
+        String providerId = (String) userInfo.get("sub");
         String email = (String) userInfo.get("email");
         String name = (String) userInfo.get("name");
         String profilePictureUrl = (String) userInfo.get("picture");
-        Member member = memberRepository.findBySocialId(socialId).orElse(null);
+        Member member = memberRepository.findByProviderId(providerId).orElse(null);
         if (member == null) {
             member = memberRepository.save(Member.builder()
                     .email(email)
                     .name(name)
                     .loginType(LoginType.GOOGLE)
-                    .socialId(socialId)
+                    .providerId(providerId)
                     .build());
             member.updateProfileImage(profilePictureUrl);
             eventPublisher.publishEvent(member);
         }
-        String jwtToken = jwtTokenProvider.createAccessToken(member.getSocialId(), member.getRole());
-        String refreshToken = jwtTokenProvider.createRefreshToken(socialId);
-        redisService.setValues(REFRESH_TOKEN_PREFIX+member.getSocialId(), refreshToken);
+        String jwtToken = jwtTokenProvider.createAccessToken(member.getId(), member.getRole());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        redisService.setValues(REFRESH_TOKEN_PREFIX+member.getId(), refreshToken);
 
         return new LoginResponse(jwtToken, refreshToken, MemberResponse.from(member));
     }
 
     public LoginResponse refresh(String refreshToken) {
         if (isTokenValidate(refreshToken)) {
-            String socialId = getSocialIdByToken(refreshToken);
-            Member member = getMemberBySocialId(socialId);
-            String storedRefreshToken = redisService.getValues(REFRESH_TOKEN_PREFIX+member.getSocialId());
+            Long memberId = getMemberIdByToken(refreshToken);
+            Member member = getMemberByMemberId(memberId);
+            String storedRefreshToken = redisService.getValues(REFRESH_TOKEN_PREFIX+member.getId());
             if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
                 throw new InvalidTokenException();
             }
-            String newAccessToken = jwtTokenProvider.createAccessToken(socialId, member.getRole());
-            String newRefreshToken = jwtTokenProvider.createRefreshToken(socialId);
-            redisService.setValues(REFRESH_TOKEN_PREFIX+member.getSocialId(), newRefreshToken);
+            String newAccessToken = jwtTokenProvider.createAccessToken(memberId, member.getRole());
+            String newRefreshToken = jwtTokenProvider.createRefreshToken(memberId);
+            redisService.setValues(REFRESH_TOKEN_PREFIX+member.getId(), newRefreshToken);
 
             return new LoginResponse(newAccessToken, newRefreshToken, MemberResponse.from(member));
         }
@@ -123,10 +156,26 @@ public class AuthService {
 
     public void logout(String accessToken) {
         if (isTokenValidate(accessToken)) {
-            String socialId = getSocialIdByToken(accessToken);
-            Member member = getMemberBySocialId(socialId);
-            redisService.deleteValues(REFRESH_TOKEN_PREFIX+member.getSocialId());
+            Long memberId = getMemberIdByToken(accessToken);
+            Member member = getMemberByMemberId(memberId);
+            redisService.deleteValues(REFRESH_TOKEN_PREFIX+member.getId());
         }
+    }
+
+    private Member processOAuth2User(OAuth2UserInfo userInfo) {
+        return memberRepository.findByLoginTypeAndProviderId(userInfo.getProvider(), userInfo.getProviderId())
+                .orElseGet(() -> {
+                    Member newMember = Member.builder()
+                            .email(userInfo.getEmail())
+                            .name(userInfo.getName())
+                            .providerId(userInfo.getProviderId())
+                            .loginType(userInfo.getProvider())
+                            .build();
+                    newMember.updateProfileImage(userInfo.getProfileImageUrl());
+                    eventPublisher.publishEvent(newMember);
+
+                    return memberRepository.save(newMember);
+                });
     }
 
     private String getAccessToken(String authorizationCode) {
@@ -160,8 +209,8 @@ public class AuthService {
         return response.getBody();
     }
 
-    private Member getMemberBySocialId(String socialId) {
-        return memberRepository.findBySocialId(socialId)
+    private Member getMemberByMemberId(Long memberId) {
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
@@ -175,8 +224,8 @@ public class AuthService {
         }
     }
 
-    private String getSocialIdByToken(String token) {
-        return jwtTokenProvider.getSocialId(token);
+    private Long getMemberIdByToken(String token) {
+        return Long.parseLong(jwtTokenProvider.getMemberId(token));
     }
 
     /* 미사용 코드

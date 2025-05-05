@@ -19,6 +19,14 @@ spring:
     open-in-view: false
   cache:
     type: redis
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+    check-template-location: true
+  devtools:
+    livereload:
+      enabled: true
 
 server:
   port: 8080

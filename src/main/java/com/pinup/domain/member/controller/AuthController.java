@@ -2,6 +2,7 @@ package com.pinup.domain.member.controller;
 
 import com.pinup.domain.member.dto.request.LoginRequest;
 import com.pinup.domain.member.dto.request.SignUpRequest;
+import com.pinup.domain.member.dto.request.SocialLoginRequest;
 import com.pinup.domain.member.dto.response.LoginResponse;
 import com.pinup.domain.member.service.AuthService;
 import com.pinup.global.response.ResultCode;
@@ -28,7 +29,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(summary = "회원가입")
+    @Operation(summary = "앱 회원가입")
     @PostMapping(value = "/sign-up")
     public ResponseEntity<ResultResponse> signUp(
             @Valid @RequestBody SignUpRequest signUpRequest
@@ -37,18 +38,28 @@ public class AuthController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.SIGN_UP_SUCCESS));
     }
 
-    @Operation(summary = "소셜 로그인", description = "AT, RT, 유저정보 반환")
+    @Operation(summary = "앱 소셜 로그인", description = "AT, RT, 유저정보 반환")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     @PostMapping("/login")
-    public ResponseEntity<ResultResponse> socialLogin(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ResultResponse> appSocialLogin(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(ResultResponse.of(
                 ResultCode.SOCIAL_LOGIN_SUCCESS,
-                authService.socialLogin(loginRequest))
+                authService.appSocialLogin(loginRequest))
+        );
+    }
+
+    @Operation(summary = "웹 소셜 로그인", description = "AT, RT, 유저정보 반환")
+    @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
+    @PostMapping("/web/social-login")
+    public ResponseEntity<ResultResponse> webSocialLogin(@Valid @RequestBody SocialLoginRequest socialLoginRequest) {
+        return ResponseEntity.ok(ResultResponse.of(
+                ResultCode.SOCIAL_LOGIN_SUCCESS,
+                authService.webSocialLogin(socialLoginRequest.getProvider(), socialLoginRequest.getCode()))
         );
     }
 
     @GetMapping("/login/google/callback")
-    @Operation(summary = "구글 로그인", description = "AT, RT, 유저정보 반환")
+    @Operation(summary = "웹 구글 로그인", description = "AT, RT, 유저정보 반환")
     @ApiResponse(content = {@Content(schema = @Schema(implementation = LoginResponse.class))})
     public ResponseEntity<ResultResponse> googleLogin(@RequestParam("code") String code) {
         return ResponseEntity.ok(ResultResponse.of(
